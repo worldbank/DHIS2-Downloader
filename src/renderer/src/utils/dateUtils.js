@@ -1,8 +1,8 @@
-export const generateQuarters = (startDate, endDate) => {
-  const startYear = startDate.year
-  const startMonth = startDate.month
-  const endYear = endDate.year
-  const endMonth = endDate.month
+const generateQuarters = (startDate, endDate) => {
+  const startYear = startDate.getFullYear()
+  const startMonth = startDate.getMonth()
+  const endYear = endDate.getFullYear()
+  const endMonth = endDate.getMonth()
 
   const quarters = []
 
@@ -25,9 +25,9 @@ export const generateQuarters = (startDate, endDate) => {
   return quarters
 }
 
-export const generateYears = (startDate, endDate) => {
-  const startYear = startDate.year
-  const endYear = endDate.year
+const generateYears = (startDate, endDate) => {
+  const startYear = startDate.getFullYear()
+  const endYear = endDate.getFullYear()
 
   const years = []
   for (let year = startYear; year <= endYear; year++) {
@@ -37,14 +37,14 @@ export const generateYears = (startDate, endDate) => {
   return years
 }
 
-export const generateMonths = (startDate, endDate) => {
-  const startYear = startDate.year
-  const startMonth = startDate.month
-  const endYear = endDate.year
-  const endMonth = endDate.month
+const generateMonths = (startDate, endDate) => {
+  const startYear = startDate.getFullYear()
+  const startMonth = startDate.getMonth()
+  const endYear = endDate.getFullYear()
+  const endMonth = endDate.getMonth()
 
-  const start = new Date(startYear, startMonth - 1)
-  const end = new Date(endYear, endMonth - 1)
+  const start = new Date(startYear, startMonth)
+  const end = new Date(endYear, endMonth)
   const months = []
 
   for (let date = start; date <= end; date.setMonth(date.getMonth() + 1)) {
@@ -54,4 +54,21 @@ export const generateMonths = (startDate, endDate) => {
   }
 
   return months
+}
+
+export const generatePeriods = (period, startDate, endDate) => {
+  if (typeof startDate === 'string' || typeof endDate === 'string') {
+    startDate = new Date(startDate)
+    endDate = new Date(endDate)
+  }
+
+  if (period === 'year') {
+    return generateYears(startDate, endDate)
+  } else if (period === 'quarter') {
+    return generateQuarters(startDate, endDate)
+  } else if (period === 'month') {
+    return generateMonths(startDate, endDate)
+  } else {
+    console.error('Must be in ["year", "quarter", "month"]')
+  }
 }

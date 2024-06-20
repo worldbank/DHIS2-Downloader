@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { getInitialOrganizationUnitLevel, getChildOrgUnits } from '../service/useApi'
+import { getInitialOrganizationUnitLevel, getChildOrgUnits } from '../../service/useApi'
 
 const OrganizationUnitTree = ({ dhis2Url, username, password, onSelect }) => {
   const [orgUnits, setOrgUnits] = useState([])

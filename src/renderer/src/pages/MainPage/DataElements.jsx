@@ -34,7 +34,7 @@ const DataElementsSelector = ({
   )
 }
 
-const AddedElementsDisplay = ({ dataPoints, addedDataPoints, handleRemoveDataPoint }) => {
+const AddedElementsDisplay = ({ addedDataPoints, handleRemoveDataPoint }) => {
   return (
     <div className="mb-4">
       <h3 className="text-xl font-bold mb-2">Selected Elements</h3>
@@ -53,7 +53,6 @@ const AddedElementsDisplay = ({ dataPoints, addedDataPoints, handleRemoveDataPoi
 }
 
 const DataElementsMenu = ({
-  dataPoints,
   addedDataPoints,
   filteredDataPoints,
   handleFilterDataPoint,
@@ -70,7 +69,6 @@ const DataElementsMenu = ({
         handleAddSelectedDataPoint={handleAddSelectedDataPoint}
       />
       <AddedElementsDisplay
-        dataPoints={dataPoints}
         addedDataPoints={addedDataPoints}
         handleRemoveDataPoint={handleRemoveDataPoint}
       />

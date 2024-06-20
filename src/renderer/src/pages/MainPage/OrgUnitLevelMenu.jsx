@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-import { getOrganizationLevels } from '../service/useApi'
+import { getOrganizationLevels } from '../../service/useApi'
 
-const OrgUnitLevelMenu = ({ dhis2Url, username, password, OrgUnitLevel, handleOrgUnitLevel }) => {
+const OrgUnitLevelMenu = ({ dhis2Url, username, password, orgUnitLevel, handleOrgUnitLevel }) => {
   const [allOrgUnitLevels, setOrgUnitLevels] = useState([])
 
   useEffect(async () => {
@@ -14,7 +14,7 @@ const OrgUnitLevelMenu = ({ dhis2Url, username, password, OrgUnitLevel, handleOr
     <>
       <select
         id="orgUnitLevel"
-        value={OrgUnitLevel}
+        value={orgUnitLevel}
         onChange={handleOrgUnitLevel}
         className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded"
       >

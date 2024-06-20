@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
-import Login from './components/Login'
 import { getUserInfo } from './service/useApi'
-import MainPage from './components/MainPage'
-import { clearCacheData } from './utils/helpers'
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
+import MainPage from './pages/MainPage'
+import Login from './pages/Login'
 
 const App = () => {
   const [username, setUsername] = useState('')

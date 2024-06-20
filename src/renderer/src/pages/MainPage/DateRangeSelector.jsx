@@ -1,10 +1,10 @@
 const DateRangeSelector = ({
   startDate,
   endDate,
-  period,
+  frequency,
   handleStartDateChange,
   handleEndDateChange,
-  handlePeriod
+  handleFrequency
 }) => {
   let today = new Date().toJSON().slice(0, 10)
 
@@ -17,10 +17,10 @@ const DateRangeSelector = ({
             <input
               type="radio"
               id="year"
-              name="period"
+              name="frequency"
               value="year"
-              onChange={handlePeriod}
-              checked={period === 'year'}
+              onChange={handleFrequency}
+              checked={frequency === 'year'}
               className="form-radio text-blue-600"
             />
             <span className="ml-2">Year</span>
@@ -31,10 +31,10 @@ const DateRangeSelector = ({
             <input
               type="radio"
               id="quarter"
-              name="period"
+              name="frequency"
               value="quarter"
-              checked={period === 'quarter'}
-              onChange={handlePeriod}
+              checked={frequency === 'quarter'}
+              onChange={handleFrequency}
               className="form-radio text-blue-600"
             />
             <span className="ml-2">Quarter</span>
@@ -45,10 +45,10 @@ const DateRangeSelector = ({
             <input
               type="radio"
               id="month"
-              name="period"
+              name="frequency"
               value="month"
-              checked={period === 'month'}
-              onChange={handlePeriod}
+              checked={frequency === 'month'}
+              onChange={handleFrequency}
               className="form-radio text-blue-600"
             />
             <span className="ml-2">Month</span>
