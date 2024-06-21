@@ -6,7 +6,7 @@ const CategoryDropdownMenu = ({ category, selectedCategory, handleSelectCategory
         id="categoryCombination"
         value={selectedCategory}
         onChange={handleSelectCategory}
-        className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded"
+        className="w-full px-4 py-2 border border-gray-700 rounded"
       >
         <option value="">Select Category Combination</option>
         {category?.map((combo) => (

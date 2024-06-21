@@ -1,5 +1,3 @@
-import { Link } from "react-router-dom"
-
 const TopMenu = ({ username, handleDisconnect }) => (
   <div className="flex justify-between items-center p-4 bg-gray-200 shadow-md">
     <div className="font-bold text-xl">DHIS2 Data Downloader</div>

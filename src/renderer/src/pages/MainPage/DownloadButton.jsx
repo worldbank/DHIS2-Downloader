@@ -9,7 +9,7 @@ const DownloadButton = ({ handleDownload, isDownloadDisabled }) => {
           isDownloadDisabled ? 'opacity-50 cursor-not-allowed' : ''
         }`}
       >
-        Download Data
+        Download
       </button>
     </div>
   )

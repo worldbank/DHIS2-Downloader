@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import TopMenu from '../TopMenu'
+import LoadingModal from './LoadingModal'
 import OrganizationUnitTree from './OrganizationUnitTree'
 import OrgUnitLevelMenu from './OrgUnitLevelMenu'
 import DateRangeSelector from './DateRangeSelector'
@@ -11,12 +11,12 @@ import {
 } from '../../service/useApi'
 import DataElementsMenu from './DataElements'
 import CategoryDropdownMenu from './CategoryCombo'
-import { generateDownloadingUrl, jsonToCsv } from '../../utils/helpers'
+import { generateDownloadingUrl, jsonToCsv, objectToCsv } from '../../utils/helpers'
 import { generatePeriods } from '../../utils/dateUtils'
 import DownloadButton from './DownloadButton'
 
 // eslint-disable-next-line react/prop-types
-const MainPage = ({ dhis2Url, username, password, handleDisconnect }) => {
+const MainPage = ({ dhis2Url, username, password }) => {
   const [selectedOrgUnits, setSelectedOrgUnits] = useState([])
   const [orgUnitLevel, selectOrgUnitLevel] = useState([])
   const [startDate, setStartDate] = useState('')
@@ -28,22 +28,25 @@ const MainPage = ({ dhis2Url, username, password, handleDisconnect }) => {
   const [selectedDataPoints, setSelectedDataPoints] = useState([])
   const [category, setCategory] = useState([])
   const [selectedCategory, setSelectedCategory] = useState([])
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState('')
 
   useEffect(async () => {
     try {
-      setIsLoading(true)
+      setIsLoading('loading')
       const elements = await getDataElements(dhis2Url, username, password)
       const indicators = await getIndicators(dhis2Url, username, password)
       const categories = await getCategoryCombination(dhis2Url, username, password)
-      const data = [...elements.dataElements, indicators.indicators]
+      const data = [
+        ...elements.dataElements.map((item) => ({ ...item, category: 'DataElement' })),
+        ...indicators.indicators.map((item) => ({ ...item, category: 'Indicator' }))
+      ]
       setCategory([...categories.categoryCombos])
       setdataPoints(data)
       setFilteredDataPoints(data)
     } catch (error) {
       console.log(error)
     } finally {
-      setIsLoading(false)
+      setIsLoading('')
     }
   }, [dhis2Url, username, password])
 
@@ -116,14 +119,37 @@ const MainPage = ({ dhis2Url, username, password, handleDisconnect }) => {
     setAddedDataPoints(addedDataPoints.filter((element) => element.id !== elementId))
   }
 
+  const handleExportAllDataPoints = () => {
+    try {
+      setIsLoading('downloading')
+      const csvDataPoints = objectToCsv(dataPoints)
+      const csvBlob = new Blob([csvDataPoints], { type: 'text/csv' })
+      const downloadLink = document.createElement('a')
+      downloadLink.href = URL.createObjectURL(csvBlob)
+      downloadLink.download = 'JsonId.csv'
+      downloadLink.click()
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setIsLoading('')
+    }
+  }
+
   const handleDownload = async () => {
-    const ou = orgUnitLevel
+    let ou = ''
+    if (selectedOrgUnits.length > 0) {
+      ou = `${orgUnitLevel};${selectedOrgUnits.join(';')}&ouMode=SELECTED`
+    } else {
+      ou = orgUnitLevel
+    }
     const co = selectedCategory
     const dx = addedDataPoints.map((element) => element.id).join(';')
     const periods = generatePeriods(frequency, startDate, endDate)
     const pe = periods.join(';')
     const downloadingUrl = generateDownloadingUrl(dhis2Url, ou, dx, pe, co)
+    console.log(downloadingUrl)
     try {
+      setIsLoading('downloading')
       const data = await fetchData(downloadingUrl, username, password)
       const csvData = jsonToCsv(data)
       const csvBlob = new Blob([csvData], { type: 'text/csv' })
@@ -133,6 +159,8 @@ const MainPage = ({ dhis2Url, username, password, handleDisconnect }) => {
       downloadLink.click()
     } catch (error) {
       console.log(error)
+    } finally {
+      setIsLoading('')
     }
   }
 
@@ -140,7 +168,7 @@ const MainPage = ({ dhis2Url, username, password, handleDisconnect }) => {
 
   return (
     <div>
-      <TopMenu username={username} handleDisconnect={handleDisconnect} />
+      {/* <TopMenu username={username} handleDisconnect={handleDisconnect} /> */}
       <div dir="ltr">
         <div className="flex px-4 py-8">
           <div className="w-1/3 px-4 py-8" style={{ height: '70vh' }}>
@@ -153,6 +181,8 @@ const MainPage = ({ dhis2Url, username, password, handleDisconnect }) => {
                 dhis2Url={dhis2Url}
                 username={username}
                 password={password}
+                selectedOrgUnits={selectedOrgUnits}
+                setSelectedOrgUnits={setSelectedOrgUnits}
                 onSelect={handleOrgUnitSelect}
               />
             </div>
@@ -171,12 +201,13 @@ const MainPage = ({ dhis2Url, username, password, handleDisconnect }) => {
                 handleSelectDataPoint={handleSelectDataPoint}
                 handleAddSelectedDataPoint={handleAddSelectedDataPoint}
                 handleRemoveDataPoint={handleRemoveDataPoint}
+                handleExportAllDataPoints={handleExportAllDataPoints}
               />
             </div>
           </div>
           <div className="w-1/3 px-4 py-8">
             <h3 className="text-xl font-bold mb-2">Organization Levels</h3>
-            <div className="overflow-y-auto mb-4">
+            <div className="mb-4">
               <OrgUnitLevelMenu
                 dhis2Url={dhis2Url}
                 username={username}
@@ -204,7 +235,7 @@ const MainPage = ({ dhis2Url, username, password, handleDisconnect }) => {
                 handleSelectCategory={handleSelectCategory}
               />
             </div>
-            <div className="space-y-4">
+            <div className="mt-4">
               <DownloadButton
                 handleDownload={handleDownload}
                 isDownloadDisabled={isDownloadDisabled}
@@ -214,7 +245,7 @@ const MainPage = ({ dhis2Url, username, password, handleDisconnect }) => {
         </div>
       </div>
 
-      {isLoading && <div>{'Loading'}</div>}
+      {isLoading.length > 0 && <LoadingModal isLoading={isLoading} />}
     </div>
   )
 }

@@ -10,7 +10,7 @@ const DateRangeSelector = ({
 
   return (
     <div className="flex">
-      <div className="w-1/2 space-x-2 space-y-4">
+      <div className="w-1/2 space-y-4">
         <legend className="text-sm font-medium text-gray-700">Frequency</legend>
         <div className="mt-2">
           <label className="inline-flex items-center">
@@ -55,8 +55,8 @@ const DateRangeSelector = ({
           </label>
         </div>
       </div>
-      <div className="w-1/2 space-x-2 space-y-4">
-        <div className="w-full mt-4">
+      <div className="w-1/2 space-y-4">
+        <div className="w-full">
           <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">
             Start Date
           </label>
@@ -68,7 +68,7 @@ const DateRangeSelector = ({
             className="mt-2 block w-full px-1 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
           />
         </div>
-        <div className="w-full mt-4">
+        <div className="w-full">
           <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">
             End Date
           </label>

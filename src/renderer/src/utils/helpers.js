@@ -35,3 +35,28 @@ export const jsonToCsv = (data) => {
 
   return csvRows.join('\n')
 }
+
+export const objectToCsv = (array) => {
+  if (!array || !array.length) {
+    console.error('No data to export')
+    return
+  }
+
+  const headers = Object.keys(array[0])
+  const csvRows = []
+
+  // Add the headers row
+  csvRows.push(headers.join(','))
+
+  // Add each row of data
+  for (const obj of array) {
+    const values = headers.map((header) => {
+      const escapedValue = ('' + obj[header]).replace(/"/g, '\\"')
+      return `"${escapedValue}"`
+    })
+    csvRows.push(values.join(','))
+  }
+
+  // Create a Blob from the CSV string
+  return csvRows.join('\n')
+}
