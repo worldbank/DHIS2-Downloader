@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
+import { HashRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom'
 import { getUserInfo } from './service/useApi'
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 import MainPage from './pages/MainPage'
 import Login from './pages/Login'
+import About from './pages/About'
+import TopMenu from './pages/TopMenu'
 
 const App = () => {
   const [username, setUsername] = useState('')
@@ -13,19 +15,19 @@ const App = () => {
   useEffect(() => {
     console.log('App start...')
     if (
-      localStorage['accessToken'] &&
-      localStorage['dhis2Url'] &&
-      localStorage['username'] &&
-      localStorage['password']
+      localStorage.getItem('accessToken') &&
+      localStorage.getItem('dhis2Url') &&
+      localStorage.getItem('username') &&
+      localStorage.getItem('password')
     ) {
-      setAccessToken(localStorage['accessToken'])
-      setDhis2Url(localStorage['dhis2Url'])
-      setUsername(localStorage['username'])
-      setPassword(localStorage['password'])
+      setAccessToken(localStorage.getItem('accessToken'))
+      setDhis2Url(localStorage.getItem('dhis2Url'))
+      setUsername(localStorage.getItem('username'))
+      setPassword(localStorage.getItem('password'))
     }
-    if (localStorage['dhis2Url'] && localStorage['username']) {
-      setDhis2Url(localStorage['dhis2Url'])
-      setUsername(localStorage['username'])
+    if (localStorage.getItem('dhis2Url') && localStorage.getItem('username')) {
+      setDhis2Url(localStorage.getItem('dhis2Url'))
+      setUsername(localStorage.getItem('username'))
     }
   }, [])
 
@@ -40,6 +42,7 @@ const App = () => {
         localStorage.setItem('username', username)
         localStorage.setItem('password', password)
         localStorage.setItem('dhis2Url', dhis2Url)
+        console.log('Login successful, token:', token)
       }
     } catch (error) {
       alert('Invalid Username or Password')
@@ -57,27 +60,50 @@ const App = () => {
     window.location.reload()
   }
 
+  const PrivateRoute = ({ children }) => {
+    return accessToken ? children : <Navigate to="/login" />
+  }
+
   return (
-    <div className="bg-teal-300 text-black min-h-screen">
-      {!accessToken ? (
-        <Login
-          dhis2Url={dhis2Url}
-          setDhis2Url={setDhis2Url}
+    <Router>
+      <div className="bg-teal-200 text-black min-h-screen">
+        <TopMenu
+          accessToken={accessToken}
           username={username}
-          setUsername={setUsername}
-          password={password}
-          setPassword={setPassword}
-          handleConnect={handleConnect}
-        />
-      ) : (
-        <MainPage
-          dhis2Url={dhis2Url}
-          username={username}
-          password={password}
           handleDisconnect={handleDisconnect}
         />
-      )}
-    </div>
+        <Routes>
+          <Route path="/about" element={<About />} />
+          <Route
+            path="/login"
+            element={
+              accessToken ? (
+                <Navigate replace to="/home" />
+              ) : (
+                <Login
+                  dhis2Url={dhis2Url}
+                  setDhis2Url={setDhis2Url}
+                  username={username}
+                  setUsername={setUsername}
+                  password={password}
+                  setPassword={setPassword}
+                  handleConnect={handleConnect}
+                />
+              )
+            }
+          />
+          <Route
+            path="/home"
+            element={
+              <PrivateRoute>
+                <MainPage dhis2Url={dhis2Url} username={username} password={password} />
+              </PrivateRoute>
+            }
+          />
+        </Routes>
+      </div>
+    </Router>
   )
 }
+
 export default App

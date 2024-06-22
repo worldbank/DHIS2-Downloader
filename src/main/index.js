@@ -33,7 +33,7 @@ function createWindow() {
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
+    mainWindow.loadFile(join(__dirname, '../renderer/index.html'), { hash: 'home' })
   }
 }
 
@@ -68,12 +68,12 @@ app.whenReady().then(() => {
 
   createWindow()
 
-  protocol.handle('media', (req) => {
-    const basePath = app.getAppPath() // Get the base directory of your Electron app
-    const pathToMedia = new URL(req.url).pathname
-    const absolutePath = path.join(basePath, pathToMedia) // Resolve the absolute path
-    return net.fetch(`file://${absolutePath}`)
-  })
+  // protocol.handle('media', (req) => {
+  //   const basePath = app.getAppPath() // Get the base directory of your Electron app
+  //   const pathToMedia = new URL(req.url).pathname
+  //   const absolutePath = path.join(basePath, pathToMedia) // Resolve the absolute path
+  //   return net.fetch(`file://${absolutePath}`)
+  // })
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the

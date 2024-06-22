@@ -30,24 +30,30 @@ const MainPage = ({ dhis2Url, username, password }) => {
   const [selectedCategory, setSelectedCategory] = useState([])
   const [isLoading, setIsLoading] = useState('')
 
-  useEffect(async () => {
-    try {
-      setIsLoading('loading')
-      const elements = await getDataElements(dhis2Url, username, password)
-      const indicators = await getIndicators(dhis2Url, username, password)
-      const categories = await getCategoryCombination(dhis2Url, username, password)
-      const data = [
-        ...elements.dataElements.map((item) => ({ ...item, category: 'DataElement' })),
-        ...indicators.indicators.map((item) => ({ ...item, category: 'Indicator' }))
-      ]
-      setCategory([...categories.categoryCombos])
-      setdataPoints(data)
-      setFilteredDataPoints(data)
-    } catch (error) {
-      console.log(error)
-    } finally {
-      setIsLoading('')
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading('loading')
+        const elements = await getDataElements(dhis2Url, username, password)
+        const indicators = await getIndicators(dhis2Url, username, password)
+        const categories = await getCategoryCombination(dhis2Url, username, password)
+
+        const data = [
+          ...elements.dataElements.map((item) => ({ ...item, category: 'DataElement' })),
+          ...indicators.indicators.map((item) => ({ ...item, category: 'Indicator' }))
+        ]
+
+        setCategory([...categories.categoryCombos])
+        setdataPoints(data)
+        setFilteredDataPoints(data)
+      } catch (error) {
+        console.log(error)
+      } finally {
+        setIsLoading('')
+      }
     }
+
+    fetchData()
   }, [dhis2Url, username, password])
 
   const handleOrgUnitSelect = (unitId) => {
@@ -145,6 +151,7 @@ const MainPage = ({ dhis2Url, username, password }) => {
     const co = selectedCategory
     const dx = addedDataPoints.map((element) => element.id).join(';')
     const periods = generatePeriods(frequency, startDate, endDate)
+    console.log(startDate, endDate, periods)
     const pe = periods.join(';')
     const downloadingUrl = generateDownloadingUrl(dhis2Url, ou, dx, pe, co)
     console.log(downloadingUrl)
@@ -164,11 +171,13 @@ const MainPage = ({ dhis2Url, username, password }) => {
     }
   }
 
-  const isDownloadDisabled = false
+  const isDownloadDisabled =
+    new Date(startDate) >= new Date(endDate) ||
+    addedDataPoints.length == 0 ||
+    orgUnitLevel.length == 0
 
   return (
     <div>
-      {/* <TopMenu username={username} handleDisconnect={handleDisconnect} /> */}
       <div dir="ltr">
         <div className="flex px-4 py-8">
           <div className="w-1/3 px-4 py-8" style={{ height: '70vh' }}>

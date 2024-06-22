@@ -12,9 +12,12 @@ const OrganizationUnitTree = ({
   const [orgUnits, setOrgUnits] = useState([])
   const [expandedOrgUnits, setExpandedOrgUnits] = useState([])
 
-  useEffect(async () => {
-    const data = await getInitialOrganizationUnitLevel(dhis2Url, username, password)
-    setOrgUnits(data.organisationUnits)
+  useEffect(() => {
+    const fetchOrgUnitLevel = async () => {
+      const data = await getInitialOrganizationUnitLevel(dhis2Url, username, password)
+      setOrgUnits(data.organisationUnits)
+    }
+    fetchOrgUnitLevel()
   }, [dhis2Url, username, password])
 
   const fetchChildOrgUnits = async (parentId, parentPath) => {
