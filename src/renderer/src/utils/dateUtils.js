@@ -7,8 +7,8 @@ const generateQuarters = (startDate, endDate) => {
   const quarters = []
 
   // Convert start and end dates to Date objects
-  const start = new Date(startYear, startMonth - 1)
-  const end = new Date(endYear, endMonth - 1)
+  const start = new Date(startYear, startMonth)
+  const end = new Date(endYear, endMonth)
 
   // Helper function to get the quarter from a month
   const getQuarter = (month) => {
@@ -43,14 +43,16 @@ const generateMonths = (startDate, endDate) => {
   const endYear = endDate.getFullYear()
   const endMonth = endDate.getMonth()
 
-  const start = new Date(startYear, startMonth)
-  const end = new Date(endYear, endMonth)
   const months = []
 
-  for (let date = start; date <= end; date.setMonth(date.getMonth() + 1)) {
-    const year = date.getFullYear()
-    const month = date.getMonth().toString().padStart(2, '0')
-    months.push(`${year}${month}`)
+  for (let year = startYear; year <= endYear; year++) {
+    const start = year === startYear ? startMonth : 0
+    const end = year === endYear ? endMonth : 11
+
+    for (let month = start; month <= end; month++) {
+      const monthStr = (month + 1).toString().padStart(2, '0')
+      months.push(`${year}${monthStr}`)
+    }
   }
 
   return months
