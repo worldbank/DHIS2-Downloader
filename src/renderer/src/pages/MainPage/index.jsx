@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import LoadingModal from './LoadingModal'
+import { useEffect, useState, useRef } from 'react'
+import LoadingModal from '../Modal'
 import OrganizationUnitTree from './OrganizationUnitTree'
 import OrgUnitLevelMenu from './OrgUnitLevelMenu'
 import DateRangeSelector from './DateRangeSelector'
@@ -14,9 +14,11 @@ import CategoryDropdownMenu from './CategoryCombo'
 import { generateDownloadingUrl, jsonToCsv, objectToCsv } from '../../utils/helpers'
 import { generatePeriods } from '../../utils/dateUtils'
 import DownloadButton from './DownloadButton'
+import { useLiveQuery } from 'dexie-react-hooks'
+import { changeSchema } from '../../service/db'
 
 // eslint-disable-next-line react/prop-types
-const MainPage = ({ dhis2Url, username, password }) => {
+const MainPage = ({ dhis2Url, username, password, db }) => {
   const [selectedOrgUnits, setSelectedOrgUnits] = useState([])
   const [orgUnitLevel, selectOrgUnitLevel] = useState([])
   const [startDate, setStartDate] = useState('')
@@ -29,6 +31,8 @@ const MainPage = ({ dhis2Url, username, password }) => {
   const [category, setCategory] = useState([])
   const [selectedCategory, setSelectedCategory] = useState([])
   const [isLoading, setIsLoading] = useState('')
+  const dbRef = useRef(db)
+  const services = useLiveQuery(() => dbRef.current.services.toArray())
 
   useEffect(() => {
     const fetchData = async () => {
@@ -151,20 +155,23 @@ const MainPage = ({ dhis2Url, username, password }) => {
     const co = selectedCategory
     const dx = addedDataPoints.map((element) => element.id).join(';')
     const periods = generatePeriods(frequency, startDate, endDate)
-    console.log(startDate, endDate, periods)
     const pe = periods.join(';')
     const downloadingUrl = generateDownloadingUrl(dhis2Url, ou, dx, pe, co)
     console.log(downloadingUrl)
     try {
       setIsLoading('downloading')
       const data = await fetchData(downloadingUrl, username, password)
-      const csvData = jsonToCsv(data)
+      const { csvData, headers, dbObjects } = jsonToCsv(data)
+      const schema = '++id, ' + headers.join(', ')
+      dbRef.current = await changeSchema(dbRef.current, { services: schema })
+      await dbRef.current.services.bulkAdd(dbObjects)
       const csvBlob = new Blob([csvData], { type: 'text/csv' })
       const downloadLink = document.createElement('a')
       downloadLink.href = URL.createObjectURL(csvBlob)
       downloadLink.download = 'dhis2_data.csv'
       downloadLink.click()
     } catch (error) {
+      setIsLoading('Error')
       console.log(error)
     } finally {
       setIsLoading('')

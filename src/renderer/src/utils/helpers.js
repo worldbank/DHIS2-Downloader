@@ -21,19 +21,28 @@ export const generateDownloadingUrl = (dhis2Url, ou, dx, pe, co) => {
 }
 
 export const jsonToCsv = (data) => {
-  const headers = data.headers.filter((header) => !header.hidden)
-  const headerNames = headers.map((header) => header.name)
+  const headers = data.headers
+  const headerNames = headers.map((header) => header.column)
   const csvRows = []
+  const objectsArray = []
+
+  // Add the CSV header
   csvRows.push(headerNames.join(','))
 
   // Add the data rows
   for (const row of data.rows) {
-    const filteredRow = headers.map((header) => row[data.headers.indexOf(header)])
-    const values = filteredRow.map((value) => JSON.stringify(value ?? '')) // Handle null/undefined values
+    const rowObject = {}
+    const values = headers.map((header) => {
+      // Get the value for each header, handle null/undefined values
+      const value = row[data.headers.indexOf(header)]
+      rowObject[header.column] = value ?? '' // Assign value to the corresponding key in rowObject
+      return JSON.stringify(value ?? '')
+    })
     csvRows.push(values.join(','))
+    objectsArray.push(rowObject) // Add the row object to the array
   }
 
-  return csvRows.join('\n')
+  return { csv: csvRows.join('\n'), headers: headerNames, dbObjects: objectsArray }
 }
 
 export const objectToCsv = (array) => {

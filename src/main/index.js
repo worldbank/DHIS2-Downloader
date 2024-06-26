@@ -44,7 +44,8 @@ protocol.registerSchemesAsPrivileged([
     privileges: {
       secure: true,
       supportFetchAPI: true,
-      bypassCSP: true
+      bypassCSP: true,
+      stream: true
     }
   }
 ])
@@ -68,12 +69,14 @@ app.whenReady().then(() => {
 
   createWindow()
 
-  // protocol.handle('media', (req) => {
-  //   const basePath = app.getAppPath() // Get the base directory of your Electron app
-  //   const pathToMedia = new URL(req.url).pathname
-  //   const absolutePath = path.join(basePath, pathToMedia) // Resolve the absolute path
-  //   return net.fetch(`file://${absolutePath}`)
-  // })
+  protocol.handle('media', (req) => {
+    // const basePath = app.getAppPath() // Get the base directory of your Electron app
+    // const pathToMedia = new URL(req.url).pathname
+    // const absolutePath = path.join(basePath, pathToMedia) // Resolve the absolute path
+    // return net.fetch(`file://${absolutePath}`)
+    const pathToMedia = new URL(req.url).pathname
+    return net.fetch(`file://${pathToMedia}`)
+  })
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the

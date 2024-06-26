@@ -4,7 +4,8 @@ import { getUserInfo } from './service/useApi'
 import MainPage from './pages/MainPage'
 import Login from './pages/Login'
 import About from './pages/About'
-import TopMenu from './pages/TopMenu'
+import NavBar from './pages/TopMenu'
+import { db } from './service/db'
 
 const App = () => {
   const [username, setUsername] = useState('')
@@ -51,12 +52,19 @@ const App = () => {
     }
   }
 
-  const handleDisconnect = () => {
+  const handleDisconnect = async () => {
     setAccessToken('')
     setPassword('')
     setUsername('')
     localStorage.removeItem('accessToken')
     localStorage.removeItem('password')
+    try {
+      await db.close()
+      await db.delete()
+      console.log('Database deleted on logout.')
+    } catch (error) {
+      console.error('Failed to delete db:', error.stack)
+    }
     window.location.reload()
   }
 
@@ -66,12 +74,8 @@ const App = () => {
 
   return (
     <Router>
-      <div className="bg-teal-200 text-black min-h-screen">
-        <TopMenu
-          accessToken={accessToken}
-          username={username}
-          handleDisconnect={handleDisconnect}
-        />
+      <div className="bg-teal-100 text-black min-h-screen">
+        <NavBar accessToken={accessToken} username={username} handleDisconnect={handleDisconnect} />
         <Routes>
           <Route path="/about" element={<About />} />
           <Route
@@ -96,7 +100,7 @@ const App = () => {
             path="/home"
             element={
               <PrivateRoute>
-                <MainPage dhis2Url={dhis2Url} username={username} password={password} />
+                <MainPage dhis2Url={dhis2Url} username={username} password={password} db={db} />
               </PrivateRoute>
             }
           />
