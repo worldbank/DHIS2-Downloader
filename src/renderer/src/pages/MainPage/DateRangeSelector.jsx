@@ -6,7 +6,7 @@ const DateRangeSelector = ({
   handleEndDateChange,
   handleFrequency
 }) => {
-  let today = new Date().toJSON().slice(0, 10)
+  let today = new Date().toJSON().slice(0, 7)
 
   return (
     <div className="flex">
@@ -61,7 +61,7 @@ const DateRangeSelector = ({
             Start Date
           </label>
           <input
-            type="date"
+            type="month"
             id="startDate"
             value={startDate}
             onChange={handleStartDateChange}
@@ -73,7 +73,7 @@ const DateRangeSelector = ({
             End Date
           </label>
           <input
-            type="date"
+            type="month"
             id="endDate"
             value={endDate}
             max={today}
