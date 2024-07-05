@@ -46,11 +46,21 @@ export const getCategoryCombination = (dhis2Url, username, password) => {
 }
 
 export const getDataElements = (dhis2Url, username, password) => {
-  const elementUrl = `${dhis2Url}/api/dataElements?fields=id,displayName&paging=false`
+  const elementUrl = `${dhis2Url}/api/dataElements?fields=id,displayName,displayDescription&paging=false`
   return fetchData(elementUrl, username, password)
 }
 
 export const getIndicators = (dhis2Url, username, password) => {
-  const indicatorUrl = `${dhis2Url}/api/indicators?fields=id,displayName&paging=false`
+  const indicatorUrl = `${dhis2Url}/api/indicators.json?fields=id,code,displayName,displayDescription,numerator,denominator,indicatorGroups[id,code,displayName,attributeValues[value]]&paging=false`
   return fetchData(indicatorUrl, username, password)
+}
+
+export const getProgramIndicators = (dhis2Url, username, password) => {
+  const indicatorUrl = `${dhis2Url}/api/programIndicators?fields=id,displayName&paging=false`
+  return fetchData(indicatorUrl, username, password)
+}
+
+export const getCategoryOptionCombos = (dhis2Url, username, password) => {
+  const catComboOptionUrl = `${dhis2Url}/api/categoryOptionCombos?fields=id,displayName&paging=false`
+  return fetchData(catComboOptionUrl, username, password)
 }

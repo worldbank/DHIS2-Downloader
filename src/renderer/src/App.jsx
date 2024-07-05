@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from 'react'
 import { HashRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom'
-import { getUserInfo } from './service/useApi'
+import {
+  getDataElements,
+  getUserInfo,
+  getIndicators,
+  getCategoryOptionCombos
+} from './service/useApi'
 import MainPage from './pages/MainPage'
 import Login from './pages/Login'
 import About from './pages/About'
-import NavBar from './pages/TopMenu'
-import { db } from './service/db'
+import NavBar from './pages/NavBar'
+import DataDictionary from './pages/DataDictionary'
+import { servicesDb, dictionaryDb } from './service/db'
 
 const App = () => {
   const [username, setUsername] = useState('')
@@ -43,7 +49,12 @@ const App = () => {
         localStorage.setItem('username', username)
         localStorage.setItem('password', password)
         localStorage.setItem('dhis2Url', dhis2Url)
-        console.log('Login successful, token:', token)
+        const elements = await getDataElements(dhis2Url, username, password)
+        const indicators = await getIndicators(dhis2Url, username, password)
+        const catOptionCombos = await getCategoryOptionCombos(dhis2Url, username, password)
+        await dictionaryDb.dataElements.bulkAdd(elements.dataElements)
+        await dictionaryDb.indicators.bulkAdd(indicators.indicators)
+        await dictionaryDb.catOptionCombos.bulkAdd(catOptionCombos.categoryOptionCombos)
       }
     } catch (error) {
       alert('Invalid Username or Password')
@@ -59,8 +70,10 @@ const App = () => {
     localStorage.removeItem('accessToken')
     localStorage.removeItem('password')
     try {
-      await db.close()
-      await db.delete()
+      await servicesDb.close()
+      await dictionaryDb.close()
+      await servicesDb.delete()
+      await dictionaryDb.delete()
       console.log('Database deleted on logout.')
     } catch (error) {
       console.error('Failed to delete db:', error.stack)
@@ -74,10 +87,25 @@ const App = () => {
 
   return (
     <Router>
-      <div className="bg-teal-100 text-black min-h-screen">
-        <NavBar accessToken={accessToken} username={username} handleDisconnect={handleDisconnect} />
+      <div className="bg-teal-green text-black min-h-screen flex flex-col">
+        <div className="min-w-full mx-auto">
+          <NavBar
+            accessToken={accessToken}
+            username={username}
+            handleDisconnect={handleDisconnect}
+          />
+        </div>
+
         <Routes>
           <Route path="/about" element={<About />} />
+          <Route
+            path="/dictionary"
+            element={
+              <PrivateRoute>
+                <DataDictionary dictionaryDb={dictionaryDb} />
+              </PrivateRoute>
+            }
+          />
           <Route
             path="/login"
             element={
@@ -100,7 +128,13 @@ const App = () => {
             path="/home"
             element={
               <PrivateRoute>
-                <MainPage dhis2Url={dhis2Url} username={username} password={password} db={db} />
+                <MainPage
+                  dhis2Url={dhis2Url}
+                  username={username}
+                  password={password}
+                  dictionaryDb={dictionaryDb}
+                  servicesDb={servicesDb}
+                />
               </PrivateRoute>
             }
           />

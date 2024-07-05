@@ -1,8 +1,15 @@
 import Dexie from 'dexie'
 
-export const db = new Dexie('myDatabase')
-db.version(1).stores({
+export const dictionaryDb = new Dexie('dictionary')
+export const servicesDb = new Dexie('services')
+servicesDb.version(1).stores({
   services: '++id'
+})
+
+dictionaryDb.version(1).stores({
+  dataElements: '++id, displayName, displayDescription',
+  indicators: '++id, displayName, displayDescription, numerator, denominator',
+  catOptionCombos: '++id, displayName'
 })
 
 export const changeSchema = async (db, schemaChanges) => {
@@ -12,6 +19,8 @@ export const changeSchema = async (db, schemaChanges) => {
   newDb.on('blocked', () => false) // Silence console warning of blocked event.
 
   await db.delete()
-  newDb.version(1).stores(schemaChanges)
+  newDb.version(2).stores({
+    ...schemaChanges
+  })
   return await newDb.open()
 }
