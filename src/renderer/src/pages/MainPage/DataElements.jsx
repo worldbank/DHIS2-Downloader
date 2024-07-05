@@ -1,27 +1,48 @@
+import { useState } from 'react'
+
 const DataElementsSelector = ({
   filteredDataPoints,
   handleFilterDataPoint,
   handleSelectDataPoint,
   handleAddSelectedDataPoint,
-  handleExportAllDataPoints
 }) => {
+  const [dataType, setDataType] = useState('all')
+
+  const handleDataType = (event) => {
+    setDataType(event.target.value)
+  }
+
+  const filteredTypeDataPoints = filteredDataPoints.filter((element) =>
+    dataType !== 'all' ? element.category === dataType : true
+  )
+
   return (
     <div className="mb-4">
+      Data Type
+      <select
+        onChange={handleDataType}
+        className="mb-2 w-full px-4 py-2 border border-gray-700 rounded"
+      >
+        <option value={'all'}>All Data Types</option>
+        <option value={'dataElement'}>Data Element</option>
+        <option value={'Indicator'}>Indicator</option>
+        <option value={'programIndicator'}>Program Indicator</option>
+      </select>
       <input
         type="text"
-        placeholder="Filter data elements"
+        placeholder="Search"
         onChange={handleFilterDataPoint}
         className="mb-2 w-full px-4 py-2 border border-gray-700 rounded"
       />
       <select
         multiple
         onChange={handleSelectDataPoint}
-        className="w-full px-4 py-2 overflow-auto border-gray-700 rounded"
-        style={{ minHeight: '200px' }}
+        className="w-full px-4 py-2 overflow-y border-gray-700 rounded"
+        style={{ minHeight: '200px', maxHeight: '200px' }}
       >
-        {filteredDataPoints.map((element) => (
-          <option key={element.id} value={element.id}>
-            {element.category}-{element.displayName}
+        {filteredTypeDataPoints.map((element) => (
+          <option key={element.id} value={element.id} className="whitespace-normal">
+            - {element.displayName}
           </option>
         ))}
       </select>
@@ -30,12 +51,6 @@ const DataElementsSelector = ({
         className="mt-2 mr-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
       >
         Select
-      </button>
-      <button
-        onClick={handleExportAllDataPoints}
-        className="mt-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-      >
-        Export All
       </button>
     </div>
   )
@@ -66,7 +81,6 @@ const DataElementsMenu = ({
   handleSelectDataPoint,
   handleAddSelectedDataPoint,
   handleRemoveDataPoint,
-  handleExportAllDataPoints
 }) => {
   return (
     <div>
@@ -75,7 +89,6 @@ const DataElementsMenu = ({
         handleFilterDataPoint={handleFilterDataPoint}
         handleSelectDataPoint={handleSelectDataPoint}
         handleAddSelectedDataPoint={handleAddSelectedDataPoint}
-        handleExportAllDataPoints={handleExportAllDataPoints}
       />
       <AddedElementsDisplay
         addedDataPoints={addedDataPoints}
