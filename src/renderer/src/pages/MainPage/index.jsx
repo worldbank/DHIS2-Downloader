@@ -7,7 +7,8 @@ import {
   fetchData,
   getCategoryCombination,
   getDataElements,
-  getIndicators
+  getIndicators,
+  getProgramIndicators
 } from '../../service/useApi'
 import DataElementsMenu from './DataElements'
 import CategoryDropdownMenu from './CategoryCombo'
@@ -18,7 +19,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { changeSchema } from '../../service/db'
 
 // eslint-disable-next-line react/prop-types
-const MainPage = ({ dhis2Url, username, password, db }) => {
+const MainPage = ({ dhis2Url, username, password, dictionaryDb, servicesDb }) => {
   const [selectedOrgUnits, setSelectedOrgUnits] = useState([])
   const [orgUnitLevel, selectOrgUnitLevel] = useState([])
   const [startDate, setStartDate] = useState('')
@@ -31,20 +32,33 @@ const MainPage = ({ dhis2Url, username, password, db }) => {
   const [category, setCategory] = useState([])
   const [selectedCategory, setSelectedCategory] = useState([])
   const [isLoading, setIsLoading] = useState('')
-  const dbRef = useRef(db)
-  const services = useLiveQuery(() => dbRef.current.services.toArray())
+  const [record, setRecord] = useState(['ou', 'pe', 'dx', 'co', 'url'])
+  const servicesDbRef = useRef(servicesDb)
+  const elements = useLiveQuery(() => dictionaryDb.dataElements.toArray()) || []
+  const indicators = useLiveQuery(() => dictionaryDb.indicators.toArray()) || []
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading('loading')
-        const elements = await getDataElements(dhis2Url, username, password)
-        const indicators = await getIndicators(dhis2Url, username, password)
         const categories = await getCategoryCombination(dhis2Url, username, password)
+        const programIndicators = await getProgramIndicators(dhis2Url, username, password)
 
         const data = [
-          ...elements.dataElements.map((item) => ({ ...item, category: 'DataElement' })),
-          ...indicators.indicators.map((item) => ({ ...item, category: 'Indicator' }))
+          ...elements.map((item) => ({
+            id: item.id,
+            displayName: item.displayName,
+            category: 'dataElement'
+          })),
+          ...indicators.map((item) => ({
+            id: item.id,
+            displayName: item.displayName,
+            category: 'Indicator'
+          })),
+          ...programIndicators.programIndicators.map((item) => ({
+            ...item,
+            category: 'programIndicator'
+          }))
         ]
 
         setCategory([...categories.categoryCombos])
@@ -58,7 +72,7 @@ const MainPage = ({ dhis2Url, username, password, db }) => {
     }
 
     fetchData()
-  }, [dhis2Url, username, password])
+  }, [dhis2Url, username, password, elements, indicators])
 
   const handleOrgUnitSelect = (unitId) => {
     if (selectedOrgUnits.includes(unitId)) {
@@ -69,7 +83,10 @@ const MainPage = ({ dhis2Url, username, password, db }) => {
   }
 
   const handleOrgUnitLevel = (event) => {
-    selectOrgUnitLevel(event.target.value)
+    const level = Number.parseInt(event.target.value)
+    selectOrgUnitLevel((prevLevels) =>
+      prevLevels.includes(level) ? prevLevels.filter((l) => l !== level) : [...prevLevels, level]
+    )
   }
 
   const handleStartDateChange = (event) => {
@@ -124,25 +141,8 @@ const MainPage = ({ dhis2Url, username, password, db }) => {
 
   const handleRemoveDataPoint = (elementId) => {
     const dataToRemove = addedDataPoints.find((element) => element.id === elementId)
-    console.log(dataToRemove)
     setFilteredDataPoints(filteredDataPoints.concat(dataToRemove))
     setAddedDataPoints(addedDataPoints.filter((element) => element.id !== elementId))
-  }
-
-  const handleExportAllDataPoints = () => {
-    try {
-      setIsLoading('downloading')
-      const csvDataPoints = objectToCsv(dataPoints)
-      const csvBlob = new Blob([csvDataPoints], { type: 'text/csv' })
-      const downloadLink = document.createElement('a')
-      downloadLink.href = URL.createObjectURL(csvBlob)
-      downloadLink.download = 'JsonId.csv'
-      downloadLink.click()
-    } catch (error) {
-      console.log(error)
-    } finally {
-      setIsLoading('')
-    }
   }
 
   const handleDownload = async () => {
@@ -150,8 +150,9 @@ const MainPage = ({ dhis2Url, username, password, db }) => {
     if (selectedOrgUnits.length > 0) {
       ou = `${orgUnitLevel};${selectedOrgUnits.join(';')}&ouMode=SELECTED`
     } else {
-      ou = orgUnitLevel
+      ou = orgUnitLevel.map((level) => `LEVEL-${level}`).join(';')
     }
+    console.log(ou)
     const co = selectedCategory
     const dx = addedDataPoints.map((element) => element.id).join(';')
     const periods = generatePeriods(frequency, startDate, endDate)
@@ -163,8 +164,10 @@ const MainPage = ({ dhis2Url, username, password, db }) => {
       const data = await fetchData(downloadingUrl, username, password)
       const { csvData, headers, dbObjects } = jsonToCsv(data)
       const schema = '++id, ' + headers.join(', ')
-      dbRef.current = await changeSchema(dbRef.current, { services: schema })
-      await dbRef.current.services.bulkAdd(dbObjects)
+      servicesDbRef.current = await changeSchema(servicesDbRef.current, { services: schema })
+      await servicesDbRef.current.services.bulkAdd(dbObjects)
+      setRecord((prevRecord) => [...prevRecord, [ou, pe, dx, co, downloadingUrl]])
+      console.log(record)
       const csvBlob = new Blob([csvData], { type: 'text/csv' })
       const downloadLink = document.createElement('a')
       downloadLink.href = URL.createObjectURL(csvBlob)
@@ -176,6 +179,9 @@ const MainPage = ({ dhis2Url, username, password, db }) => {
     } finally {
       setIsLoading('')
     }
+  }
+  const handleExit = () => {
+    setIsLoading('')
   }
 
   const isDownloadDisabled =
@@ -217,7 +223,6 @@ const MainPage = ({ dhis2Url, username, password, db }) => {
                 handleSelectDataPoint={handleSelectDataPoint}
                 handleAddSelectedDataPoint={handleAddSelectedDataPoint}
                 handleRemoveDataPoint={handleRemoveDataPoint}
-                handleExportAllDataPoints={handleExportAllDataPoints}
               />
             </div>
           </div>
@@ -261,7 +266,7 @@ const MainPage = ({ dhis2Url, username, password, db }) => {
         </div>
       </div>
 
-      {isLoading.length > 0 && <LoadingModal isLoading={isLoading} />}
+      {isLoading.length > 0 && <LoadingModal isLoading={isLoading} onExit={handleExit} />}
     </div>
   )
 }

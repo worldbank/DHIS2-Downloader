@@ -50,7 +50,7 @@ export const updateFormulaNames = (pageData, data, formulaType) => {
 }
 
 export const generateDownloadingUrl = (dhis2Url, ou, dx, pe, co) => {
-  let parameters = `api/analytics.json?dimension=ou:LEVEL-${ou}&dimension=pe:${pe}&dimension=dx:${dx}`
+  let parameters = `api/analytics.json?dimension=ou:${ou}&dimension=pe:${pe}&dimension=dx:${dx}`
   let defaultFormat =
     '&displayProperty=NAME&ignoreLimit=TRUE&hierarchyMeta=true&hideEmptyRows=TRUE&showHierarchy=true&rows=ou;pe;dx'
 
