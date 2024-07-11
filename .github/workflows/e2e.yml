@@ -19,7 +19,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16.x'
+          node-version: '18.x'
 
       - name: Install dependencies
         run: npm install
@@ -46,8 +46,11 @@ jobs:
           chmod -R +x dist/linux-unpacked
 
       - name: Run Playwright tests
-        run: npm run test:playwright
+        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" npm run test:playwright
         env:
+          ELECTRON_NO_ATTACH_CONSOLE: true
+          ELECTRON_DISABLE_SANDBOX: true
+          DEBUG: pw:api
           TEST_DHIS2_URL: ${{ secrets.TEST_DHIS2_URL }}
           TEST_USERNAME: ${{ secrets.TEST_USERNAME }}
           TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}

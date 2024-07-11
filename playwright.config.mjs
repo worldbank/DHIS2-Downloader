@@ -17,11 +17,11 @@ export default defineConfig({
     {
       name: 'electron',
       use: {
-        browserName: 'chromium',
-        channel: 'chrome',
-        launchOptions: {
-          args: ['--no-sandbox']
-        }
+        //   browserName: 'chromium',
+        //   channel: 'chrome',
+        //   launchOptions: {
+        //     args: ['--no-sandbox']
+        //   }
       }
     }
   ]
