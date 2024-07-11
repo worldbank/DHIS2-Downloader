@@ -3,6 +3,7 @@ import { test, expect } from '@playwright/test'
 import path from 'path'
 import { execSync } from 'child_process'
 import dotenv from 'dotenv'
+import os from 'os'
 
 dotenv.config()
 
@@ -13,17 +14,29 @@ test.describe('Electron app', () => {
     // Build the application before running the tests
     execSync('npm run build', { stdio: 'inherit' })
 
-    // Path to the built Electron app
-    const appPath = path.join(
-      __dirname,
-      '..',
-      'dist',
-      'mac-arm64',
-      'DHIS2 Downloader.app',
-      'Contents',
-      'MacOS',
-      'DHIS2 Downloader'
-    )
+    const platform = os.platform()
+    let appPath
+    if (platform == 'darwin') {
+      appPath = path.join(
+        __dirname,
+        '..',
+        'dist',
+        'mac-arm64',
+        'DHIS2 Downloader.app',
+        'Contents',
+        'MacOS',
+        'DHIS2 Downloader'
+      )
+    } else if (platform === 'win32') {
+      // Windows
+      appPath = path.join(__dirname, '..', 'dist', 'win-unpacked', 'DHIS2 Downloader.exe')
+    } else if (platform === 'linux') {
+      // Linux
+      appPath = path.join(__dirname, '..', 'dist', 'linux-unpacked', 'dhis2-downloader')
+    }
+    console.log(`Running on platform: ${platform}`)
+    console.log(`App path: ${appPath}`)
+
     electronApp = await electron.launch({
       executablePath: appPath
     })
