@@ -12,25 +12,23 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [16.x, 18.x]
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '16.x'
 
       - name: Install dependencies
         run: npm install
 
       - name: Build project
         run: npm run build:linux
+
+      - name: List dist directory contents
+        run: ls -R dist
 
       - name: Run Playwright tests
         run: npm run test:playwright
