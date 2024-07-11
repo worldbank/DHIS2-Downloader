@@ -24,6 +24,15 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Install Electron dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install build-essential clang libdbus-1-dev libgtk-3-dev \
+            libnotify-dev libasound2-dev libcap-dev \
+            libcups2-dev libxtst-dev \
+            libxss1 libnss3-dev gcc-multilib g++-multilib curl \
+            gperf bison python3-dbusmock openjdk-8-jre
+
       - name: Build project
         run: npm run build:linux
 
@@ -31,7 +40,10 @@ jobs:
         run: ls -R dist
 
       - name: Set executable permissions
-        run: chmod +x dist/linux-unpacked/dhis2-downloader
+        run: |
+          chmod +x dist/linux-unpacked/dhis2-downloader
+          chmod +x dist/linux-unpacked/chrome-sandbox
+          chmod -R +x dist/linux-unpacked
 
       - name: Run Playwright tests
         run: npm run test:playwright
