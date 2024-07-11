@@ -30,6 +30,9 @@ jobs:
       - name: List dist directory contents
         run: ls -R dist
 
+      - name: Set executable permissions
+        run: chmod +x dist/linux-unpacked/dhis2-downloader
+
       - name: Run Playwright tests
         run: npm run test:playwright
         env:
