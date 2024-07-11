@@ -1,6 +1,7 @@
-const { app, shell, BrowserWindow, ipcMain, protocol, net } = require('electron')
-const { path, join } = require('path')
-const { electronApp, optimizer, is } = require('@electron-toolkit/utils')
+import { app, shell, BrowserWindow, ipcMain, protocol, net } from 'electron'
+import { path, join } from 'path'
+import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+
 const iconPath = join(__dirname, '../../resources/icon.png')
 
 function createWindow() {

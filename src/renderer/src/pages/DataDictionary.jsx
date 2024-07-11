@@ -2,8 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { useRef, useState, useEffect, useCallback, useMemo } from 'react'
 import LoadingModal from './Modal'
 import { objectToCsv } from '../utils/helpers'
-import { getJsonIdInfo } from '../service/useApi'
-import { extractIds, updateFormulaNames } from '../utils/helpers'
+import { updateFormulaNames } from '../utils/helpers'
 
 const ExportLink = ({ onClick, text }) => (
   <div className="flex items-center cursor-pointer text-blue-600" onClick={onClick}>

@@ -1,0 +1,216 @@
+{
+  "config": {
+    "configFile": "/Users/czhang/Desktop/GFF/dhis2-downloader/playwright.config.mjs",
+    "rootDir": "/Users/czhang/Desktop/GFF/dhis2-downloader/tests",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results/results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 15000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/Users/czhang/Desktop/GFF/dhis2-downloader/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "electron",
+        "name": "electron",
+        "testDir": "/Users/czhang/Desktop/GFF/dhis2-downloader/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "version": "1.45.1",
+    "workers": 5,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "example.spec.js",
+      "file": "example.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Electron app",
+          "file": "example.spec.js",
+          "line": 11,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should have a navbar with clickable elements",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "electron",
+                  "projectName": "electron",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "passed",
+                      "duration": 181,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "buffer": "Cj4gZGhpczItZG93bmxvYWRlckAwLjAuMSBidWlsZAo+IGVsZWN0cm9uLXZpdGUgYnVpbGQKCg=="
+                        },
+                        {
+                          "buffer": "G1szNm12aXRlIHY1LjIuMTMgG1szMm1idWlsZGluZyBTU1IgYnVuZGxlIGZvciBwcm9kdWN0aW9uLi4uG1szNm0bWzM5bQo="
+                        },
+                        {
+                          "buffer": "dHJhbnNmb3JtaW5nLi4uCg=="
+                        },
+                        {
+                          "buffer": "G1szMm3inJMbWzM5bSAxIG1vZHVsZXMgdHJhbnNmb3JtZWQuCg=="
+                        },
+                        {
+                          "buffer": "cmVuZGVyaW5nIGNodW5rcy4uLgo="
+                        },
+                        {
+                          "buffer": "G1sybW91dC9tYWluLxtbMjJtG1szNm1pbmRleC5qcyAgG1szOW0bWzFtG1sybTEuOTMga0IbWzIybRtbMW0bWzIybQo="
+                        },
+                        {
+                          "buffer": "G1szMm3inJMgYnVpbHQgaW4gMzRtcxtbMzltCg=="
+                        },
+                        {
+                          "buffer": "G1szNm12aXRlIHY1LjIuMTMgG1szMm1idWlsZGluZyBTU1IgYnVuZGxlIGZvciBwcm9kdWN0aW9uLi4uG1szNm0bWzM5bQo="
+                        },
+                        {
+                          "buffer": "dHJhbnNmb3JtaW5nLi4uCg=="
+                        },
+                        {
+                          "buffer": "G1szMm3inJMbWzM5bSAxIG1vZHVsZXMgdHJhbnNmb3JtZWQuCg=="
+                        },
+                        {
+                          "buffer": "cmVuZGVyaW5nIGNodW5rcy4uLgo="
+                        },
+                        {
+                          "buffer": "G1sybW91dC9wcmVsb2FkLxtbMjJtG1szNm1pbmRleC5qcyAgG1szOW0bWzFtG1sybTAuNDIga0IbWzIybRtbMW0bWzIybQo="
+                        },
+                        {
+                          "buffer": "G1szMm3inJMgYnVpbHQgaW4gNW1zG1szOW0K"
+                        },
+                        {
+                          "buffer": "G1szNm12aXRlIHY1LjIuMTMgG1szMm1idWlsZGluZyBmb3IgcHJvZHVjdGlvbi4uLhtbMzZtG1szOW0K"
+                        },
+                        {
+                          "buffer": "dHJhbnNmb3JtaW5nLi4uCg=="
+                        },
+                        {
+                          "buffer": "G1szMm3inJMbWzM5bSA1NCBtb2R1bGVzIHRyYW5zZm9ybWVkLgo="
+                        },
+                        {
+                          "buffer": "cmVuZGVyaW5nIGNodW5rcy4uLgo="
+                        },
+                        {
+                          "buffer": "G1sybS4uLy4uL291dC9yZW5kZXJlci8bWzIybRtbMzJtaW5kZXguaHRtbCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAbWzM5bRtbMW0bWzJtICAwLjU1IGtCG1syMm0bWzFtG1syMm0KG1sybS4uLy4uL291dC9yZW5kZXJlci8bWzIybRtbMm1hc3NldHMvG1syMm0bWzMybUZBU1RSX0xvZ29fV2hpdGVfRW4tQlFSSGdEdVcucG5nICAbWzM5bRtbMW0bWzJtICA3LjY1IGtCG1syMm0bWzFtG1syMm0K"
+                        },
+                        {
+                          "buffer": "G1sybS4uLy4uL291dC9yZW5kZXJlci8bWzIybRtbMm1hc3NldHMvG1syMm0bWzM1bWluZGV4LUR0cTBUbkFaLmNzcyAgICAgICAgICAgICAgICAbWzM5bRtbMW0bWzJtIDE5LjgwIGtCG1syMm0bWzFtG1syMm0KG1sybS4uLy4uL291dC9yZW5kZXJlci8bWzIybRtbMm1hc3NldHMvG1syMm0bWzM2bWluZGV4LURMaHF1V0NFLmpzICAgICAgICAgICAgICAgICAbWzM5bRtbMW0bWzJtNDc1LjAyIGtCG1syMm0bWzFtG1syMm0KG1szMm3inJMgYnVpbHQgaW4gNTMzbXMbWzM5bQo="
+                        },
+                        {
+                          "text": "Running on platform: darwin\n"
+                        },
+                        {
+                          "text": "App path: /Users/czhang/Desktop/GFF/dhis2-downloader/dist/mac-arm64/DHIS2 Downloader.app/Contents/MacOS/DHIS2 Downloader\n"
+                        }
+                      ],
+                      "stderr": [
+                        {
+                          "buffer": "InBhdGgiIGlzIGltcG9ydGVkIGZyb20gZXh0ZXJuYWwgbW9kdWxlICJwYXRoIiBidXQgbmV2ZXIgdXNlZCBpbiAic3JjL21haW4vaW5kZXguanMiLgo="
+                        }
+                      ],
+                      "retry": 0,
+                      "startTime": "2024-07-11T19:25:12.890Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "dd9b2edffe9b7501040c-7c3a2968a83df7425d60",
+              "file": "example.spec.js",
+              "line": 57,
+              "column": 7
+            },
+            {
+              "title": "Could fill in Login Form",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "electron",
+                  "projectName": "electron",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "passed",
+                      "duration": 284,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2024-07-11T19:25:14.392Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "dd9b2edffe9b7501040c-4d9d3e94d2e94c9722e8",
+              "file": "example.spec.js",
+              "line": 68,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2024-07-11T19:25:12.648Z",
+    "duration": 2226.217,
+    "expected": 2,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

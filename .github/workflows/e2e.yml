@@ -4,31 +4,33 @@ on:
   push:
     branches:
       - main
+      - 'release/*'
   pull_request:
     branches:
       - main
 
 jobs:
   test:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
+
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        node-version: [16.x, 18.x]
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: ${{ matrix.node-version }}
 
       - name: Install dependencies
         run: npm install
 
-      - name: Build application
-        run: npm run build
+      - name: Build project
+        run: npm run build:linux
 
       - name: Run Playwright tests
         run: npm run test:playwright
@@ -36,3 +38,12 @@ jobs:
           TEST_DHIS2_URL: ${{ secrets.TEST_DHIS2_URL }}
           TEST_USERNAME: ${{ secrets.TEST_USERNAME }}
           TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
+
+      - name: Upload Playwright test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: playwright-test-results
+          path: test-results/
+
+
+

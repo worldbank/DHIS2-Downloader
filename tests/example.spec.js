@@ -2,9 +2,10 @@ import { _electron as electron } from 'playwright'
 import { test, expect } from '@playwright/test'
 import path from 'path'
 import { execSync } from 'child_process'
-import dotenv from 'dotenv'
 import os from 'os'
+import dotenv from 'dotenv'
 
+// Load environment variables from .env file
 dotenv.config()
 
 test.describe('Electron app', () => {
