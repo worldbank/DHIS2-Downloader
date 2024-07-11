@@ -66,19 +66,25 @@ test.describe('Electron app', () => {
   })
 
   test('Could fill in Login Form', async () => {
-    const window = await electronApp.firstWindow()
-    const dhis2UrlInput = await window.locator('xpath=//form//input[@placeholder="DHIS2 URL"]')
-    await dhis2UrlInput.fill(process.env.TEST_DHIS2_URL)
+    try {
+      const window = await electronApp.firstWindow()
+      const dhis2UrlInput = await window.locator('xpath=//form//input[@placeholder="DHIS2 URL"]')
+      console.log('TEST_DHIS2_URL:', process.env.TEST_DHIS2_URL)
+      await dhis2UrlInput.fill(process.env.TEST_DHIS2_URL)
 
-    // Fill in other input fields (example)
-    const usernameInput = await window.locator('xpath=//form//input[@placeholder="Username"]')
-    await usernameInput.fill(process.env.TEST_USERNAME)
+      // Fill in other input fields (example)
+      const usernameInput = await window.locator('xpath=//form//input[@placeholder="Username"]')
+      await usernameInput.fill(process.env.TEST_USERNAME)
 
-    const passwordInput = await window.locator('xpath=//form//input[@placeholder="Password"]')
-    await passwordInput.fill(process.env.TEST_PASSWORD)
+      const passwordInput = await window.locator('xpath=//form//input[@placeholder="Password"]')
+      await passwordInput.fill(process.env.TEST_PASSWORD)
 
-    // Optionally, click the submit button
-    const submitButton = await window.locator('xpath=//form//button[@type="submit"]')
-    await submitButton.click()
+      const submitButton = await window.locator('xpath=//form//button[@type="submit"]')
+      await submitButton.click()
+    } catch (error) {
+      console.error('Test failed:', error)
+      await window.screenshot({ path: path.join('test-results', 'error-screenshot.png') })
+      throw error
+    }
   })
 })

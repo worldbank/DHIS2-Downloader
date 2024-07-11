@@ -82,7 +82,7 @@
                     {
                       "workerIndex": 0,
                       "status": "passed",
-                      "duration": 181,
+                      "duration": 208,
                       "errors": [],
                       "stdout": [
                         {
@@ -104,7 +104,7 @@
                           "buffer": "G1sybW91dC9tYWluLxtbMjJtG1szNm1pbmRleC5qcyAgG1szOW0bWzFtG1sybTEuOTMga0IbWzIybRtbMW0bWzIybQo="
                         },
                         {
-                          "buffer": "G1szMm3inJMgYnVpbHQgaW4gMzRtcxtbMzltCg=="
+                          "buffer": "G1szMm3inJMgYnVpbHQgaW4gNjNtcxtbMzltCg=="
                         },
                         {
                           "buffer": "G1szNm12aXRlIHY1LjIuMTMgG1szMm1idWlsZGluZyBTU1IgYnVuZGxlIGZvciBwcm9kdWN0aW9uLi4uG1szNm0bWzM5bQo="
@@ -122,7 +122,7 @@
                           "buffer": "G1sybW91dC9wcmVsb2FkLxtbMjJtG1szNm1pbmRleC5qcyAgG1szOW0bWzFtG1sybTAuNDIga0IbWzIybRtbMW0bWzIybQo="
                         },
                         {
-                          "buffer": "G1szMm3inJMgYnVpbHQgaW4gNW1zG1szOW0K"
+                          "buffer": "G1szMm3inJMgYnVpbHQgaW4gN21zG1szOW0K"
                         },
                         {
                           "buffer": "G1szNm12aXRlIHY1LjIuMTMgG1szMm1idWlsZGluZyBmb3IgcHJvZHVjdGlvbi4uLhtbMzZtG1szOW0K"
@@ -140,7 +140,7 @@
                           "buffer": "G1sybS4uLy4uL291dC9yZW5kZXJlci8bWzIybRtbMzJtaW5kZXguaHRtbCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAbWzM5bRtbMW0bWzJtICAwLjU1IGtCG1syMm0bWzFtG1syMm0KG1sybS4uLy4uL291dC9yZW5kZXJlci8bWzIybRtbMm1hc3NldHMvG1syMm0bWzMybUZBU1RSX0xvZ29fV2hpdGVfRW4tQlFSSGdEdVcucG5nICAbWzM5bRtbMW0bWzJtICA3LjY1IGtCG1syMm0bWzFtG1syMm0K"
                         },
                         {
-                          "buffer": "G1sybS4uLy4uL291dC9yZW5kZXJlci8bWzIybRtbMm1hc3NldHMvG1syMm0bWzM1bWluZGV4LUR0cTBUbkFaLmNzcyAgICAgICAgICAgICAgICAbWzM5bRtbMW0bWzJtIDE5LjgwIGtCG1syMm0bWzFtG1syMm0KG1sybS4uLy4uL291dC9yZW5kZXJlci8bWzIybRtbMm1hc3NldHMvG1syMm0bWzM2bWluZGV4LURMaHF1V0NFLmpzICAgICAgICAgICAgICAgICAbWzM5bRtbMW0bWzJtNDc1LjAyIGtCG1syMm0bWzFtG1syMm0KG1szMm3inJMgYnVpbHQgaW4gNTMzbXMbWzM5bQo="
+                          "buffer": "G1sybS4uLy4uL291dC9yZW5kZXJlci8bWzIybRtbMm1hc3NldHMvG1syMm0bWzM1bWluZGV4LUR0cTBUbkFaLmNzcyAgICAgICAgICAgICAgICAbWzM5bRtbMW0bWzJtIDE5LjgwIGtCG1syMm0bWzFtG1syMm0KG1sybS4uLy4uL291dC9yZW5kZXJlci8bWzIybRtbMm1hc3NldHMvG1syMm0bWzM2bWluZGV4LURMaHF1V0NFLmpzICAgICAgICAgICAgICAgICAbWzM5bRtbMW0bWzJtNDc1LjAyIGtCG1syMm0bWzFtG1syMm0KG1szMm3inJMgYnVpbHQgaW4gNTU5bXMbWzM5bQo="
                         },
                         {
                           "text": "Running on platform: darwin\n"
@@ -155,7 +155,7 @@
                         }
                       ],
                       "retry": 0,
-                      "startTime": "2024-07-11T19:25:12.890Z",
+                      "startTime": "2024-07-11T21:06:57.370Z",
                       "attachments": []
                     }
                   ],
@@ -182,12 +182,16 @@
                     {
                       "workerIndex": 0,
                       "status": "passed",
-                      "duration": 284,
+                      "duration": 306,
                       "errors": [],
-                      "stdout": [],
+                      "stdout": [
+                        {
+                          "text": "TEST_DHIS2_URL: https://moph-dw.gov.af\n"
+                        }
+                      ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2024-07-11T19:25:14.392Z",
+                      "startTime": "2024-07-11T21:06:59.238Z",
                       "attachments": []
                     }
                   ],
@@ -206,8 +210,8 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2024-07-11T19:25:12.648Z",
-    "duration": 2226.217,
+    "startTime": "2024-07-11T21:06:57.079Z",
+    "duration": 2574.254,
     "expected": 2,
     "skipped": 0,
     "unexpected": 0,

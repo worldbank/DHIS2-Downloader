@@ -61,5 +61,12 @@ jobs:
           name: playwright-test-results
           path: test-results/
 
+      - name: Upload error screenshots
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: error-screenshots
+          path: test-results/error-screenshot.png
+
 
 
