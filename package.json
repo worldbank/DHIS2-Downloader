@@ -8,6 +8,7 @@
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
+    "test:playwright": "playwright test",
     "start": "electron-vite preview",
     "dev": "electron-vite dev --watch",
     "build": "electron-vite build",
@@ -20,9 +21,12 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.0",
     "@electron-toolkit/utils": "^3.0.0",
+    "@playwright/test": "^1.45.1",
     "dexie": "^4.0.7",
     "dexie-react-hooks": "^1.1.7",
+    "dotenv": "^16.4.5",
     "electron-updater": "^6.1.7",
+    "playwright": "^1.45.1",
     "react-router-dom": "^6.23.1",
     "react-select": "^5.8.0"
   },
