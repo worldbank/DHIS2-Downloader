@@ -65,7 +65,7 @@ test.describe('Electron app', () => {
     }
   })
 
-  test('Could fill in Login Form', async () => {
+  test('Could Perform Login', async () => {
     try {
       const window = await electronApp.firstWindow()
       const dhis2UrlInput = await window.locator('xpath=//form//input[@placeholder="DHIS2 URL"]')
@@ -87,4 +87,12 @@ test.describe('Electron app', () => {
       throw error
     }
   })
+
+  // test('Could Click ', async () => {
+  //   const window = await electronApp.firstWindow()
+  //   const dictionaryNavLink = await window.$('xpath=//navbar//a[@href="#/dictionary"]')
+  //   const isClickable = await dictionaryNavLink.isClickable()
+  //   expect(isClickable).toBe(true)
+  //   await dictionaryNavLink.click()
+  // })
 })

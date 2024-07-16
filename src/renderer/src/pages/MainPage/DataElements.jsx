@@ -4,7 +4,7 @@ const DataElementsSelector = ({
   filteredDataPoints,
   handleFilterDataPoint,
   handleSelectDataPoint,
-  handleAddSelectedDataPoint,
+  handleAddSelectedDataPoint
 }) => {
   const [dataType, setDataType] = useState('all')
 
@@ -80,7 +80,7 @@ const DataElementsMenu = ({
   handleFilterDataPoint,
   handleSelectDataPoint,
   handleAddSelectedDataPoint,
-  handleRemoveDataPoint,
+  handleRemoveDataPoint
 }) => {
   return (
     <div>

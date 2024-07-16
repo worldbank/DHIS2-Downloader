@@ -1,8 +1,8 @@
 const generateQuarters = (startDate, endDate) => {
-  const startYear = startDate.getFullYear()
-  const startMonth = startDate.getMonth()
-  const endYear = endDate.getFullYear()
-  const endMonth = endDate.getMonth()
+  const startYear = startDate.getUTCFullYear()
+  const startMonth = startDate.getUTCMonth()
+  const endYear = endDate.getUTCFullYear()
+  const endMonth = endDate.getUTCMonth()
 
   const quarters = []
 
@@ -16,9 +16,9 @@ const generateQuarters = (startDate, endDate) => {
   }
 
   // Loop through each quarter between start and end dates
-  for (let date = start; date <= end; date.setMonth(date.getMonth() + 3)) {
-    const year = date.getFullYear()
-    const quarter = getQuarter(date.getMonth())
+  for (let date = start; date <= end; date.setMonth(date.getUTCMonth() + 3)) {
+    const year = date.getUTCFullYear()
+    const quarter = getQuarter(date.getUTCMonth())
     quarters.push(`${year}Q${quarter}`)
   }
 
@@ -26,8 +26,8 @@ const generateQuarters = (startDate, endDate) => {
 }
 
 const generateYears = (startDate, endDate) => {
-  const startYear = startDate.getFullYear()
-  const endYear = endDate.getFullYear()
+  const startYear = startDate.getUTCFullYear()
+  const endYear = endDate.getUTCFullYear()
 
   const years = []
   for (let year = startYear; year <= endYear; year++) {
@@ -38,10 +38,10 @@ const generateYears = (startDate, endDate) => {
 }
 
 const generateMonths = (startDate, endDate) => {
-  const startYear = startDate.getFullYear()
-  const startMonth = startDate.getMonth()
-  const endYear = endDate.getFullYear()
-  const endMonth = endDate.getMonth()
+  const startYear = startDate.getUTCFullYear()
+  const startMonth = startDate.getUTCMonth()
+  const endYear = endDate.getUTCFullYear()
+  const endMonth = endDate.getUTCMonth()
 
   const months = []
 

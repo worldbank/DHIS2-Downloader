@@ -3,16 +3,10 @@ import LoadingModal from '../Modal'
 import OrganizationUnitTree from './OrganizationUnitTree'
 import OrgUnitLevelMenu from './OrgUnitLevelMenu'
 import DateRangeSelector from './DateRangeSelector'
-import {
-  fetchData,
-  getCategoryCombination,
-  getDataElements,
-  getIndicators,
-  getProgramIndicators
-} from '../../service/useApi'
+import { fetchData, getCategoryCombination, getProgramIndicators } from '../../service/useApi'
 import DataElementsMenu from './DataElements'
 import CategoryDropdownMenu from './CategoryCombo'
-import { generateDownloadingUrl, jsonToCsv, objectToCsv } from '../../utils/helpers'
+import { generateDownloadingUrl, jsonToCsv } from '../../utils/helpers'
 import { generatePeriods } from '../../utils/dateUtils'
 import DownloadButton from './DownloadButton'
 import { useLiveQuery } from 'dexie-react-hooks'
@@ -32,7 +26,6 @@ const MainPage = ({ dhis2Url, username, password, dictionaryDb, servicesDb }) =>
   const [category, setCategory] = useState([])
   const [selectedCategory, setSelectedCategory] = useState([])
   const [isLoading, setIsLoading] = useState('')
-  const [record, setRecord] = useState(['ou', 'pe', 'dx', 'co', 'url'])
   const servicesDbRef = useRef(servicesDb)
   const elements = useLiveQuery(() => dictionaryDb.dataElements.toArray()) || []
   const indicators = useLiveQuery(() => dictionaryDb.indicators.toArray()) || []
@@ -163,23 +156,28 @@ const MainPage = ({ dhis2Url, username, password, dictionaryDb, servicesDb }) =>
       setIsLoading('downloading')
       const data = await fetchData(downloadingUrl, username, password)
       const { csvData, headers, dbObjects } = jsonToCsv(data)
-      const schema = '++id, ' + headers.join(', ')
-      servicesDbRef.current = await changeSchema(servicesDbRef.current, { services: schema })
-      await servicesDbRef.current.services.bulkAdd(dbObjects)
-      setRecord((prevRecord) => [...prevRecord, [ou, pe, dx, co, downloadingUrl]])
-      console.log(record)
+      // const schema = '++id, ' + headers.join(', ')
+      // servicesDbRef.current = await changeSchema(servicesDbRef.current, { services: schema })
+      // await servicesDbRef.current.services.bulkAdd(dbObjects)
+      await dictionaryDb.query.add({
+        ou: ou,
+        pe: pe,
+        dx: dx,
+        co: co,
+        url: downloadingUrl
+      })
       const csvBlob = new Blob([csvData], { type: 'text/csv' })
       const downloadLink = document.createElement('a')
       downloadLink.href = URL.createObjectURL(csvBlob)
       downloadLink.download = 'dhis2_data.csv'
       downloadLink.click()
-    } catch (error) {
-      setIsLoading('Error')
-      console.log(error)
-    } finally {
       setIsLoading('')
+    } catch (error) {
+      setIsLoading(error)
+      console.log(error)
     }
   }
+
   const handleExit = () => {
     setIsLoading('')
   }
@@ -258,6 +256,7 @@ const MainPage = ({ dhis2Url, username, password, dictionaryDb, servicesDb }) =>
             </div>
             <div className="mt-4">
               <DownloadButton
+                dictionaryDb={dictionaryDb}
                 handleDownload={handleDownload}
                 isDownloadDisabled={isDownloadDisabled}
               />
