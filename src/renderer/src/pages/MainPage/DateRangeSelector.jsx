@@ -1,11 +1,22 @@
-const DateRangeSelector = ({
-  startDate,
-  endDate,
-  frequency,
-  handleStartDateChange,
-  handleEndDateChange,
-  handleFrequency
-}) => {
+import { useSelector, useDispatch } from 'react-redux'
+import { setStartDate, setEndDate, setFrequency } from '../../reducers/dateRangeReducer'
+
+const DateRangeSelector = () => {
+  const dispatch = useDispatch()
+  const { frequency, startDate, endDate } = useSelector((state) => state.dateRange)
+
+  const handleStartDateChange = (event) => {
+    dispatch(setStartDate(event.target.value))
+  }
+
+  const handleEndDateChange = (event) => {
+    dispatch(setEndDate(event.target.value))
+  }
+
+  const handleFrequencyChange = (event) => {
+    dispatch(setFrequency(event.target.value))
+  }
+
   let today = new Date().toJSON().slice(0, 7)
 
   return (
@@ -19,7 +30,7 @@ const DateRangeSelector = ({
               id="year"
               name="frequency"
               value="year"
-              onChange={handleFrequency}
+              onChange={handleFrequencyChange}
               checked={frequency === 'year'}
               className="form-radio text-blue-600"
             />
@@ -34,7 +45,7 @@ const DateRangeSelector = ({
               name="frequency"
               value="quarter"
               checked={frequency === 'quarter'}
-              onChange={handleFrequency}
+              onChange={handleFrequencyChange}
               className="form-radio text-blue-600"
             />
             <span className="ml-2">Quarter</span>
@@ -48,7 +59,7 @@ const DateRangeSelector = ({
               name="frequency"
               value="month"
               checked={frequency === 'month'}
-              onChange={handleFrequency}
+              onChange={handleFrequencyChange}
               className="form-radio text-blue-600"
             />
             <span className="ml-2">Month</span>

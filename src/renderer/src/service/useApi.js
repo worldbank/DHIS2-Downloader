@@ -6,7 +6,7 @@ export const fetchData = async (apiUrl, username, password) => {
   })
 
   if (!response.ok) {
-    throw console.error(`HTTP error! status: ${response.status}`)
+    throw console.error(`${response.message}`)
   }
 
   return await response.json()
@@ -56,7 +56,7 @@ export const getIndicators = (dhis2Url, username, password) => {
 }
 
 export const getProgramIndicators = (dhis2Url, username, password) => {
-  const indicatorUrl = `${dhis2Url}/api/programIndicators?fields=id,displayName&paging=false`
+  const indicatorUrl = `${dhis2Url}/api/programIndicators?fields=id,displayName,displayDescription&paging=false`
   return fetchData(indicatorUrl, username, password)
 }
 

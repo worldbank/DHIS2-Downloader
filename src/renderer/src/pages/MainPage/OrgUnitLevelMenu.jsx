@@ -1,24 +1,16 @@
-import { useState, useEffect, useRef } from 'react'
-import { getOrganizationLevels } from '../../service/useApi'
+import React, { useState, useEffect, useRef } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+import { updateOrgUnitLevels, fetchOrganizationLevels } from '../../reducers/orgUnitReducer'
 
-// eslint-disable-next-line react/prop-types
-const OrgUnitLevelMenu = ({ dhis2Url, username, password, orgUnitLevel, handleOrgUnitLevel }) => {
-  const [allOrgUnitLevels, setAllOrgUnitLevels] = useState([])
+const OrgUnitLevelMenu = ({ dhis2Url, username, password }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef(null)
+  const dispatch = useDispatch()
+  const { allOrgUnitLevels, selectedOrgUnitLevels } = useSelector((state) => state.orgUnit)
 
   useEffect(() => {
-    const fetchOrganizationLevels = async () => {
-      try {
-        const data = await getOrganizationLevels(dhis2Url, username, password)
-        const sortedData = data.organisationUnitLevels.sort((a, b) => a.level - b.level)
-        setAllOrgUnitLevels(sortedData)
-      } catch (error) {
-        console.error('Error fetching organization levels:', error)
-      }
-    }
-    fetchOrganizationLevels()
-  }, [dhis2Url, username, password])
+    dispatch(fetchOrganizationLevels({ dhis2Url, username, password }))
+  }, [dispatch, dhis2Url, username, password])
 
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside)
@@ -37,9 +29,9 @@ const OrgUnitLevelMenu = ({ dhis2Url, username, password, orgUnitLevel, handleOr
     }
   }
 
-  const selectedOrgUnitName = allOrgUnitLevels
-    .filter((level) => orgUnitLevel?.includes(level.level))
-    ?.map((level) => level.displayName)
+  const handleOrgUnitLevelChange = (level) => {
+    dispatch(updateOrgUnitLevels(level))
+  }
 
   return (
     <div className="relative w-full" ref={dropdownRef}>
@@ -48,8 +40,8 @@ const OrgUnitLevelMenu = ({ dhis2Url, username, password, orgUnitLevel, handleOr
           className="w-full px-3 py-2 border border-gray-300 rounded cursor-pointer relative flex items-center bg-white text-gray-700 focus:outline-none focus:border-blue-500"
           onClick={toggleDropdown}
         >
-          {orgUnitLevel?.length > 0 ? (
-            <span className="flex-grow">{orgUnitLevel?.length} selected</span>
+          {selectedOrgUnitLevels?.length > 0 ? (
+            <span className="flex-grow">{selectedOrgUnitLevels?.length} selected</span>
           ) : (
             <span className="flex-grow">{'Select Level'}</span>
           )}
@@ -67,9 +59,9 @@ const OrgUnitLevelMenu = ({ dhis2Url, username, password, orgUnitLevel, handleOr
                     <input
                       type="checkbox"
                       value={level.level}
-                      checked={orgUnitLevel.includes(level.level)}
+                      checked={selectedOrgUnitLevels.includes(level.level)}
                       className="cursor-pointer"
-                      onChange={handleOrgUnitLevel}
+                      onChange={() => handleOrgUnitLevelChange(level.level)}
                     />
                     <span className="ml-2">{level.displayName}</span>
                   </label>

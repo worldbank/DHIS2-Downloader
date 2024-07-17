@@ -1,14 +1,14 @@
-const Login = ({
-  dhis2Url,
-  setDhis2Url,
-  username,
-  setUsername,
-  password,
-  setPassword,
-  handleConnect
-}) => {
-  const handleDHIS2URL = (event) => {
-    setDhis2Url(event.target.value)
+import { useSelector, useDispatch } from 'react-redux'
+import { setDhis2Url, setUsername, setPassword, connect } from '../reducers/authReducer'
+
+const Login = () => {
+  const dispatch = useDispatch()
+  const { dhis2Url, username, password } = useSelector((state) => state.auth)
+  const { isLoading, errorMessage } = useSelector((state) => state.status)
+
+  const handleConnect = async (event) => {
+    event.preventDefault()
+    dispatch(connect(dhis2Url, username, password))
   }
 
   return (
@@ -23,7 +23,7 @@ const Login = ({
                 type="text"
                 placeholder="DHIS2 URL"
                 value={dhis2Url}
-                onChange={handleDHIS2URL}
+                onChange={(e) => dispatch(setDhis2Url(e.target.value))}
                 className="w-full px-4 py-2 border border-teal-300 rounded focus:outline-none focus:border-blue-500"
               />
             </div>
@@ -33,7 +33,7 @@ const Login = ({
                 type="text"
                 placeholder="Username"
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                onChange={(e) => dispatch(setUsername(e.target.value))}
                 className="w-full px-4 py-2 border border-teal-300 rounded focus:outline-none focus:border-blue-500"
               />
             </div>
@@ -43,7 +43,7 @@ const Login = ({
                 type="password"
                 placeholder="Password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => dispatch(setPassword(e.target.value))}
                 className="w-full px-4 py-2 border border-teal-300 rounded focus:outline-none focus:border-blue-500"
               />
             </div>

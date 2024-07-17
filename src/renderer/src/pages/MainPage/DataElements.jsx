@@ -1,53 +1,86 @@
-import { useState } from 'react'
+import React, { useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+import {
+  setData,
+  setSearchQuery,
+  setSelectedDataType,
+  setFilteredElements,
+  setSelectedElements,
+  addSelectedElements,
+  removeElement
+} from '../../reducers/dataElementsReducer'
+import { useLiveQuery } from 'dexie-react-hooks'
+import { dictionaryDb } from '../../service/db'
 
-const DataElementsSelector = ({
-  filteredDataPoints,
-  handleFilterDataPoint,
-  handleSelectDataPoint,
-  handleAddSelectedDataPoint
-}) => {
-  const [dataType, setDataType] = useState('all')
+const DataElementsSelector = () => {
+  const dispatch = useDispatch()
+  const { data, selectedDataType, searchQuery, filteredElements, selectedElements } = useSelector(
+    (state) => state.dataElements
+  )
+  const elements = useLiveQuery(() => dictionaryDb.dataElements.toArray(), [])
+  const indicators = useLiveQuery(() => dictionaryDb.indicators.toArray(), [])
+  const programIndicators = useLiveQuery(() => dictionaryDb.programIndicators.toArray(), [])
 
-  const handleDataType = (event) => {
-    setDataType(event.target.value)
+  useEffect(() => {
+    if (elements && indicators && programIndicators) {
+      const allData = [...elements, ...indicators, ...programIndicators]
+      dispatch(setData(allData))
+    }
+  }, [elements, indicators, programIndicators, dispatch])
+
+  useEffect(() => {
+    const filtered = data
+      .filter((element) =>
+        selectedDataType !== 'All' ? element.category === selectedDataType : true
+      )
+      .filter((element) => element.displayName.toLowerCase().includes(searchQuery.toLowerCase()))
+    dispatch(setFilteredElements(filtered))
+  }, [data, selectedDataType, searchQuery, dispatch])
+
+  const handleSelectElement = (event) => {
+    const selected = Array.from(event.target.selectedOptions).map((option) => ({
+      id: option.value,
+      displayName: option.label
+    }))
+    dispatch(setSelectedElements(selected))
   }
 
-  const filteredTypeDataPoints = filteredDataPoints.filter((element) =>
-    dataType !== 'all' ? element.category === dataType : true
-  )
+  const handleAddSelectedElements = () => {
+    dispatch(addSelectedElements(selectedElements))
+  }
 
   return (
     <div className="mb-4">
       Data Type
       <select
-        onChange={handleDataType}
+        onChange={(e) => dispatch(setSelectedDataType(e.target.value))}
         className="mb-2 w-full px-4 py-2 border border-gray-700 rounded"
       >
-        <option value={'all'}>All Data Types</option>
-        <option value={'dataElement'}>Data Element</option>
-        <option value={'Indicator'}>Indicator</option>
-        <option value={'programIndicator'}>Program Indicator</option>
+        <option value="All">All Data Types</option>
+        <option value="DataElement">Data Element</option>
+        <option value="Indicator">Indicator</option>
+        <option value="ProgramIndicator">Program Indicator</option>
       </select>
       <input
         type="text"
         placeholder="Search"
-        onChange={handleFilterDataPoint}
+        onChange={(e) => dispatch(setSearchQuery(e.target.value))}
         className="mb-2 w-full px-4 py-2 border border-gray-700 rounded"
       />
       <select
         multiple
-        onChange={handleSelectDataPoint}
+        onChange={handleSelectElement}
         className="w-full px-4 py-2 overflow-y border-gray-700 rounded"
         style={{ minHeight: '200px', maxHeight: '200px' }}
       >
-        {filteredTypeDataPoints.map((element) => (
+        {filteredElements.map((element) => (
           <option key={element.id} value={element.id} className="whitespace-normal">
             - {element.displayName}
           </option>
         ))}
       </select>
       <button
-        onClick={handleAddSelectedDataPoint}
+        onClick={handleAddSelectedElements}
         className="mt-2 mr-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
       >
         Select
@@ -56,15 +89,22 @@ const DataElementsSelector = ({
   )
 }
 
-const AddedElementsDisplay = ({ addedDataPoints, handleRemoveDataPoint }) => {
+const SelectedDataElementsDisplay = () => {
+  const dispatch = useDispatch()
+  const addedDataElements = useSelector((state) => state.dataElements.addedElements)
+
+  const handleRemoveElement = (id) => {
+    dispatch(removeElement(id))
+  }
+
   return (
     <div className="mb-4">
       <h3 className="text-xl font-bold mb-2">Selected Items</h3>
       <ul>
-        {addedDataPoints.map((element) => (
+        {addedDataElements.map((element) => (
           <li key={element.id} className="text-sm">
             {element.displayName}
-            <button onClick={() => handleRemoveDataPoint(element.id)} className="ml-2 text-red-500">
+            <button onClick={() => handleRemoveElement(element.id)} className="ml-2 text-red-500">
               Remove
             </button>
           </li>
@@ -74,26 +114,11 @@ const AddedElementsDisplay = ({ addedDataPoints, handleRemoveDataPoint }) => {
   )
 }
 
-const DataElementsMenu = ({
-  addedDataPoints,
-  filteredDataPoints,
-  handleFilterDataPoint,
-  handleSelectDataPoint,
-  handleAddSelectedDataPoint,
-  handleRemoveDataPoint
-}) => {
+const DataElementsMenu = () => {
   return (
     <div>
-      <DataElementsSelector
-        filteredDataPoints={filteredDataPoints}
-        handleFilterDataPoint={handleFilterDataPoint}
-        handleSelectDataPoint={handleSelectDataPoint}
-        handleAddSelectedDataPoint={handleAddSelectedDataPoint}
-      />
-      <AddedElementsDisplay
-        addedDataPoints={addedDataPoints}
-        handleRemoveDataPoint={handleRemoveDataPoint}
-      />
+      <DataElementsSelector />
+      <SelectedDataElementsDisplay />
     </div>
   )
 }

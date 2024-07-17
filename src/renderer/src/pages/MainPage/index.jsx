@@ -1,159 +1,43 @@
-import { useEffect, useState, useRef } from 'react'
+import { useState, useRef } from 'react'
 import LoadingModal from '../Modal'
 import OrganizationUnitTree from './OrganizationUnitTree'
 import OrgUnitLevelMenu from './OrgUnitLevelMenu'
 import DateRangeSelector from './DateRangeSelector'
-import { fetchData, getCategoryCombination, getProgramIndicators } from '../../service/useApi'
+import { fetchData } from '../../service/useApi'
 import DataElementsMenu from './DataElements'
 import CategoryDropdownMenu from './CategoryCombo'
 import { generateDownloadingUrl, jsonToCsv } from '../../utils/helpers'
 import { generatePeriods } from '../../utils/dateUtils'
 import DownloadButton from './DownloadButton'
-import { useLiveQuery } from 'dexie-react-hooks'
-import { changeSchema } from '../../service/db'
+import { useSelector, useDispatch } from 'react-redux'
+import { setLoading, setError, clearError } from '../../reducers/statusReducer'
 
 // eslint-disable-next-line react/prop-types
-const MainPage = ({ dhis2Url, username, password, dictionaryDb, servicesDb }) => {
-  const [selectedOrgUnits, setSelectedOrgUnits] = useState([])
-  const [orgUnitLevel, selectOrgUnitLevel] = useState([])
-  const [startDate, setStartDate] = useState('')
-  const [endDate, setEndDate] = useState('')
-  const [frequency, setFrequency] = useState('year')
-  const [dataPoints, setdataPoints] = useState([])
-  const [filteredDataPoints, setFilteredDataPoints] = useState([])
-  const [addedDataPoints, setAddedDataPoints] = useState([])
-  const [selectedDataPoints, setSelectedDataPoints] = useState([])
-  const [category, setCategory] = useState([])
-  const [selectedCategory, setSelectedCategory] = useState([])
-  const [isLoading, setIsLoading] = useState('')
+const MainPage = ({ dictionaryDb, servicesDb }) => {
   const servicesDbRef = useRef(servicesDb)
-  const elements = useLiveQuery(() => dictionaryDb.dataElements.toArray()) || []
-  const indicators = useLiveQuery(() => dictionaryDb.indicators.toArray()) || []
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading('loading')
-        const categories = await getCategoryCombination(dhis2Url, username, password)
-        const programIndicators = await getProgramIndicators(dhis2Url, username, password)
-
-        const data = [
-          ...elements.map((item) => ({
-            id: item.id,
-            displayName: item.displayName,
-            category: 'dataElement'
-          })),
-          ...indicators.map((item) => ({
-            id: item.id,
-            displayName: item.displayName,
-            category: 'Indicator'
-          })),
-          ...programIndicators.programIndicators.map((item) => ({
-            ...item,
-            category: 'programIndicator'
-          }))
-        ]
-
-        setCategory([...categories.categoryCombos])
-        setdataPoints(data)
-        setFilteredDataPoints(data)
-      } catch (error) {
-        console.log(error)
-      } finally {
-        setIsLoading('')
-      }
-    }
-
-    fetchData()
-  }, [dhis2Url, username, password, elements, indicators])
-
-  const handleOrgUnitSelect = (unitId) => {
-    if (selectedOrgUnits.includes(unitId)) {
-      setSelectedOrgUnits(selectedOrgUnits.filter((id) => id !== unitId))
-    } else {
-      setSelectedOrgUnits([...selectedOrgUnits, unitId])
-    }
-  }
-
-  const handleOrgUnitLevel = (event) => {
-    const level = Number.parseInt(event.target.value)
-    selectOrgUnitLevel((prevLevels) =>
-      prevLevels.includes(level) ? prevLevels.filter((l) => l !== level) : [...prevLevels, level]
-    )
-  }
-
-  const handleStartDateChange = (event) => {
-    setStartDate(event.target.value)
-  }
-
-  const handleEndDateChange = (event) => {
-    setEndDate(event.target.value)
-  }
-
-  const handleFrequency = (event) => {
-    setFrequency(event.target.value)
-  }
-
-  const handleSelectCategory = (event) => {
-    setSelectedCategory(event.target.value)
-  }
-
-  const handleFilterDataPoint = (event) => {
-    const searchTerm = event.target.value ? event.target.value.toLowerCase() : ''
-    const filteredData = dataPoints.filter((element) =>
-      element.displayName ? element.displayName.toLowerCase().includes(searchTerm) : false
-    )
-    setFilteredDataPoints(filteredData)
-  }
-
-  const handleSelectDataPoint = (event) => {
-    const selectedOptionId = Array.from(event.target.selectedOptions).map((option) => option.value)
-    const selectedData = dataPoints.filter((element) => selectedOptionId.includes(element.id))
-    setSelectedDataPoints(selectedData)
-  }
-
-  const handleAddSelectedDataPoint = () => {
-    // Avoid duplicated selection
-    const allSelectedIds = [
-      ...addedDataPoints.map((item) => item.id),
-      ...selectedDataPoints.map((item) => item.id)
-    ]
-    const uniqueSelectedDataId = Array.from(new Set(allSelectedIds))
-    const uniqueSelectedData = dataPoints.filter((element) =>
-      uniqueSelectedDataId.includes(element.id)
-    )
-    setAddedDataPoints(uniqueSelectedData)
-    // Remove selected elements from displayed items.
-    const updatedFilteredDataPoints = filteredDataPoints.filter(
-      (element) => !uniqueSelectedDataId.includes(element.id)
-    )
-
-    setFilteredDataPoints(updatedFilteredDataPoints)
-    setSelectedDataPoints([])
-  }
-
-  const handleRemoveDataPoint = (elementId) => {
-    const dataToRemove = addedDataPoints.find((element) => element.id === elementId)
-    setFilteredDataPoints(filteredDataPoints.concat(dataToRemove))
-    setAddedDataPoints(addedDataPoints.filter((element) => element.id !== elementId))
-  }
+  const dispatch = useDispatch()
+  const { selectedOrgUnits, selectedOrgUnitLevels } = useSelector((state) => state.orgUnit)
+  const { addedElements } = useSelector((state) => state.dataElements)
+  const { selectedCategory } = useSelector((state) => state.category)
+  const { frequency, startDate, endDate } = useSelector((state) => state.dateRange)
+  const { dhis2Url, username, password } = useSelector((state) => state.auth)
+  const { isLoading, errorMessage, notification } = useSelector((state) => state.status)
 
   const handleDownload = async () => {
     let ou = ''
     if (selectedOrgUnits.length > 0) {
-      ou = `${orgUnitLevel};${selectedOrgUnits.join(';')}&ouMode=SELECTED`
+      ou = `${selectedOrgUnitLevels.join(';')};${selectedOrgUnits.join(';')}&ouMode=SELECTED`
     } else {
-      ou = orgUnitLevel.map((level) => `LEVEL-${level}`).join(';')
+      ou = selectedOrgUnitLevels.map((level) => `LEVEL-${level}`).join(';')
     }
-    console.log(ou)
     const co = selectedCategory
-    const dx = addedDataPoints.map((element) => element.id).join(';')
+    const dx = addedElements.map((element) => element.id).join(';')
     const periods = generatePeriods(frequency, startDate, endDate)
     const pe = periods.join(';')
     const downloadingUrl = generateDownloadingUrl(dhis2Url, ou, dx, pe, co)
     console.log(downloadingUrl)
     try {
-      setIsLoading('downloading')
+      dispatch(setLoading(true))
       const data = await fetchData(downloadingUrl, username, password)
       const { csvData, headers, dbObjects } = jsonToCsv(data)
       // const schema = '++id, ' + headers.join(', ')
@@ -171,21 +55,18 @@ const MainPage = ({ dhis2Url, username, password, dictionaryDb, servicesDb }) =>
       downloadLink.href = URL.createObjectURL(csvBlob)
       downloadLink.download = 'dhis2_data.csv'
       downloadLink.click()
-      setIsLoading('')
+      dispatch(setLoading(false))
     } catch (error) {
-      setIsLoading(error)
+      dispatch(setLoading(false))
+      dispatch(setError(error))
       console.log(error)
     }
   }
 
-  const handleExit = () => {
-    setIsLoading('')
-  }
-
   const isDownloadDisabled =
     new Date(startDate) >= new Date(endDate) ||
-    addedDataPoints.length == 0 ||
-    orgUnitLevel.length == 0
+    addedElements.length == 0 ||
+    selectedOrgUnitLevels.length == 0
 
   return (
     <div>
@@ -197,14 +78,7 @@ const MainPage = ({ dhis2Url, username, password, dictionaryDb, servicesDb }) =>
               className="overflow-y-scroll border border-gray-300 p-4 bg-gray-100"
               style={{ height: 'calc(70vh - 2rem)' }}
             >
-              <OrganizationUnitTree
-                dhis2Url={dhis2Url}
-                username={username}
-                password={password}
-                selectedOrgUnits={selectedOrgUnits}
-                setSelectedOrgUnits={setSelectedOrgUnits}
-                onSelect={handleOrgUnitSelect}
-              />
+              <OrganizationUnitTree dhis2Url={dhis2Url} username={username} password={password} />
             </div>
           </div>
           <div className="w-1/3 px-4 py-8" style={{ height: '70vh' }}>
@@ -213,46 +87,21 @@ const MainPage = ({ dhis2Url, username, password, dictionaryDb, servicesDb }) =>
               className="overflow-y-scroll border border-gray-300 p-4 bg-gray-100"
               style={{ height: 'calc(70vh - 2rem)' }}
             >
-              <DataElementsMenu
-                dataPoints={dataPoints}
-                filteredDataPoints={filteredDataPoints}
-                addedDataPoints={addedDataPoints}
-                handleFilterDataPoint={handleFilterDataPoint}
-                handleSelectDataPoint={handleSelectDataPoint}
-                handleAddSelectedDataPoint={handleAddSelectedDataPoint}
-                handleRemoveDataPoint={handleRemoveDataPoint}
-              />
+              <DataElementsMenu />
             </div>
           </div>
           <div className="w-1/3 px-4 py-8">
             <h3 className="text-xl font-bold mb-2">Organization Levels</h3>
             <div className="mb-4">
-              <OrgUnitLevelMenu
-                dhis2Url={dhis2Url}
-                username={username}
-                password={password}
-                orgUnitLevel={orgUnitLevel}
-                handleOrgUnitLevel={handleOrgUnitLevel}
-              />
+              <OrgUnitLevelMenu dhis2Url={dhis2Url} username={username} password={password} />
             </div>
             <h3 className="text-xl font-bold mb-2">Date Range</h3>
             <div className="overflow-y-auto">
-              <DateRangeSelector
-                startDate={startDate}
-                endDate={endDate}
-                frequency={frequency}
-                handleStartDateChange={handleStartDateChange}
-                handleEndDateChange={handleEndDateChange}
-                handleFrequency={handleFrequency}
-              />
+              <DateRangeSelector />
             </div>
             <h3 className="text-xl font-bold mb-2">Category Combination</h3>
             <div className="overflow-y-auto">
-              <CategoryDropdownMenu
-                category={category}
-                selectedCategory={selectedCategory}
-                handleSelectCategory={handleSelectCategory}
-              />
+              <CategoryDropdownMenu dhis2Url={dhis2Url} username={username} password={password} />
             </div>
             <div className="mt-4">
               <DownloadButton
@@ -265,7 +114,7 @@ const MainPage = ({ dhis2Url, username, password, dictionaryDb, servicesDb }) =>
         </div>
       </div>
 
-      {isLoading.length > 0 && <LoadingModal isLoading={isLoading} onExit={handleExit} />}
+      {(isLoading || errorMessage || notification.message) && <LoadingModal />}
     </div>
   )
 }

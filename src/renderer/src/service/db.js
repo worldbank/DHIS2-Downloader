@@ -7,8 +7,9 @@ servicesDb.version(1).stores({
 })
 
 dictionaryDb.version(1).stores({
-  dataElements: '++id, displayName, displayDescription',
-  indicators: '++id, displayName, displayDescription, numerator, denominator',
+  dataElements: '++id, category, displayName, displayDescription',
+  indicators: '++id, category, displayName, displayDescription, numerator, denominator',
+  programIndicators: '++id, category, displayName, displayDescription',
   catOptionCombos: '++id, displayName',
   query: '++id, ou, pe, dx, co, url'
 })

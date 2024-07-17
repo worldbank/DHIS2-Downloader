@@ -6,8 +6,6 @@ import ExportLink from '../../components/ExportLink'
 const DownloadButton = ({ dictionaryDb, handleDownload, isDownloadDisabled }) => {
   const queries = useLiveQuery(() => dictionaryDb.query.toArray(), []) || []
 
-  console.log(queries)
-
   const handleExportQueries = () => {
     const csvContent = objectToCsv(queries)
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
