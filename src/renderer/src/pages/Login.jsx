@@ -4,7 +4,6 @@ import { setDhis2Url, setUsername, setPassword, connect } from '../reducers/auth
 const Login = () => {
   const dispatch = useDispatch()
   const { dhis2Url, username, password } = useSelector((state) => state.auth)
-  const { isLoading, errorMessage } = useSelector((state) => state.status)
 
   const handleConnect = async (event) => {
     event.preventDefault()

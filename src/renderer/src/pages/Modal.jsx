@@ -2,13 +2,13 @@ import React from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { handleExit } from '../reducers/statusReducer'
 
-const LoadingModal = () => {
+const NotificationModal = () => {
   const dispatch = useDispatch()
   const { isLoading, errorMessage, notification } = useSelector((state) => state.status)
 
-  const handleClose = () => {
-    dispatch(handleExit())
-  }
+  const handleClose = () => dispatch(handleExit())
+
+  if (!isLoading && !notification.message && !errorMessage) return null
 
   return (
     <div className="fixed inset-0 bg-gray-200 bg-opacity-75 flex items-start justify-center pt-20 z-50">
@@ -20,35 +20,17 @@ const LoadingModal = () => {
           </>
         )}
         {notification.message && (
-          <>
-            <p className={`text-${notification.type === 'success' ? 'green' : 'blue'}-600 mb-2`}>
-              {notification.message}
-            </p>
-            <button
-              onClick={handleClose}
-              className="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 focus:outline-none"
-            >
-              Dismiss
-            </button>
-          </>
+          <p className={`text-${notification.type === 'success' ? 'green' : 'blue'}-600 mb-2`}>
+            {notification.message}
+          </p>
         )}
-        {errorMessage && (
-          <>
-            <p className="text-red-600 mb-2">{errorMessage}</p>
-            <button
-              onClick={handleClose}
-              className="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 focus:outline-none"
-            >
-              Dismiss
-            </button>
-          </>
-        )}
-        {!isLoading && !notification.message && !errorMessage && (
+        {errorMessage && <p className="text-red-600 mb-2">{errorMessage}</p>}
+        {!isLoading && (
           <button
             onClick={handleClose}
             className="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 focus:outline-none"
           >
-            Close
+            {errorMessage || notification.message ? 'Dismiss' : 'Close'}
           </button>
         )}
       </div>
@@ -56,4 +38,4 @@ const LoadingModal = () => {
   )
 }
 
-export default LoadingModal
+export default NotificationModal

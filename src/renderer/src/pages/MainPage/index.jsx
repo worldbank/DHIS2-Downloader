@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import LoadingModal from '../Modal'
+import NotificationModal from '../Modal'
 import OrganizationUnitTree from './OrganizationUnitTree'
 import OrgUnitLevelMenu from './OrgUnitLevelMenu'
 import DateRangeSelector from './DateRangeSelector'
@@ -10,7 +10,7 @@ import { generateDownloadingUrl, jsonToCsv } from '../../utils/helpers'
 import { generatePeriods } from '../../utils/dateUtils'
 import DownloadButton from './DownloadButton'
 import { useSelector, useDispatch } from 'react-redux'
-import { setLoading, setError, clearError } from '../../reducers/statusReducer'
+import { setLoading, setError, setNotification } from '../../reducers/statusReducer'
 
 // eslint-disable-next-line react/prop-types
 const MainPage = ({ dictionaryDb, servicesDb }) => {
@@ -21,7 +21,6 @@ const MainPage = ({ dictionaryDb, servicesDb }) => {
   const { selectedCategory } = useSelector((state) => state.category)
   const { frequency, startDate, endDate } = useSelector((state) => state.dateRange)
   const { dhis2Url, username, password } = useSelector((state) => state.auth)
-  const { isLoading, errorMessage, notification } = useSelector((state) => state.status)
 
   const handleDownload = async () => {
     let ou = ''
@@ -39,6 +38,10 @@ const MainPage = ({ dictionaryDb, servicesDb }) => {
     try {
       dispatch(setLoading(true))
       const data = await fetchData(downloadingUrl, username, password)
+      console.log(data)
+      if (data.status === 'ERROR') {
+        throw new Error(data.message || 'An error occurred while fetching data')
+      }
       const { csvData, headers, dbObjects } = jsonToCsv(data)
       // const schema = '++id, ' + headers.join(', ')
       // servicesDbRef.current = await changeSchema(servicesDbRef.current, { services: schema })
@@ -55,11 +58,15 @@ const MainPage = ({ dictionaryDb, servicesDb }) => {
       downloadLink.href = URL.createObjectURL(csvBlob)
       downloadLink.download = 'dhis2_data.csv'
       downloadLink.click()
-      dispatch(setLoading(false))
+      dispatch(setNotification({ message: 'Download completed successfully', type: 'success' }))
     } catch (error) {
+      if (error.message) {
+        dispatch(setError(error.message))
+      } else {
+        dispatch(setError(error))
+      }
+    } finally {
       dispatch(setLoading(false))
-      dispatch(setError(error))
-      console.log(error)
     }
   }
 
@@ -113,8 +120,6 @@ const MainPage = ({ dictionaryDb, servicesDb }) => {
           </div>
         </div>
       </div>
-
-      {(isLoading || errorMessage || notification.message) && <LoadingModal />}
     </div>
   )
 }

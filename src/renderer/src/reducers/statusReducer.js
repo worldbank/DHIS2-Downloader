@@ -5,7 +5,7 @@ const initialState = {
   errorMessage: '',
   notification: {
     message: '',
-    type: '' // 'success', 'error', 'info', etc.
+    type: ''
   }
 }
 
@@ -19,27 +19,14 @@ const statusSlice = createSlice({
     setError: (state, action) => {
       state.errorMessage = action.payload
     },
-    clearError: (state) => {
-      state.errorMessage = ''
-    },
     setNotification: (state, action) => {
-      state.notification.message = action.payload.message
-      state.notification.type = action.payload.type
-    },
-    clearNotification: (state) => {
-      state.notification.message = ''
-      state.notification.type = ''
+      state.notification = action.payload
     },
     handleExit: (state) => {
-      state.isLoading = false
-      state.errorMessage = ''
-      state.notification.message = ''
-      state.notification.type = ''
+      return initialState
     }
   }
 })
 
-export const { setLoading, setError, clearError, setNotification, clearNotification, handleExit } =
-  statusSlice.actions
-
+export const { setLoading, setError, setNotification, handleExit } = statusSlice.actions
 export default statusSlice.reducer

@@ -7,7 +7,7 @@ import {
   getCategoryOptionCombos
 } from '../service/useApi'
 import { dictionaryDb, servicesDb } from '../service/db'
-import { setLoading, setError, clearError, setNotification } from '../reducers/statusReducer'
+import { setLoading, setError, setNotification } from '../reducers/statusReducer'
 
 const initialState = {
   dhis2Url: '',
@@ -33,8 +33,6 @@ const authSlice = createSlice({
       state.accessToken = action.payload
     },
     clearAuth: (state) => {
-      state.dhis2Url = ''
-      state.username = ''
       state.password = ''
       state.accessToken = ''
     }
@@ -70,7 +68,6 @@ export const initializeAuth = () => async (dispatch) => {
 
 export const connect = (dhis2Url, username, password) => async (dispatch) => {
   dispatch(setLoading(true))
-  dispatch(clearError())
   try {
     const data = await getUserInfo(dhis2Url, username, password)
     if (data.id) {
@@ -81,29 +78,39 @@ export const connect = (dhis2Url, username, password) => async (dispatch) => {
       localStorage.setItem('password', password)
       localStorage.setItem('dhis2Url', dhis2Url)
 
-      const elements = await getDataElements(dhis2Url, username, password)
-      const indicators = await getIndicators(dhis2Url, username, password)
-      const programIndicators = await getProgramIndicators(dhis2Url, username, password)
-      const catOptionCombos = await getCategoryOptionCombos(dhis2Url, username, password)
+      const [elements, indicators, programIndicators, catOptionCombos] = await Promise.all([
+        getDataElements(dhis2Url, username, password),
+        getIndicators(dhis2Url, username, password),
+        getProgramIndicators(dhis2Url, username, password),
+        getCategoryOptionCombos(dhis2Url, username, password)
+      ])
 
-      await dictionaryDb.dataElements.bulkAdd(
-        elements.dataElements.map((element) => ({ ...element, category: 'DataElement' }))
-      )
-      await dictionaryDb.indicators.bulkAdd(
-        indicators.indicators.map((indicator) => ({ ...indicator, category: 'Indicator' }))
-      )
-      await dictionaryDb.programIndicators.bulkAdd(
-        programIndicators.programIndicators.map((pi) => ({
-          ...pi,
-          category: 'ProgramIndicator'
-        }))
-      )
-      await dictionaryDb.catOptionCombos.bulkAdd(catOptionCombos.categoryOptionCombos)
+      await Promise.all([
+        dictionaryDb.dataElements.bulkAdd(
+          elements.dataElements.map((element) => ({ ...element, category: 'DataElement' }))
+        ),
+        dictionaryDb.indicators.bulkAdd(
+          indicators.indicators.map((indicator) => ({ ...indicator, category: 'Indicator' }))
+        ),
+        dictionaryDb.programIndicators.bulkAdd(
+          programIndicators.programIndicators.map((pi) => ({
+            ...pi,
+            category: 'ProgramIndicator'
+          }))
+        ),
+        dictionaryDb.catOptionCombos.bulkAdd(catOptionCombos.categoryOptionCombos)
+      ])
 
       dispatch(setNotification({ message: 'Connected successfully', type: 'success' }))
+    } else {
+      dispatch(setError('Invalid Username or Password'))
     }
   } catch (error) {
-    dispatch(setError('Invalid Username or Password'))
+    if (error.message) {
+      dispatch(setError(error.message))
+    } else {
+      dispatch(setError(error))
+    }
     localStorage.clear()
   } finally {
     dispatch(setLoading(false))

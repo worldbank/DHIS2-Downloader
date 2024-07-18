@@ -4,12 +4,12 @@ export const fetchData = async (apiUrl, username, password) => {
       Authorization: `Basic ${btoa(`${username}:${password}`)}`
     }
   })
-
+  const data = await response.json()
   if (!response.ok) {
-    throw console.error(`${response.message}`)
+    throw new Error(data.message || 'An error occurred while fetching data')
   }
 
-  return await response.json()
+  return data
 }
 
 export const getUserInfo = async (dhis2Url, username, password) => {

@@ -3,6 +3,7 @@ import { HashRouter as Router, Routes, Route, Link, Navigate } from 'react-route
 import { useSelector, useDispatch } from 'react-redux'
 import { initializeAuth, disconnect } from './reducers/authReducer'
 import MainPage from './pages/MainPage'
+import NotificationModal from './pages/Modal'
 import Login from './pages/Login'
 import About from './pages/About'
 import NavBar from './pages/NavBar'
@@ -16,7 +17,7 @@ const App = () => {
   // const [accessToken, setAccessToken] = useState('')
   const dispatch = useDispatch()
   const { dhis2Url, username, password, accessToken } = useSelector((state) => state.auth)
-  const { notification } = useSelector((state) => state.status)
+  const { isLoading, errorMessage } = useSelector((state) => state.status)
 
   useEffect(() => {
     dispatch(initializeAuth())
@@ -25,68 +26,6 @@ const App = () => {
   const handleDisconnect = async () => {
     dispatch(disconnect())
   }
-
-  // useEffect(() => {
-  //   console.log('App start...')
-  //   if (
-  //     localStorage.getItem('accessToken') &&
-  //     localStorage.getItem('dhis2Url') &&
-  //     localStorage.getItem('username') &&
-  //     localStorage.getItem('password')
-  //   ) {
-  //     setAccessToken(localStorage.getItem('accessToken'))
-  //     setDhis2Url(localStorage.getItem('dhis2Url'))
-  //     setUsername(localStorage.getItem('username'))
-  //     setPassword(localStorage.getItem('password'))
-  //   }
-  //   if (localStorage.getItem('dhis2Url') && localStorage.getItem('username')) {
-  //     setDhis2Url(localStorage.getItem('dhis2Url'))
-  //     setUsername(localStorage.getItem('username'))
-  //   }
-  // }, [])
-
-  // const handleConnect = async (event) => {
-  //   event.preventDefault()
-  //   try {
-  //     const data = await getUserInfo(dhis2Url, username, password)
-  //     if (data.id) {
-  //       const token = data.id
-  //       setAccessToken(token)
-  //       localStorage.setItem('accessToken', token)
-  //       localStorage.setItem('username', username)
-  //       localStorage.setItem('password', password)
-  //       localStorage.setItem('dhis2Url', dhis2Url)
-  //       const elements = await getDataElements(dhis2Url, username, password)
-  //       const indicators = await getIndicators(dhis2Url, username, password)
-  //       const catOptionCombos = await getCategoryOptionCombos(dhis2Url, username, password)
-  //       await dictionaryDb.dataElements.bulkAdd(elements.dataElements)
-  //       await dictionaryDb.indicators.bulkAdd(indicators.indicators)
-  //       await dictionaryDb.catOptionCombos.bulkAdd(catOptionCombos.categoryOptionCombos)
-  //     }
-  //   } catch (error) {
-  //     alert('Invalid Username or Password')
-  //     localStorage.clear()
-  //     console.log(error)
-  //   }
-  // }
-
-  // const handleDisconnect = async () => {
-  //   setAccessToken('')
-  //   setPassword('')
-  //   setUsername('')
-  //   localStorage.removeItem('accessToken')
-  //   localStorage.removeItem('password')
-  //   try {
-  //     await servicesDb.close()
-  //     await dictionaryDb.close()
-  //     await servicesDb.delete()
-  //     await dictionaryDb.delete()
-  //     console.log('Database deleted on logout.')
-  //   } catch (error) {
-  //     console.error('Failed to delete db:', error.stack)
-  //   }
-  //   window.location.reload()
-  // }
 
   const PrivateRoute = ({ children }) => {
     return accessToken ? children : <Navigate to="/login" />
@@ -132,6 +71,7 @@ const App = () => {
             }
           />
         </Routes>
+        {(isLoading || errorMessage) && <NotificationModal />}
       </div>
     </Router>
   )
