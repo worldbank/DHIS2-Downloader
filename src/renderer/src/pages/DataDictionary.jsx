@@ -9,7 +9,6 @@ const DataDictionary = ({ dictionaryDb }) => {
   const [currentPage, setCurrentPage] = useState(1)
   const [jumpToPage, setJumpToPage] = useState('')
   const [itemsPerPage, setItemsPerPage] = useState(10)
-  const [isLoading, setIsLoading] = useState('')
   const [currentPageData, setCurrentPageData] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
   const [searchInput, setSearchInput] = useState('')
@@ -34,14 +33,18 @@ const DataDictionary = ({ dictionaryDb }) => {
   )
 
   const filteredData = useMemo(
-    () => data.filter((item) => item.displayName.toLowerCase().includes(searchQuery.toLowerCase())),
+    () =>
+      data.filter(
+        (item) =>
+          item.displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          item.id.toLowerCase().includes(searchQuery.toLowerCase())
+      ),
     [data, searchQuery]
   )
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage)
 
   const fetchData = useCallback(() => {
-    setIsLoading('Loading')
     const startIndex = (currentPage - 1) * itemsPerPage
     const pageData = filteredData.slice(startIndex, startIndex + itemsPerPage)
 
@@ -52,7 +55,6 @@ const DataDictionary = ({ dictionaryDb }) => {
     )
 
     setCurrentPageData(updatedPageData)
-    setIsLoading('')
   }, [currentPage, itemsPerPage, filteredData, data])
 
   useEffect(() => {
@@ -107,8 +109,6 @@ const DataDictionary = ({ dictionaryDb }) => {
       downloadLink.click()
     } catch (error) {
       console.log(error)
-    } finally {
-      setIsLoading('')
     }
   }
 
@@ -130,7 +130,7 @@ const DataDictionary = ({ dictionaryDb }) => {
             type="text"
             value={searchInput}
             onChange={handleSearchChange}
-            placeholder="Search by name"
+            placeholder="Search by Name or ID"
             className="w-full px-4 py-2 border border-gray-300 rounded"
           />
           <button type="submit" className="ml-2 px-4 py-2 bg-blue-500 text-white rounded">
@@ -140,9 +140,9 @@ const DataDictionary = ({ dictionaryDb }) => {
       </div>
       {currentPageData && (
         <div className="overflow-x-auto w-full">
-          <table className="w-full max-w-4xl mx-auto bg-white border border-gray-200">
+          <table className="w-full max-w-4xl mx-auto bg-white shadow-md rounded-lg">
             <thead>
-              <tr className="bg-gray-100 border-b text-base">
+              <tr className="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
                 <th className="py-1 px-1 border-r">Type</th>
                 <th className="py-1 px-1 border-r">JSON ID</th>
                 <th className="py-1 px-1 border-r">Name</th>
@@ -153,7 +153,7 @@ const DataDictionary = ({ dictionaryDb }) => {
                 <th className="py-1 px-1 border-r">Denominator Name</th>
               </tr>
             </thead>
-            <tbody className="text-xs">
+            <tbody className="text-gray-600 text-xs font-light">
               {currentPageData.map((el) => (
                 <tr key={el.id} className="border-b">
                   <td className="py-1 px-1 border-r whitespace-normal">{el.category}</td>

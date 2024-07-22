@@ -25,7 +25,8 @@ const MainPage = ({ dictionaryDb, servicesDb }) => {
   const handleDownload = async () => {
     let ou = ''
     if (selectedOrgUnits.length > 0) {
-      ou = `${selectedOrgUnitLevels.join(';')};${selectedOrgUnits.join(';')}&ouMode=SELECTED`
+      let levels = selectedOrgUnitLevels.map((level) => `LEVEL-${level}`).join(';')
+      ou = `${levels};${selectedOrgUnits.join(';')}&ouMode=SELECTED`
     } else {
       ou = selectedOrgUnitLevels.map((level) => `LEVEL-${level}`).join(';')
     }
@@ -38,7 +39,6 @@ const MainPage = ({ dictionaryDb, servicesDb }) => {
     try {
       dispatch(setLoading(true))
       const data = await fetchData(downloadingUrl, username, password)
-      console.log(data)
       if (data.status === 'ERROR') {
         throw new Error(data.message || 'An error occurred while fetching data')
       }
@@ -112,7 +112,6 @@ const MainPage = ({ dictionaryDb, servicesDb }) => {
             </div>
             <div className="mt-4">
               <DownloadButton
-                dictionaryDb={dictionaryDb}
                 handleDownload={handleDownload}
                 isDownloadDisabled={isDownloadDisabled}
               />

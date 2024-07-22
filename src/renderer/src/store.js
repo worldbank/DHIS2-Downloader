@@ -6,6 +6,7 @@ import statusReducer from './reducers/statusReducer'
 import orgUnitReducer from './reducers/orgUnitReducer'
 import dataElementsReducer from './reducers/dataElementsReducer'
 import popUpRedcuer from './reducers/exportReducer'
+import mouseReducer from './reducers/mouseReducer'
 
 const store = configureStore({
   reducer: {
@@ -15,7 +16,8 @@ const store = configureStore({
     dateRange: dateRangeReducer,
     dataElements: dataElementsReducer,
     orgUnit: orgUnitReducer,
-    popup: popUpRedcuer
+    popup: popUpRedcuer,
+    mouse: mouseReducer
   }
 })
 

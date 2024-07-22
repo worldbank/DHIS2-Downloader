@@ -64,7 +64,7 @@
         {
           "title": "Electron app",
           "file": "example.spec.js",
-          "line": 10,
+          "line": 11,
           "column": 6,
           "specs": [
             {
@@ -82,12 +82,9 @@
                     {
                       "workerIndex": 0,
                       "status": "passed",
-                      "duration": 35,
+                      "duration": 251,
                       "errors": [],
                       "stdout": [
-                        {
-                          "text": "Building application...\n"
-                        },
                         {
                           "buffer": "Cj4gZGhpczItZG93bmxvYWRlckAwLjAuMSBidWlsZAo+IGVsZWN0cm9uLXZpdGUgYnVpbGQKCg=="
                         },
@@ -107,7 +104,7 @@
                           "buffer": "G1sybW91dC9tYWluLxtbMjJtG1szNm1pbmRleC5qcyAgG1szOW0bWzFtG1sybTEuOTMga0IbWzIybRtbMW0bWzIybQo="
                         },
                         {
-                          "buffer": "G1szMm3inJMgYnVpbHQgaW4gMzBtcxtbMzltCg=="
+                          "buffer": "G1szMm3inJMgYnVpbHQgaW4gMzFtcxtbMzltCg=="
                         },
                         {
                           "buffer": "G1szNm12aXRlIHY1LjIuMTMgG1szMm1idWlsZGluZyBTU1IgYnVuZGxlIGZvciBwcm9kdWN0aW9uLi4uG1szNm0bWzM5bQo="
@@ -125,7 +122,7 @@
                           "buffer": "G1sybW91dC9wcmVsb2FkLxtbMjJtG1szNm1pbmRleC5qcyAgG1szOW0bWzFtG1sybTAuNDIga0IbWzIybRtbMW0bWzIybQo="
                         },
                         {
-                          "buffer": "G1szMm3inJMgYnVpbHQgaW4gNm1zG1szOW0K"
+                          "buffer": "G1szMm3inJMgYnVpbHQgaW4gNW1zG1szOW0K"
                         },
                         {
                           "buffer": "G1szNm12aXRlIHY1LjIuMTMgG1szMm1idWlsZGluZyBmb3IgcHJvZHVjdGlvbi4uLhtbMzZtG1szOW0K"
@@ -134,22 +131,22 @@
                           "buffer": "dHJhbnNmb3JtaW5nLi4uCg=="
                         },
                         {
-                          "buffer": "G1szMm3inJMbWzM5bSA1NSBtb2R1bGVzIHRyYW5zZm9ybWVkLgo="
+                          "buffer": "G1szMm3inJMbWzM5bSA3NiBtb2R1bGVzIHRyYW5zZm9ybWVkLgo="
                         },
                         {
                           "buffer": "cmVuZGVyaW5nIGNodW5rcy4uLgo="
                         },
                         {
-                          "buffer": "G1sybS4uLy4uL291dC9yZW5kZXJlci8bWzIybRtbMzJtaW5kZXguaHRtbCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAbWzM5bRtbMW0bWzJtICAwLjU1IGtCG1syMm0bWzFtG1syMm0KG1sybS4uLy4uL291dC9yZW5kZXJlci8bWzIybRtbMm1hc3NldHMvG1syMm0bWzMybUZBU1RSX0xvZ29fV2hpdGVfRW4tQlFSSGdEdVcucG5nICAbWzM5bRtbMW0bWzJtICA3LjY1IGtCG1syMm0bWzFtG1syMm0K"
+                          "buffer": "G1sybS4uLy4uL291dC9yZW5kZXJlci8bWzIybRtbMzJtaW5kZXguaHRtbCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAbWzM5bRtbMW0bWzJtICAwLjY3IGtCG1syMm0bWzFtG1syMm0KG1sybS4uLy4uL291dC9yZW5kZXJlci8bWzIybRtbMm1hc3NldHMvG1syMm0bWzMybUZBU1RSX0xvZ29fV2hpdGVfRW4tQlFSSGdEdVcucG5nICAbWzM5bRtbMW0bWzJtICA3LjY1IGtCG1syMm0bWzFtG1syMm0K"
                         },
                         {
-                          "buffer": "G1sybS4uLy4uL291dC9yZW5kZXJlci8bWzIybRtbMm1hc3NldHMvG1syMm0bWzM1bWluZGV4LURiSVAyLUVOLmNzcyAgICAgICAgICAgICAgICAbWzM5bRtbMW0bWzJtIDE5Ljc1IGtCG1syMm0bWzFtG1syMm0K"
+                          "buffer": "G1sybS4uLy4uL291dC9yZW5kZXJlci8bWzIybRtbMm1hc3NldHMvG1syMm0bWzM1bWluZGV4LUNIVkxiOXY2LmNzcyAgICAgICAgICAgICAgICAbWzM5bRtbMW0bWzJtIDIxLjA4IGtCG1syMm0bWzFtG1syMm0K"
                         },
                         {
-                          "buffer": "G1sybS4uLy4uL291dC9yZW5kZXJlci8bWzIybRtbMm1hc3NldHMvG1syMm0bWzM2bWluZGV4LTdYYS0xdWpiLmpzICAgICAgICAgICAgICAgICAbWzM5bRtbMW0bWzJtNDc1LjczIGtCG1syMm0bWzFtG1syMm0K"
+                          "buffer": "G1sybS4uLy4uL291dC9yZW5kZXJlci8bWzIybRtbMm1hc3NldHMvG1syMm0bWzM2bWluZGV4LUJibXBpaEY1LmpzICAgICAgICAgICAgICAgICAbWzM5bRtbMW0bWzMzbTU1OC41NyBrQhtbMzltG1syMm0K"
                         },
                         {
-                          "buffer": "G1szMm3inJMgYnVpbHQgaW4gNTQ0bXMbWzM5bQo="
+                          "buffer": "G1szMm3inJMgYnVpbHQgaW4gNjA1bXMbWzM5bQo="
                         },
                         {
                           "text": "Running on platform: darwin\n"
@@ -164,7 +161,7 @@
                         }
                       ],
                       "retry": 0,
-                      "startTime": "2024-07-16T03:59:01.594Z",
+                      "startTime": "2024-07-22T20:02:41.929Z",
                       "attachments": []
                     }
                   ],
@@ -173,12 +170,12 @@
               ],
               "id": "dd9b2edffe9b7501040c-7c3a2968a83df7425d60",
               "file": "example.spec.js",
-              "line": 60,
+              "line": 59,
               "column": 7
             },
             {
               "title": "Could Perform Login",
-              "ok": false,
+              "ok": true,
               "tags": [],
               "tests": [
                 {
@@ -190,54 +187,26 @@
                   "results": [
                     {
                       "workerIndex": 0,
-                      "status": "failed",
-                      "duration": 10167,
-                      "error": {
-                        "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n  \u001b[2m- waiting for locator('//form//input[@placeholder=\"DHIS2 URL\"]') to be visible\u001b[22m\n",
-                        "stack": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n  \u001b[2m- waiting for locator('//form//input[@placeholder=\"DHIS2 URL\"]') to be visible\u001b[22m\n\n    at /Users/czhang/Desktop/GFF/dhis2-downloader/tests/example.spec.js:72:20",
-                        "location": {
-                          "file": "/Users/czhang/Desktop/GFF/dhis2-downloader/tests/example.spec.js",
-                          "column": 20,
-                          "line": 72
-                        },
-                        "snippet": "\u001b[0m \u001b[90m 70 |\u001b[39m       console\u001b[33m.\u001b[39mlog(\u001b[32m'TEST_DHIS2_URL:'\u001b[39m\u001b[33m,\u001b[39m process\u001b[33m.\u001b[39menv\u001b[33m.\u001b[39m\u001b[33mTEST_DHIS2_URL\u001b[39m)\n \u001b[90m 71 |\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 72 |\u001b[39m       \u001b[36mawait\u001b[39m window\u001b[33m.\u001b[39mwaitForSelector(\u001b[32m'xpath=//form//input[@placeholder=\"DHIS2 URL\"]'\u001b[39m\u001b[33m,\u001b[39m {\n \u001b[90m    |\u001b[39m                    \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 73 |\u001b[39m         state\u001b[33m:\u001b[39m \u001b[32m'visible'\u001b[39m\u001b[33m,\u001b[39m\n \u001b[90m 74 |\u001b[39m         timeout\u001b[33m:\u001b[39m \u001b[35m10000\u001b[39m\n \u001b[90m 75 |\u001b[39m       })\u001b[0m"
-                      },
-                      "errors": [
-                        {
-                          "location": {
-                            "file": "/Users/czhang/Desktop/GFF/dhis2-downloader/tests/example.spec.js",
-                            "column": 20,
-                            "line": 72
-                          },
-                          "message": "TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n  \u001b[2m- waiting for locator('//form//input[@placeholder=\"DHIS2 URL\"]') to be visible\u001b[22m\n\n\n\u001b[0m \u001b[90m 70 |\u001b[39m       console\u001b[33m.\u001b[39mlog(\u001b[32m'TEST_DHIS2_URL:'\u001b[39m\u001b[33m,\u001b[39m process\u001b[33m.\u001b[39menv\u001b[33m.\u001b[39m\u001b[33mTEST_DHIS2_URL\u001b[39m)\n \u001b[90m 71 |\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 72 |\u001b[39m       \u001b[36mawait\u001b[39m window\u001b[33m.\u001b[39mwaitForSelector(\u001b[32m'xpath=//form//input[@placeholder=\"DHIS2 URL\"]'\u001b[39m\u001b[33m,\u001b[39m {\n \u001b[90m    |\u001b[39m                    \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 73 |\u001b[39m         state\u001b[33m:\u001b[39m \u001b[32m'visible'\u001b[39m\u001b[33m,\u001b[39m\n \u001b[90m 74 |\u001b[39m         timeout\u001b[33m:\u001b[39m \u001b[35m10000\u001b[39m\n \u001b[90m 75 |\u001b[39m       })\u001b[0m\n\n\u001b[2m    at /Users/czhang/Desktop/GFF/dhis2-downloader/tests/example.spec.js:72:20\u001b[22m"
-                        }
-                      ],
+                      "status": "passed",
+                      "duration": 418,
+                      "errors": [],
                       "stdout": [
                         {
                           "text": "TEST_DHIS2_URL: https://moph-dw.gov.af\n"
                         }
                       ],
-                      "stderr": [
-                        {
-                          "text": "Test failed: page.waitForSelector: Timeout 10000ms exceeded.\nCall log:\n  \u001b[2m- waiting for locator('//form//input[@placeholder=\"DHIS2 URL\"]') to be visible\u001b[22m\n\n    at \u001b[90m/Users/czhang/Desktop/GFF/dhis2-downloader/\u001b[39mtests/example.spec.js:72:20 {\n  name: \u001b[32m'TimeoutError'\u001b[39m,\n  [\u001b[32mSymbol(step)\u001b[39m]: {\n    stepId: \u001b[32m'pw:api@5'\u001b[39m,\n    location: {\n      file: \u001b[32m'/Users/czhang/Desktop/GFF/dhis2-downloader/tests/example.spec.js'\u001b[39m,\n      line: \u001b[33m72\u001b[39m,\n      column: \u001b[33m20\u001b[39m,\n      function: \u001b[90mundefined\u001b[39m\n    },\n    category: \u001b[32m'pw:api'\u001b[39m,\n    title: \u001b[32m'page.waitForSelector(xpath=//form//input[@placeholder=\"DHIS2 URL\"])'\u001b[39m,\n    apiName: \u001b[32m'page.waitForSelector'\u001b[39m,\n    params: {\n      selector: \u001b[32m'xpath=//form//input[@placeholder=\"DHIS2 URL\"]'\u001b[39m,\n      state: \u001b[32m'visible'\u001b[39m,\n      timeout: \u001b[33m10000\u001b[39m\n    },\n    boxedStack: \u001b[90mundefined\u001b[39m,\n    steps: [],\n    complete: \u001b[36m[Function: complete]\u001b[39m,\n    endWallTime: \u001b[33m1721102353895\u001b[39m,\n    error: {\n      message: \u001b[32m'TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\\n'\u001b[39m +\n        \u001b[32m'Call log:\\n'\u001b[39m +\n        \u001b[32m`  \\x1B[2m- waiting for locator('//form//input[@placeholder=\"DHIS2 URL\"]') to be visible\\x1B[22m\\n`\u001b[39m,\n      stack: \u001b[32m'TimeoutError: page.waitForSelector: Timeout 10000ms exceeded.\\n'\u001b[39m +\n        \u001b[32m'Call log:\\n'\u001b[39m +\n        \u001b[32m`  \\x1B[2m- waiting for locator('//form//input[@placeholder=\"DHIS2 URL\"]') to be visible\\x1B[22m\\n`\u001b[39m +\n        \u001b[32m'\\n'\u001b[39m +\n        \u001b[32m'    at /Users/czhang/Desktop/GFF/dhis2-downloader/tests/example.spec.js:72:20'\u001b[39m\n    }\n  }\n}\n"
-                        }
-                      ],
+                      "stderr": [],
                       "retry": 0,
-                      "startTime": "2024-07-16T03:59:03.886Z",
-                      "attachments": [],
-                      "errorLocation": {
-                        "file": "/Users/czhang/Desktop/GFF/dhis2-downloader/tests/example.spec.js",
-                        "column": 20,
-                        "line": 72
-                      }
+                      "startTime": "2024-07-22T20:02:43.733Z",
+                      "attachments": []
                     }
                   ],
-                  "status": "unexpected"
+                  "status": "expected"
                 }
               ],
               "id": "dd9b2edffe9b7501040c-9134eabeecb37c1be8ad",
               "file": "example.spec.js",
-              "line": 68,
+              "line": 70,
               "column": 7
             }
           ]
@@ -247,11 +216,11 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2024-07-16T03:59:01.304Z",
-    "duration": 12945.180999999999,
-    "expected": 1,
+    "startTime": "2024-07-22T20:02:41.648Z",
+    "duration": 2713.9500000000003,
+    "expected": 2,
     "skipped": 0,
-    "unexpected": 1,
+    "unexpected": 0,
     "flaky": 0
   }
 }

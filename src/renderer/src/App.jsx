@@ -7,6 +7,7 @@ import NotificationModal from './pages/Modal'
 import Login from './pages/Login'
 import About from './pages/About'
 import NavBar from './pages/NavBar'
+import HistoryPage from './pages/DownloadHistory'
 import DataDictionary from './pages/DataDictionary'
 import { servicesDb, dictionaryDb } from './service/db'
 
@@ -33,15 +34,10 @@ const App = () => {
 
   return (
     <Router>
-      <div className="bg-teal-green text-black min-h-screen flex flex-col">
-        <div className="min-w-full mx-auto">
-          <NavBar
-            accessToken={accessToken}
-            username={username}
-            handleDisconnect={handleDisconnect}
-          />
-        </div>
-
+      <div className="min-w-full mx-auto">
+        <NavBar accessToken={accessToken} username={username} handleDisconnect={handleDisconnect} />
+      </div>
+      <div className="bg-extra-light-green text-black min-h-screen flex flex-col">
         <Routes>
           <Route path="/about" element={<About />} />
           <Route
@@ -49,6 +45,14 @@ const App = () => {
             element={
               <PrivateRoute>
                 <DataDictionary dictionaryDb={dictionaryDb} />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/history"
+            element={
+              <PrivateRoute>
+                <HistoryPage dictionaryDb={dictionaryDb} />
               </PrivateRoute>
             }
           />

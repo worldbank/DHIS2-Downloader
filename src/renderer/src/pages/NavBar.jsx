@@ -1,60 +1,117 @@
 import { Link } from 'react-router-dom'
-import { useState } from 'react'
-import fastrLogo from '../assets/FASTR_Logo_White_En.png'
+import { useDispatch, useSelector } from 'react-redux'
+import { mouseOver, mouseLeave, mouseClick } from '../reducers/mouseReducer'
+import { useEffect, useRef } from 'react'
 
+// eslint-disable-next-line react/prop-types
 const NavBar = ({ accessToken, username, handleDisconnect }) => {
-  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const dispatch = useDispatch()
+  const openDropdowns = useSelector((state) => state.mouse.openDropdowns)
 
-  const toggleDropdown = () => {
-    setDropdownOpen(!dropdownOpen)
+  const timerRef = useRef(null)
+
+  const handleMouseEnter = (dropdownId) => {
+    clearTimeout(timerRef.current)
+    dispatch(mouseOver(dropdownId))
   }
 
+  const handleMouseLeave = (dropdownId) => {
+    timerRef.current = setTimeout(() => {
+      dispatch(mouseLeave(dropdownId))
+    }, 300)
+  }
+
+  const handleClickOutside = () => {
+    dispatch(mouseClick())
+  }
+
+  useEffect(() => {
+    document.addEventListener('click', handleClickOutside)
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside)
+    }
+  }, [])
+
   return (
-    <header className="w-full bg-blue-600 py-2">
-      <nav className="container mx-auto px-4">
-        <div className="flex flex-wrap items-center justify-between">
-          <div className="flex items-center">
-            <div className="w-16 h-12 max-w-20 max-h-15 mr-4">
-              <img src={fastrLogo} className="object-scale-down" alt="FASTR Logo" />
-            </div>
-            <span className="text-2xl font-semibold whitespace-nowrap text-white">
-              DHIS2 Data Downloader
-            </span>
-          </div>
-          <div className="flex items-center gap-5 mt-3 sm:mt-0">
-            <Link to="/home" className="text-lg text-white hover:text-gray-200">
-              Home
-            </Link>
-            <Link to="/dictionary" className="text-lg text-gray-200 hover:text-white">
-              Dictionary
-            </Link>
-            <Link to="/about" className="text-lg text-gray-200 hover:text-white">
-              About
-            </Link>
-            {accessToken && (
-              <div className="relative">
-                <button
-                  onClick={toggleDropdown}
-                  className="text-lg text-gray-200 hover:text-white focus:outline-none"
+    <header className="w-full bg-blue-600 py-4 shadow-md">
+      <nav className="container mx-auto px-4 flex justify-between items-center">
+        <div className="flex items-center flex-grow">
+          <span className="text-2xl font-bold text-white">DHIS2 Data Downloader</span>
+        </div>
+        <div className="flex items-center gap-6">
+          <div
+            className="relative"
+            onMouseEnter={() => handleMouseEnter('home')}
+            onMouseLeave={() => handleMouseLeave('home')}
+          >
+            <button
+              className="text-lg text-white hover:text-gray-300 focus:outline-none"
+              onClick={(e) => e.stopPropagation()} // Prevents the click from closing the dropdown
+            >
+              Download
+            </button>
+            {openDropdowns['home'] && (
+              <div
+                className="absolute mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-20"
+                onMouseEnter={() => handleMouseEnter('home')}
+                onMouseLeave={() => handleMouseLeave('home')}
+              >
+                <Link
+                  to="/home"
+                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  onClick={() => dispatch(mouseClick())}
                 >
-                  {username}
-                </button>
-                {dropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-20">
-                    <button
-                      onClick={handleDisconnect}
-                      className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-                    >
-                      Sign out
-                    </button>
-                  </div>
-                )}
+                  Home
+                </Link>
+                <Link
+                  to="/history"
+                  className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  onClick={() => dispatch(mouseClick())}
+                >
+                  History
+                </Link>
               </div>
             )}
           </div>
+          <Link to="/dictionary" className="text-lg text-white hover:text-gray-300">
+            Dictionary
+          </Link>
+          <Link to="/about" className="text-lg text-white hover:text-gray-300">
+            About
+          </Link>
+          {accessToken && (
+            <div
+              className="relative"
+              onMouseEnter={() => handleMouseEnter('navbar')}
+              onMouseLeave={() => handleMouseLeave('navbar')}
+            >
+              <button
+                className="text-lg text-white hover:text-gray-300 focus:outline-none"
+                onClick={(e) => e.stopPropagation()} // Prevents the click from closing the dropdown
+              >
+                {username}
+              </button>
+              {openDropdowns['navbar'] && (
+                <div
+                  className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-20"
+                  onMouseEnter={() => handleMouseEnter('navbar')}
+                  onMouseLeave={() => handleMouseLeave('navbar')}
+                >
+                  <button
+                    onClick={handleDisconnect}
+                    className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  >
+                    Sign out
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </nav>
     </header>
   )
 }
+
 export default NavBar
