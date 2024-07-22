@@ -1,6 +1,5 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useRef, useState, useEffect, useCallback, useMemo } from 'react'
-import LoadingModal from './Modal'
 import { objectToCsv } from '../utils/helpers'
 import { updateFormulaNames } from '../utils/helpers'
 import ExportLink from '../components/ExportLink'
@@ -230,8 +229,6 @@ const DataDictionary = ({ dictionaryDb }) => {
         <ExportLink onClick={handleExportAll} text="Export All" />
         <ExportLink onClick={handleExportCurrent} text="Export This Page" />
       </div>
-
-      {isLoading.length > 0 && <LoadingModal isLoading={isLoading} />}
     </div>
   )
 }

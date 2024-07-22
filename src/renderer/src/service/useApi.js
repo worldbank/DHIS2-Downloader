@@ -4,12 +4,12 @@ export const fetchData = async (apiUrl, username, password) => {
       Authorization: `Basic ${btoa(`${username}:${password}`)}`
     }
   })
-
+  const data = await response.json()
   if (!response.ok) {
-    throw console.error(`HTTP error! status: ${response.status}`)
+    throw new Error(data.message || 'An error occurred while fetching data')
   }
 
-  return await response.json()
+  return data
 }
 
 export const getUserInfo = async (dhis2Url, username, password) => {
@@ -56,7 +56,7 @@ export const getIndicators = (dhis2Url, username, password) => {
 }
 
 export const getProgramIndicators = (dhis2Url, username, password) => {
-  const indicatorUrl = `${dhis2Url}/api/programIndicators?fields=id,displayName&paging=false`
+  const indicatorUrl = `${dhis2Url}/api/programIndicators?fields=id,displayName,displayDescription&paging=false`
   return fetchData(indicatorUrl, username, password)
 }
 

@@ -1,72 +1,30 @@
-import React, { useState, useEffect } from 'react'
-import { getInitialOrganizationUnitLevel, getChildOrgUnits } from '../../service/useApi'
+import { useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+import {
+  fetchInitialOrgUnits,
+  fetchChildOrgUnits,
+  toggleOrgUnitSelection,
+  toggleOrgUnitExpansion
+} from '../../reducers/orgUnitReducer'
 
-const OrganizationUnitTree = ({
-  dhis2Url,
-  username,
-  password,
-  selectedOrgUnits,
-  setSelectedOrgUnits,
-  onSelect
-}) => {
-  const [orgUnits, setOrgUnits] = useState([])
-  const [expandedOrgUnits, setExpandedOrgUnits] = useState([])
+const OrganizationUnitTree = ({ dhis2Url, username, password }) => {
+  const dispatch = useDispatch()
+  const { orgUnits, expandedOrgUnits, selectedOrgUnits } = useSelector((state) => state.orgUnit)
 
   useEffect(() => {
-    const fetchOrgUnitLevel = async () => {
-      const data = await getInitialOrganizationUnitLevel(dhis2Url, username, password)
-      setOrgUnits(data.organisationUnits)
-    }
-    fetchOrgUnitLevel()
-  }, [dhis2Url, username, password])
-
-  const fetchChildOrgUnits = async (parentId, parentPath) => {
-    try {
-      const data = await getChildOrgUnits(dhis2Url, parentId, username, password)
-      const updatedOrgUnits = updateOrgUnits(orgUnits, parentPath, data)
-      setOrgUnits(updatedOrgUnits)
-    } catch (error) {
-      console.error(`Error fetching child organisation units for ${parentId}:`, error)
-    }
-  }
-
-  const updateOrgUnits = (units, path, data) => {
-    if (path.length === 0) {
-      return data.children || []
-    }
-
-    const [head, ...tail] = path
-    const updatedUnits = units.map((unit) => {
-      if (unit.id === head) {
-        return {
-          ...unit,
-          children: updateOrgUnits(unit.children || [], tail, data)
-        }
-      }
-      return unit
-    })
-
-    return updatedUnits
-  }
+    dispatch(fetchInitialOrgUnits({ dhis2Url, username, password }))
+  }, [dispatch, dhis2Url, username, password])
 
   const handleOrgUnitSelect = (unitId) => {
-    if (selectedOrgUnits.includes(unitId)) {
-      setSelectedOrgUnits(selectedOrgUnits.filter((id) => id !== unitId))
-    } else {
-      setSelectedOrgUnits([...selectedOrgUnits, unitId])
-    }
-    onSelect(unitId)
+    dispatch(toggleOrgUnitSelection(unitId))
   }
 
   const handleOrgUnitExpand = (unitId, path) => {
+    dispatch(toggleOrgUnitExpansion(unitId))
     if (!expandedOrgUnits.includes(unitId)) {
-      setExpandedOrgUnits([...expandedOrgUnits, unitId])
-      fetchChildOrgUnits(unitId, path)
-    } else {
-      setExpandedOrgUnits(expandedOrgUnits.filter((id) => id !== unitId))
+      dispatch(fetchChildOrgUnits({ dhis2Url, parentId: unitId, username, password }))
     }
   }
-
   const renderTreeNodes = (units, path = []) => {
     return units.map((unit) => (
       <div key={unit.id} className="ml-4">

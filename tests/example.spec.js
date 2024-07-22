@@ -16,13 +16,15 @@ test.describe('Electron app', () => {
     execSync('npm run build', { stdio: 'inherit' })
 
     const platform = os.platform()
+    let arch
     let appPath
     if (platform == 'darwin') {
+      arch = os.arch()
       appPath = path.join(
         __dirname,
         '..',
         'dist',
-        'mac-arm64',
+        `mac-${arch}`,
         'DHIS2 Downloader.app',
         'Contents',
         'MacOS',
@@ -66,8 +68,8 @@ test.describe('Electron app', () => {
   })
 
   test('Could Perform Login', async () => {
+    const window = await electronApp.firstWindow()
     try {
-      const window = await electronApp.firstWindow()
       const dhis2UrlInput = await window.locator('xpath=//form//input[@placeholder="DHIS2 URL"]')
       console.log('TEST_DHIS2_URL:', process.env.TEST_DHIS2_URL)
       await dhis2UrlInput.fill(process.env.TEST_DHIS2_URL)

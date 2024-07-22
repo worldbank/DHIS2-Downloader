@@ -9,13 +9,13 @@ const mouseSlice = createSlice({
   initialState,
   reducers: {
     mouseOver: (state, action) => {
-      state.openDropdowns[action.payload] = true;
+      state.openDropdowns[action.payload] = true
     },
     mouseLeave: (state, action) => {
-      state.openDropdowns[action.payload] = false;
+      state.openDropdowns[action.payload] = false
     },
     mouseClick: (state, action) => {
-      state.openDropdowns = {};
+      state.openDropdowns = {}
     }
   }
 })

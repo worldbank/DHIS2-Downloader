@@ -778,6 +778,10 @@ html {
   align-items: center;
 }
 
+.justify-end {
+  justify-content: flex-end;
+}
+
 .justify-center {
   justify-content: center;
 }
@@ -891,8 +895,6 @@ html {
   background-color: rgb(229 231 235 / var(--tw-bg-opacity));
 }
 
-<<<<<<< Updated upstream
-=======
 .bg-gray-500 {
   --tw-bg-opacity: 1;
   background-color: rgb(107 114 128 / var(--tw-bg-opacity));
@@ -908,7 +910,6 @@ html {
   background-color: rgb(99 102 241 / var(--tw-bg-opacity));
 }
 
->>>>>>> Stashed changes
 .bg-teal-100 {
   --tw-bg-opacity: 1;
   background-color: rgb(204 251 241 / var(--tw-bg-opacity));
@@ -919,18 +920,16 @@ html {
   background-color: rgb(255 255 255 / var(--tw-bg-opacity));
 }
 
+.bg-opacity-50 {
+  --tw-bg-opacity: 0.5;
+}
+
 .bg-opacity-75 {
   --tw-bg-opacity: 0.75;
 }
 
-<<<<<<< Updated upstream
-.object-scale-down {
-  -o-object-fit: scale-down;
-     object-fit: scale-down;
-=======
 .p-2 {
   padding: 0.5rem;
->>>>>>> Stashed changes
 }
 
 .p-4 {
@@ -1086,6 +1085,11 @@ html {
 .text-red-500 {
   --tw-text-opacity: 1;
   color: rgb(239 68 68 / var(--tw-text-opacity));
+}
+
+.text-red-600 {
+  --tw-text-opacity: 1;
+  color: rgb(220 38 38 / var(--tw-text-opacity));
 }
 
 .text-white {
