@@ -34,7 +34,7 @@ export const updateFormulaNames = (pageData, data, formulaType) => {
         if (id.length === 2) {
           const categoryOption = data.find((el) => el.id === id[1])
           if (categoryOption) {
-            idName += `(${categoryOption.displayName})`
+            idName += ` (${categoryOption.displayName})`
             const regex = new RegExp(`{${id.join('.')}`, 'g')
             updatedFormula = updatedFormula.replace(regex, idName)
           }

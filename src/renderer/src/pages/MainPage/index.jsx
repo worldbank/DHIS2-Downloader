@@ -141,7 +141,12 @@ const MainPage = ({ dhis2Url, username, password, dictionaryDb, servicesDb }) =>
   const handleDownload = async () => {
     let ou = ''
     if (selectedOrgUnits.length > 0) {
+<<<<<<< Updated upstream
       ou = `${orgUnitLevel};${selectedOrgUnits.join(';')}&ouMode=SELECTED`
+=======
+      let levels = selectedOrgUnitLevels.map((level) => `LEVEL-${level}`).join(';')
+      ou = `${levels};${selectedOrgUnits.join(';')}&ouMode=SELECTED`
+>>>>>>> Stashed changes
     } else {
       ou = orgUnitLevel.map((level) => `LEVEL-${level}`).join(';')
     }
@@ -155,6 +160,12 @@ const MainPage = ({ dhis2Url, username, password, dictionaryDb, servicesDb }) =>
     try {
       setIsLoading('downloading')
       const data = await fetchData(downloadingUrl, username, password)
+<<<<<<< Updated upstream
+=======
+      if (data.status === 'ERROR') {
+        throw new Error(data.message || 'An error occurred while fetching data')
+      }
+>>>>>>> Stashed changes
       const { csvData, headers, dbObjects } = jsonToCsv(data)
       // const schema = '++id, ' + headers.join(', ')
       // servicesDbRef.current = await changeSchema(servicesDbRef.current, { services: schema })
@@ -256,7 +267,6 @@ const MainPage = ({ dhis2Url, username, password, dictionaryDb, servicesDb }) =>
             </div>
             <div className="mt-4">
               <DownloadButton
-                dictionaryDb={dictionaryDb}
                 handleDownload={handleDownload}
                 isDownloadDisabled={isDownloadDisabled}
               />

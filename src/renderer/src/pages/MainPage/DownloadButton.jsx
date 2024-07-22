@@ -1,8 +1,5 @@
-import { objectToCsv } from '../../utils/helpers'
-import { useLiveQuery } from 'dexie-react-hooks'
-import ExportLink from '../../components/ExportLink'
-
 // eslint-disable-next-line react/prop-types
+<<<<<<< Updated upstream
 const DownloadButton = ({ dictionaryDb, handleDownload, isDownloadDisabled }) => {
   const queries = useLiveQuery(() => dictionaryDb.query.toArray(), []) || []
 
@@ -19,6 +16,9 @@ const DownloadButton = ({ dictionaryDb, handleDownload, isDownloadDisabled }) =>
     document.body.removeChild(link)
   }
 
+=======
+const DownloadButton = ({ handleDownload, isDownloadDisabled }) => {
+>>>>>>> Stashed changes
   return (
     <div className="mb-4 w-full md:w-1/2 lg:w-1/3 flex flex-col space-y-2">
       <button
@@ -30,7 +30,6 @@ const DownloadButton = ({ dictionaryDb, handleDownload, isDownloadDisabled }) =>
       >
         Download
       </button>
-      <ExportLink onClick={handleExportQueries} text={'Export Downloading History'} />
     </div>
   )
 }
