@@ -13,11 +13,16 @@ const categorySlice = createSlice({
   name: 'category',
   initialState: {
     category: [],
-    selectedCategory: ''
+    selectedCategory: []
   },
   reducers: {
     setSelectedCategory: (state, action) => {
-      state.selectedCategory = action.payload
+      const coId = action.payload
+      if (state.selectedCategory.includes(coId)) {
+        state.selectedCategory = state.selectedCategory.filter((id) => id !== coId)
+      } else {
+        state.selectedCategory.push(coId)
+      }
     }
   },
   extraReducers: (builder) => {

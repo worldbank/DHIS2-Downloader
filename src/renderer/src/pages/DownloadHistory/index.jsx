@@ -1,20 +1,22 @@
 import React, { useState } from 'react'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { objectToCsv, jsonToCsv } from '../utils/helpers'
-import { fetchData } from '../service/useApi'
-import ExportLink from '../components/ExportLink'
+import { objectToCsv, jsonToCsv } from '../../utils/downloadUtils'
+import { fetchCsvData, fetchData } from '../../service/useApi'
+import { setNotification, setLoading, setError } from '../../reducers/statusReducer'
 
 // eslint-disable-next-line react/prop-types
 const HistoryPage = ({ dictionaryDb }) => {
   const downloadQueries = useLiveQuery(() => dictionaryDb.query.toArray(), []) || []
   const [selectedRows, setSelectedRows] = useState([])
+  const dispatch = useDispatch()
   const { dhis2Url, username, password } = useSelector((state) => state.auth)
 
   const handleCheckboxChange = (id) => {
-    setSelectedRows((prev) =>
-      prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]
-    )
+    // setSelectedRows((prev) =>
+    //   prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]
+    // )
+    setSelectedRows([id])
   }
 
   const handleSelectAllChange = () => {
@@ -29,12 +31,18 @@ const HistoryPage = ({ dictionaryDb }) => {
       .map((el) => el.url)
 
     try {
+      dispatch(setLoading(true))
       for (let i = 0; i < redownloadingUrls.length; i++) {
         const url = redownloadingUrls[i]
-        const data = await fetchData(url, username, password)
-        const { csvData } = jsonToCsv(data)
-
-        const csvBlob = new Blob([csvData], { type: 'text/csv' })
+        let csvBlob
+        if (url.includes('csv')) {
+          csvBlob = await fetchCsvData(url, username, password)
+        } else {
+          const data = await fetchData(url, username, password)
+          const { csvData } = jsonToCsv(data)
+          csvBlob = new Blob([csvData], { type: 'text/csv;charset=utf-8' })
+        }
+        dispatch(setNotification({ message: `Finished ${i}`, type: 'info' }))
         const link = document.createElement('a')
         link.href = URL.createObjectURL(csvBlob)
         link.setAttribute('download', `file_${i}.csv`)
@@ -43,7 +51,10 @@ const HistoryPage = ({ dictionaryDb }) => {
         document.body.removeChild(link)
       }
     } catch (error) {
-      console.error('Error during re-downloading:', error)
+      const errorMessage = error.message ? error.message : error
+      dispatch(setError(errorMessage))
+    } finally {
+      dispatch(setLoading(false))
     }
   }
 
@@ -58,6 +69,10 @@ const HistoryPage = ({ dictionaryDb }) => {
     document.body.removeChild(link)
   }
 
+  if (downloadQueries.length === 0) {
+    return <p className="text-center text-gray-500">No download history available.</p>
+  }
+
   return (
     <div className="mb-8 w-full flex flex-col space-y-4 p-4">
       <div className="overflow-x-auto w-full">
@@ -65,12 +80,12 @@ const HistoryPage = ({ dictionaryDb }) => {
           <thead>
             <tr className="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
               <th className="py-3 px-4 text-left">
-                <input
+                {/* <input
                   type="checkbox"
                   className="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out"
-                  checked={Object.keys(selectedRows).length === downloadQueries.length}
+                  checked={selectedRows.length === downloadQueries.length}
                   onChange={handleSelectAllChange}
-                />
+                /> */}
               </th>
               <th className="py-3 px-4 text-left">Organization Level</th>
               <th className="py-3 px-4 text-left">Period</th>
@@ -86,7 +101,7 @@ const HistoryPage = ({ dictionaryDb }) => {
                   <input
                     type="checkbox"
                     className="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out"
-                    checked={!!selectedRows.includes(el.id)}
+                    checked={selectedRows.includes(el.id)}
                     onChange={() => handleCheckboxChange(el.id)}
                   />
                 </td>
@@ -109,16 +124,18 @@ const HistoryPage = ({ dictionaryDb }) => {
           </tbody>
         </table>
       </div>
-      <div className="flex justify-end">
+      <div className="flex justify-end space-x-4">
         <button
           onClick={handleExportDownloadHistory}
           className="bg-indigo-500 text-white px-4 py-2 rounded-md shadow-md hover:bg-indigo-600 transition duration-150 ease-in-out"
+          disabled={downloadQueries.length === 0}
         >
           Export Downloading History
         </button>
         <button
           onClick={handleQuickRedownload}
           className="bg-indigo-500 text-white px-4 py-2 rounded-md shadow-md hover:bg-indigo-600 transition duration-150 ease-in-out"
+          disabled={selectedRows.length === 0}
         >
           Downloading Selected Record
         </button>

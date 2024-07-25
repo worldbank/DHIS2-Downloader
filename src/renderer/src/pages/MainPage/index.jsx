@@ -3,11 +3,16 @@ import NotificationModal from '../Modal'
 import OrganizationUnitTree from './OrganizationUnitTree'
 import OrgUnitLevelMenu from './OrgUnitLevelMenu'
 import DateRangeSelector from './DateRangeSelector'
-import { fetchData } from '../../service/useApi'
+import { fetchData, fetchCsvData } from '../../service/useApi'
 import DataElementsMenu from './DataElements'
 import CategoryDropdownMenu from './CategoryCombo'
-import { generateDownloadingUrl, jsonToCsv } from '../../utils/helpers'
 import { generatePeriods } from '../../utils/dateUtils'
+import {
+  generateDownloadingUrl,
+  createDataChunks,
+  csvGeneratorToBlob,
+  jsonToCsvGenerator
+} from '../../utils/downloadUtils'
 import DownloadButton from './DownloadButton'
 import { useSelector, useDispatch } from 'react-redux'
 import { setLoading, setError, setNotification } from '../../reducers/statusReducer'
@@ -31,40 +36,68 @@ const MainPage = ({ dictionaryDb, servicesDb }) => {
       ou = selectedOrgUnitLevels.map((level) => `LEVEL-${level}`).join(';')
     }
     const co = selectedCategory
-    const dx = addedElements.map((element) => element.id).join(';')
+    console.log(co)
+    const elementIds = addedElements.map((element) => element.id)
+    const dx = elementIds.join(';')
     const periods = generatePeriods(frequency, startDate, endDate)
     const pe = periods.join(';')
     const downloadingUrl = generateDownloadingUrl(dhis2Url, ou, dx, pe, co)
     console.log(downloadingUrl)
+    const chunks = createDataChunks(elementIds, periods, ou)
+
+    let notificationMessages = ''
+    let header = null
+
+    const fetchChunk = async (chunk, index) => {
+      const dx = chunk.dx.join(';')
+      const pe = chunk.periods.join(';')
+      const firstPe = chunk.periods[0]
+      const lastPe = chunk.periods[chunk.periods.length - 1]
+      const ou = chunk.ou
+      try {
+        const chunkUrl = generateDownloadingUrl(dhis2Url, ou, dx, pe, co)
+        let blob = await fetchCsvData(chunkUrl, username, password)
+        const headerText = await blob.slice(0, 1024).text()
+        const indexOfFirstNewline = headerText.indexOf('\n')
+        blob = blob.slice(indexOfFirstNewline + 1)
+        if (!header) {
+          header = headerText.slice(0, indexOfFirstNewline)
+        }
+        notificationMessages += `Chunk ${index + 1}: \n${dx}(${firstPe}-${lastPe}) finished\n`
+        dispatch(setNotification({ message: notificationMessages, type: 'info' }))
+        return blob
+      } catch (error) {
+        notificationMessages += `Chunk ${index + 1}: \n${dx}(${firstPe}-${lastPe}) failed: ${error.message}\n`
+        dispatch(setNotification({ message: notificationMessages, type: 'error' }))
+        return null
+      }
+    }
     try {
       dispatch(setLoading(true))
-      const data = await fetchData(downloadingUrl, username, password)
-      if (data.status === 'ERROR') {
-        throw new Error(data.message || 'An error occurred while fetching data')
-      }
-      const { csvData, headers, dbObjects } = jsonToCsv(data)
-      // const schema = '++id, ' + headers.join(', ')
-      // servicesDbRef.current = await changeSchema(servicesDbRef.current, { services: schema })
-      // await servicesDbRef.current.services.bulkAdd(dbObjects)
-      await dictionaryDb.query.add({
-        ou: ou,
-        pe: pe,
-        dx: dx,
-        co: co,
-        url: downloadingUrl
-      })
-      const csvBlob = new Blob([csvData], { type: 'text/csv' })
-      const downloadLink = document.createElement('a')
-      downloadLink.href = URL.createObjectURL(csvBlob)
-      downloadLink.download = 'dhis2_data.csv'
-      downloadLink.click()
-      dispatch(setNotification({ message: 'Download completed successfully', type: 'success' }))
-    } catch (error) {
-      if (error.message) {
-        dispatch(setError(error.message))
+      const fetchPromises = chunks.map((chunk, index) => fetchChunk(chunk, index))
+      const results = await Promise.all(fetchPromises)
+      const dataChunks = results.filter((result) => result !== null)
+      const headerBlob = new Blob([header + '\n'], { type: 'text/csv' })
+      if (dataChunks.length > 0) {
+        await dictionaryDb.query.add({
+          ou: ou,
+          pe: pe,
+          dx: dx,
+          co: co,
+          url: downloadingUrl
+        })
+        const csvBlob = new Blob([headerBlob, ...dataChunks], { type: 'text/csv;charset=utf-8' })
+        const downloadLink = document.createElement('a')
+        downloadLink.href = URL.createObjectURL(csvBlob)
+        downloadLink.download = 'dhis2_data.csv'
+        downloadLink.click()
+        dispatch(setNotification({ message: 'Download completed successfully', type: 'success' }))
       } else {
-        dispatch(setError(error))
+        throw new Error('No data chunks were successfully fetched.')
       }
+    } catch (error) {
+      const errorMessage = error.message ? error.message : error
+      dispatch(setError(errorMessage))
     } finally {
       dispatch(setLoading(false))
     }
@@ -100,15 +133,15 @@ const MainPage = ({ dictionaryDb, servicesDb }) => {
           <div className="w-1/3 px-4 py-8">
             <h3 className="text-xl font-bold mb-2">Organization Levels</h3>
             <div className="mb-4">
-              <OrgUnitLevelMenu dhis2Url={dhis2Url} username={username} password={password} />
+              <OrgUnitLevelMenu />
             </div>
             <h3 className="text-xl font-bold mb-2">Date Range</h3>
             <div className="overflow-y-auto">
               <DateRangeSelector />
             </div>
             <h3 className="text-xl font-bold mb-2">Category Combination</h3>
-            <div className="overflow-y-auto">
-              <CategoryDropdownMenu dhis2Url={dhis2Url} username={username} password={password} />
+            <div className="mb-4">
+              <CategoryDropdownMenu />
             </div>
             <div className="mt-4">
               <DownloadButton

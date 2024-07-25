@@ -1,15 +1,63 @@
-export const fetchData = async (apiUrl, username, password) => {
-  const response = await fetch(apiUrl, {
+export const fetchData = async (apiUrl, username, password, timeout = 1200000) => {
+  const controller = new AbortController()
+  const { signal } = controller
+  const fetchOptions = {
     headers: {
-      Authorization: `Basic ${btoa(`${username}:${password}`)}`
-    }
-  })
-  const data = await response.json()
-  if (!response.ok) {
-    throw new Error(data.message || 'An error occurred while fetching data')
+      Authorization: `Basic ${btoa(`${username}:${password}`)}`,
+      'Accept-Encoding': 'gzip, deflate, br'
+    },
+    signal
   }
 
-  return data
+  const timeoutId = setTimeout(() => controller.abort(), timeout)
+
+  try {
+    const response = await fetch(apiUrl, fetchOptions)
+    clearTimeout(timeoutId)
+    if (!response.ok) {
+      const data = await response.json()
+      throw new Error(data.message || 'An error occurred while fetching data')
+    }
+    return await response.json()
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      throw new Error(`Request timed out after ${timeout}ms`)
+    }
+    throw error
+  }
+}
+
+export const fetchCsvData = async (apiUrl, username, password, timeout = 1200000) => {
+  const controller = new AbortController()
+  const { signal } = controller
+  const fetchOptions = {
+    headers: {
+      Authorization: `Basic ${btoa(`${username}:${password}`)}`,
+      'Accept-Encoding': 'gzip, deflate, br'
+    },
+    signal
+  }
+  const timeoutId = setTimeout(() => controller.abort(), timeout)
+
+  try {
+    const response = await fetch(apiUrl, fetchOptions)
+    clearTimeout(timeoutId)
+
+    if (!response.ok) {
+      const text = await response.text()
+      const parser = new DOMParser()
+      const doc = parser.parseFromString(text, 'text/html')
+      const errorText = doc.querySelector('title').textContent || 'Error occurred'
+      throw new Error(errorText || `HTTP error! status: ${response.status}`)
+    }
+
+    return await response.blob()
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      throw new Error(`Request timed out after ${timeout}ms`)
+    }
+    throw error
+  }
 }
 
 export const getUserInfo = async (dhis2Url, username, password) => {

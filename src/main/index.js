@@ -7,15 +7,16 @@ const iconPath = join(__dirname, '../../resources/icon.png')
 function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
+    width: 1000,
+    height: 800,
     show: false,
     autoHideMenuBar: true,
     icon: iconPath,
     // ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
+      sandbox: false,
+      nodeIntegrationInWorker: true
     }
   })
 

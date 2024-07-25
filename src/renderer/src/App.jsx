@@ -12,10 +12,6 @@ import DataDictionary from './pages/DataDictionary'
 import { servicesDb, dictionaryDb } from './service/db'
 
 const App = () => {
-  // const [username, setUsername] = useState('')
-  // const [password, setPassword] = useState('')
-  // const [dhis2Url, setDhis2Url] = useState('')
-  // const [accessToken, setAccessToken] = useState('')
   const dispatch = useDispatch()
   const { dhis2Url, username, password, accessToken } = useSelector((state) => state.auth)
   const { isLoading, errorMessage } = useSelector((state) => state.status)
@@ -28,6 +24,7 @@ const App = () => {
     dispatch(disconnect())
   }
 
+  // eslint-disable-next-line react/prop-types
   const PrivateRoute = ({ children }) => {
     return accessToken ? children : <Navigate to="/login" />
   }

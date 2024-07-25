@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useRef, useState, useEffect, useCallback, useMemo } from 'react'
-import { objectToCsv } from '../utils/helpers'
+import { objectToCsv } from '../utils/downloadUtils'
 import { updateFormulaNames } from '../utils/helpers'
 import ExportLink from '../components/ExportLink'
 
