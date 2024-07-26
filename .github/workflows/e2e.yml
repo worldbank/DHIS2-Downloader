@@ -94,3 +94,30 @@ jobs:
           TEST_DHIS2_URL: ${{ secrets.TEST_DHIS2_URL }}
           TEST_USERNAME: ${{ secrets.TEST_USERNAME }}
           TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
+
+  build_on_win:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build:win
+
+      - name: Run Playwright tests
+        run: npm run test:playwright
+        env:
+          ELECTRON_NO_ATTACH_CONSOLE: true
+          ELECTRON_DISABLE_SANDBOX: true
+          DEBUG: pw:api
+          TEST_DHIS2_URL: ${{ secrets.TEST_DHIS2_URL }}
+          TEST_USERNAME: ${{ secrets.TEST_USERNAME }}
+          TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}

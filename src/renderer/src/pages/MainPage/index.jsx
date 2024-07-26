@@ -7,12 +7,7 @@ import { fetchData, fetchCsvData } from '../../service/useApi'
 import DataElementsMenu from './DataElements'
 import CategoryDropdownMenu from './CategoryCombo'
 import { generatePeriods } from '../../utils/dateUtils'
-import {
-  generateDownloadingUrl,
-  createDataChunks,
-  csvGeneratorToBlob,
-  jsonToCsvGenerator
-} from '../../utils/downloadUtils'
+import { generateDownloadingUrl, createDataChunks } from '../../utils/downloadUtils'
 import DownloadButton from './DownloadButton'
 import { useSelector, useDispatch } from 'react-redux'
 import { setLoading, setError, setNotification } from '../../reducers/statusReducer'

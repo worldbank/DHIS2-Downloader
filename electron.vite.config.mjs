@@ -15,6 +15,10 @@ export default defineConfig({
         '@renderer': resolve('src/renderer/src')
       }
     },
+    worker: {
+      format: 'es',
+      plugins: []
+    },
     plugins: [react()]
   }
 })
