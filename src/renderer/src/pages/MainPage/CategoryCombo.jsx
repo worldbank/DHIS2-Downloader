@@ -1,6 +1,10 @@
 import React, { useEffect, useRef } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { fetchCategoryCombinations, setSelectedCategory } from '../../reducers/categoryReducer'
+import {
+  fetchCategoryCombinations,
+  fetchOrgUnitGroupSets,
+  setSelectedCategory
+} from '../../reducers/categoryReducer'
 import { mouseClick, mouseToggle } from '../../reducers/mouseReducer'
 
 const CategoryDropdownMenu = () => {
@@ -13,6 +17,7 @@ const CategoryDropdownMenu = () => {
 
   useEffect(() => {
     dispatch(fetchCategoryCombinations({ dhis2Url, username, password }))
+    dispatch(fetchOrgUnitGroupSets({ dhis2Url, username, password }))
   }, [dhis2Url, username, password, dispatch])
 
   const handleClickOutside = (event) => {

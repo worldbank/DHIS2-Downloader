@@ -1,11 +1,19 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { getCategoryCombination } from '../service/useApi'
+import { getCategoryCombination, getOrganizationUnitGroupSets } from '../service/useApi'
 
 export const fetchCategoryCombinations = createAsyncThunk(
   'category/fetchCategoryCombinations',
   async ({ dhis2Url, username, password }) => {
     const response = await getCategoryCombination(dhis2Url, username, password)
     return response.categoryCombos
+  }
+)
+
+export const fetchOrgUnitGroupSets = createAsyncThunk(
+  'category/fetchOrgUnitGroupSets',
+  async ({ dhis2Url, username, password }) => {
+    const response = await getOrganizationUnitGroupSets(dhis2Url, username, password)
+    return response.organisationUnitGroupSets
   }
 )
 
@@ -26,9 +34,13 @@ const categorySlice = createSlice({
     }
   },
   extraReducers: (builder) => {
-    builder.addCase(fetchCategoryCombinations.fulfilled, (state, action) => {
-      state.category = action.payload
-    })
+    builder
+      .addCase(fetchCategoryCombinations.fulfilled, (state, action) => {
+        state.category = [...state.category, ...action.payload]
+      })
+      .addCase(fetchOrgUnitGroupSets.fulfilled, (state, action) => {
+        state.category = [...state.category, ...action.payload]
+      })
   }
 })
 

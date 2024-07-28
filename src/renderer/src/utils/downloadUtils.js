@@ -4,9 +4,9 @@ export const generateDownloadingUrl = (dhis2Url, ou, dx, pe, co, format = 'csv')
     '&displayProperty=NAME&ignoreLimit=TRUE&hierarchyMeta=true&hideEmptyRows=TRUE&showHierarchy=true&rows=ou;pe;dx'
 
   if (co.length !== 0) {
-    let coString = co.join(';')
-    parameters += `&dimension=co:${coString}`
-    defaultFormat += `;co`
+    parameters += co.map((el) => `&dimension=${el}`).join('')
+    let rowString = co.join(';')
+    defaultFormat += `;${rowString}`
   }
 
   const url = `${dhis2Url}/${parameters}${defaultFormat}`

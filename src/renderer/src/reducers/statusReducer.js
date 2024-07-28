@@ -20,7 +20,12 @@ const statusSlice = createSlice({
       state.errorMessage = action.payload
     },
     setNotification: (state, action) => {
-      state.notification = action.payload
+      state.notification = { ...state.notification, ...action.payload }
+    },
+    abortDownload: (state) => {
+      state.isLoading = false
+      state.notification.message = 'Download aborted'
+      state.notification.type = 'info'
     },
     handleExit: (state) => {
       return initialState
@@ -28,5 +33,6 @@ const statusSlice = createSlice({
   }
 })
 
-export const { setLoading, setError, setNotification, handleExit } = statusSlice.actions
+export const { setLoading, setError, setNotification, abortDownload, handleExit } =
+  statusSlice.actions
 export default statusSlice.reducer
