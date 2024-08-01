@@ -34,10 +34,10 @@ const NavBar = ({ accessToken, username, handleDisconnect }) => {
   }, [])
 
   return (
-    <header className="w-full bg-blue-600 py-4 shadow-md">
+    <header className="w-full bg-gff-green py-4 shadow-md">
       <nav className="container mx-auto px-4 flex justify-between items-center">
-        <div className="flex items-center flex-grow">
-          <span className="text-2xl font-bold text-white">DHIS2 Data Downloader</span>
+        <div className="text-left">
+          <span className="text-2xl font-bold text-white">FASTR DHIS2 Data Downloader</span>
         </div>
         <div className="flex items-center gap-6">
           <div

@@ -7,9 +7,12 @@ module.exports = {
         sans: ['Poppins', 'sans-serif']
       },
       colors: {
-        'gff-light-green': '#1FA29C',
+        'gff-deep-green': '#09544F',
+        'gff-dark-green': '#0C7168',
+        'gff-green': '#1FA29C',
         'extra-light-green': '#A3DAD6',
-        'gff-light-blue': '#1A90C0'
+        'gff-light-blue': '#1A90C0',
+        'gff-extra-light-blue': '#CAE6E9'
       }
     }
   },

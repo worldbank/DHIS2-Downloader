@@ -1,5 +1,6 @@
 import { useSelector, useDispatch } from 'react-redux'
 import { setDhis2Url, setUsername, setPassword, connect } from '../reducers/authReducer'
+import Tooltip from '../components/Tooltip'
 
 const Login = () => {
   const dispatch = useDispatch()
@@ -11,13 +12,20 @@ const Login = () => {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-teal-100">
+    <div className="flex items-center justify-center min-h-screen bg-grey-100">
       <div className="max-w-md w-full px-6 py-8 bg-white rounded shadow-md">
         <h3 className="text-xl font-semibold mb-6 text-center text-black">Welcome!</h3>
         <form onSubmit={handleConnect}>
           <div className="space-y-4">
             <div>
-              <label className="block mb-2">DHIS2 URL</label>
+              <label className="block mb-2">
+                DHIS2 URL
+                <Tooltip
+                  text={
+                    'Enter the DHIS2 Link without the last forward slash, e.g. https://your-dhis2.com instead of https://your-dhis2.com/.'
+                  }
+                />
+              </label>
               <input
                 type="text"
                 placeholder="DHIS2 URL"

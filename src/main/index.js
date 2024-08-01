@@ -2,7 +2,7 @@ import { app, shell, BrowserWindow, ipcMain, protocol, net } from 'electron'
 import { path, join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 
-const iconPath = join(__dirname, '../../resources/icon.png')
+const iconPath = join(__dirname, '../../resources/icon')
 
 function createWindow() {
   // Create the browser window.

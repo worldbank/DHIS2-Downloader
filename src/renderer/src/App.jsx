@@ -5,6 +5,7 @@ import { initializeAuth, disconnect } from './reducers/authReducer'
 import MainPage from './pages/MainPage'
 import NotificationModal from './pages/Modal'
 import Login from './pages/Login'
+import Footer from './pages/Footer'
 import About from './pages/About'
 import NavBar from './pages/NavBar'
 import HistoryPage from './pages/DownloadHistory'
@@ -24,7 +25,6 @@ const App = () => {
     dispatch(disconnect())
   }
 
-  // eslint-disable-next-line react/prop-types
   const PrivateRoute = ({ children }) => {
     return accessToken ? children : <Navigate to="/login" />
   }
@@ -34,7 +34,7 @@ const App = () => {
       <div className="min-w-full mx-auto">
         <NavBar accessToken={accessToken} username={username} handleDisconnect={handleDisconnect} />
       </div>
-      <div className="bg-extra-light-green text-black min-h-screen flex flex-col">
+      <div className="bg-grey-100 text-black min-h-screen flex flex-col">
         <Routes>
           <Route path="/about" element={<About />} />
           <Route
@@ -74,6 +74,7 @@ const App = () => {
         </Routes>
         {(isLoading || errorMessage) && <NotificationModal />}
       </div>
+      <Footer />
     </Router>
   )
 }
