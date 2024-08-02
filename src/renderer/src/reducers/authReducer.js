@@ -4,7 +4,8 @@ import {
   getDataElements,
   getIndicators,
   getProgramIndicators,
-  getCategoryOptionCombos
+  getCategoryOptionCombos,
+  getDataSets
 } from '../service/useApi'
 import { dictionaryDb, servicesDb } from '../service/db'
 import { setLoading, setError, setNotification } from '../reducers/statusReducer'
@@ -78,12 +79,31 @@ export const connect = (dhis2Url, username, password) => async (dispatch) => {
       localStorage.setItem('password', password)
       localStorage.setItem('dhis2Url', dhis2Url)
 
-      const [elements, indicators, programIndicators, catOptionCombos] = await Promise.all([
-        getDataElements(dhis2Url, username, password),
-        getIndicators(dhis2Url, username, password),
-        getProgramIndicators(dhis2Url, username, password),
-        getCategoryOptionCombos(dhis2Url, username, password)
-      ])
+      const [elements, indicators, programIndicators, catOptionCombos, dataSetsRaw] =
+        await Promise.all([
+          getDataElements(dhis2Url, username, password),
+          getIndicators(dhis2Url, username, password),
+          getProgramIndicators(dhis2Url, username, password),
+          getCategoryOptionCombos(dhis2Url, username, password),
+          getDataSets(dhis2Url, username, password)
+        ])
+
+      const dataSetMetrics = [
+        'REPORTING_RATE',
+        'REPORTING_RATE_ON_TIME',
+        'ACTUAL_REPORTS',
+        'ACTUAL_REPORTS_ON_TIME',
+        'EXPECTED_REPORTS'
+      ]
+
+      const dataSets = dataSetsRaw.dataSets.flatMap((ds) =>
+        dataSetMetrics.map((metric) => ({
+          ...ds,
+          id: `${ds.id}.${metric}`,
+          displayName: `${ds.displayName} (${metric})`,
+          category: 'dataSets'
+        }))
+      )
 
       await Promise.all([
         dictionaryDb.dataElements.bulkAdd(
@@ -98,7 +118,8 @@ export const connect = (dhis2Url, username, password) => async (dispatch) => {
             category: 'ProgramIndicator'
           }))
         ),
-        dictionaryDb.catOptionCombos.bulkAdd(catOptionCombos.categoryOptionCombos)
+        dictionaryDb.catOptionCombos.bulkAdd(catOptionCombos.categoryOptionCombos),
+        dictionaryDb.dataSets.bulkAdd(dataSets)
       ])
 
       dispatch(setNotification({ message: 'Connected successfully', type: 'success' }))

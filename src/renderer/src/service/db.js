@@ -11,6 +11,7 @@ dictionaryDb.version(1).stores({
   indicators: '++id, category, displayName, displayDescription, numerator, denominator',
   programIndicators: '++id, category, displayName, displayDescription',
   catOptionCombos: '++id, displayName',
+  dataSets: '++id, displayName',
   query: '++id, ou, pe, dx, co, url'
 })
 

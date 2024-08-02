@@ -20,20 +20,25 @@ const DataElementsSelector = () => {
   const elements = useLiveQuery(() => dictionaryDb.dataElements.toArray(), [])
   const indicators = useLiveQuery(() => dictionaryDb.indicators.toArray(), [])
   const programIndicators = useLiveQuery(() => dictionaryDb.programIndicators.toArray(), [])
+  const dataSets = useLiveQuery(() => dictionaryDb.dataSets.toArray(), [])
 
   useEffect(() => {
-    if (elements && indicators && programIndicators) {
-      const allData = [...elements, ...indicators, ...programIndicators]
+    if (elements && indicators && programIndicators && dataSets) {
+      const allData = [...elements, ...indicators, ...programIndicators, ...dataSets]
       dispatch(setData(allData))
     }
-  }, [elements, indicators, programIndicators, dispatch])
+  }, [elements, indicators, programIndicators, dataSets, dispatch])
 
   useEffect(() => {
     const filtered = data
       .filter((element) =>
         selectedDataType !== 'All' ? element.category === selectedDataType : true
       )
-      .filter((element) => element.displayName.toLowerCase().includes(searchQuery.toLowerCase()))
+      .filter(
+        (element) =>
+          searchQuery === '' ||
+          element.displayName.toLowerCase().includes(searchQuery.toLowerCase())
+      )
     dispatch(setFilteredElements(filtered))
   }, [data, selectedDataType, searchQuery, dispatch])
 
@@ -60,10 +65,12 @@ const DataElementsSelector = () => {
         <option value="DataElement">Data Element</option>
         <option value="Indicator">Indicator</option>
         <option value="ProgramIndicator">Program Indicator</option>
+        <option value="dataSets">DataSet</option>
       </select>
       <input
         type="text"
         placeholder="Search"
+        value={searchQuery}
         onChange={(e) => dispatch(setSearchQuery(e.target.value))}
         className="mb-2 w-full px-4 py-2 border border-gray-700 rounded"
       />
@@ -73,7 +80,7 @@ const DataElementsSelector = () => {
         className="w-full px-4 py-2 overflow-y border-gray-700 rounded"
         style={{ minHeight: '200px', maxHeight: '200px' }}
       >
-        {filteredElements.map((element) => (
+        {filteredElements?.map((element) => (
           <option key={element.id} value={element.id} className="whitespace-normal">
             - {element.displayName}
           </option>
@@ -91,7 +98,7 @@ const DataElementsSelector = () => {
 
 const SelectedDataElementsDisplay = () => {
   const dispatch = useDispatch()
-  const addedDataElements = useSelector((state) => state.dataElements.addedElements)
+  const addedDataElements = useSelector((state) => state.dataElements?.addedElements)
 
   const handleRemoveElement = (id) => {
     dispatch(removeElement(id))
@@ -101,7 +108,7 @@ const SelectedDataElementsDisplay = () => {
     <div className="mb-4">
       <h3 className="text-xl font-bold mb-2">Selected Items</h3>
       <ul>
-        {addedDataElements.map((element) => (
+        {addedDataElements?.map((element) => (
           <li key={element.id} className="text-sm">
             {element.displayName}
             <button onClick={() => handleRemoveElement(element.id)} className="ml-2 text-red-500">

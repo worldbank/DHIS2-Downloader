@@ -117,3 +117,8 @@ export const getOrganizationUnitGroupSets = (dhis2Url, username, password) => {
   const orgUnitGroupSetsUrl = `${dhis2Url}/api/organisationUnitGroupSets?fields=id,displayName&paging=false`
   return fetchData(orgUnitGroupSetsUrl, username, password)
 }
+
+export const getDataSets = (dhis2Url, username, password) => {
+  const dataSetsUrl = `${dhis2Url}/api/dataSets?fields=id,displayName&paging=false`
+  return fetchData(dataSetsUrl, username, password)
+}
