@@ -1,5 +1,4 @@
 import { useState, useRef } from 'react'
-import NotificationModal from '../Modal'
 import OrganizationUnitTree from './OrganizationUnitTree'
 import OrgUnitLevelMenu from './OrgUnitLevelMenu'
 import DateRangeSelector from './DateRangeSelector'
@@ -10,10 +9,10 @@ import { generatePeriods } from '../../utils/dateUtils'
 import { generateDownloadingUrl, createDataChunks } from '../../utils/downloadUtils'
 import DownloadButton from './DownloadButton'
 import { useSelector, useDispatch } from 'react-redux'
-import { setLoading, setError, setNotification } from '../../reducers/statusReducer'
+import { triggerLoading, triggerNotification } from '../../reducers/statusReducer'
 
 // eslint-disable-next-line react/prop-types
-const MainPage = ({ dictionaryDb, servicesDb }) => {
+const MainPage = ({ dictionaryDb, servicesDb, queryDb }) => {
   const servicesDbRef = useRef(servicesDb)
   const dispatch = useDispatch()
   const { selectedOrgUnits, selectedOrgUnitLevels } = useSelector((state) => state.orgUnit)
@@ -59,22 +58,22 @@ const MainPage = ({ dictionaryDb, servicesDb }) => {
           header = headerText.slice(0, indexOfFirstNewline)
         }
         notificationMessages += `Chunk ${index + 1}: \n${dx}(${firstPe}-${lastPe}) finished\n`
-        dispatch(setNotification({ message: notificationMessages, type: 'info' }))
+        dispatch(triggerNotification({ message: notificationMessages, type: 'info' }))
         return blob
       } catch (error) {
         notificationMessages += `Chunk ${index + 1}: \n${dx}(${firstPe}-${lastPe}) failed: ${error.message}\n`
-        dispatch(setNotification({ message: notificationMessages, type: 'error' }))
+        dispatch(triggerNotification({ message: notificationMessages, type: 'error' }))
         return null
       }
     }
     try {
-      dispatch(setLoading(true))
+      dispatch(triggerLoading(true))
       const fetchPromises = chunks.map((chunk, index) => fetchChunk(chunk, index))
       const results = await Promise.all(fetchPromises)
       const dataChunks = results.filter((result) => result !== null)
       const headerBlob = new Blob([header + '\n'], { type: 'text/csv' })
       if (dataChunks.length > 0) {
-        await dictionaryDb.query.add({
+        await queryDb.query.add({
           ou: ou,
           pe: pe,
           dx: dx,
@@ -86,15 +85,17 @@ const MainPage = ({ dictionaryDb, servicesDb }) => {
         downloadLink.href = URL.createObjectURL(csvBlob)
         downloadLink.download = 'dhis2_data.csv'
         downloadLink.click()
-        dispatch(setNotification({ message: 'Download completed successfully', type: 'success' }))
+        dispatch(
+          triggerNotification({ message: 'Download completed successfully', type: 'success' })
+        )
       } else {
         throw new Error('No data chunks were successfully fetched.')
       }
     } catch (error) {
       const errorMessage = error.message ? error.message : error
-      dispatch(setError(errorMessage))
+      dispatch(triggerNotification({ message: errorMessage, type: 'error' }))
     } finally {
-      dispatch(setLoading(false))
+      dispatch(triggerLoading(false))
     }
   }
 

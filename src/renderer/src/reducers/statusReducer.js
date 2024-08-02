@@ -1,8 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit'
+import { openModal } from './modalReducer'
 
 const initialState = {
   isLoading: false,
-  errorMessage: '',
   notification: {
     message: '',
     type: ''
@@ -15,9 +15,6 @@ const statusSlice = createSlice({
   reducers: {
     setLoading: (state, action) => {
       state.isLoading = action.payload
-    },
-    setError: (state, action) => {
-      state.errorMessage = action.payload
     },
     setNotification: (state, action) => {
       state.notification = { ...state.notification, ...action.payload }
@@ -33,6 +30,23 @@ const statusSlice = createSlice({
   }
 })
 
-export const { setLoading, setError, setNotification, abortDownload, handleExit } =
-  statusSlice.actions
+export const triggerNotification = (payload) => (dispatch) => {
+  dispatch(openModal({ type: 'NOTIFICATION' }))
+
+  dispatch(
+    setNotification({
+      message: payload.message,
+      type: payload.type
+    })
+  )
+}
+
+export const triggerLoading = (isLoading) => (dispatch) => {
+  dispatch(setLoading(isLoading))
+  if (isLoading) {
+    dispatch(openModal({ type: 'NOTIFICATION' }))
+  }
+}
+
+export const { setLoading, setNotification, abortDownload, handleExit } = statusSlice.actions
 export default statusSlice.reducer

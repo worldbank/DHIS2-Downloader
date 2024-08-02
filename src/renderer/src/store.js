@@ -5,18 +5,18 @@ import categoryReducer from './reducers/categoryReducer'
 import statusReducer from './reducers/statusReducer'
 import orgUnitReducer from './reducers/orgUnitReducer'
 import dataElementsReducer from './reducers/dataElementsReducer'
-import popUpRedcuer from './reducers/exportReducer'
 import mouseReducer from './reducers/mouseReducer'
+import modalReducer from './reducers/modalReducer'
 
 const store = configureStore({
   reducer: {
     auth: authReducer,
     category: categoryReducer,
     status: statusReducer,
+    modal: modalReducer,
     dateRange: dateRangeReducer,
     dataElements: dataElementsReducer,
     orgUnit: orgUnitReducer,
-    popup: popUpRedcuer,
     mouse: mouseReducer
   }
 })

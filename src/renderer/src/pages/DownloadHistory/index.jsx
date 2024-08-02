@@ -3,12 +3,11 @@ import { useDispatch, useSelector } from 'react-redux'
 import JSZip from 'jszip'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { objectToCsv, jsonToCsv } from '../../utils/downloadUtils'
-import { fetchCsvData, fetchData } from '../../service/useApi'
-import { setNotification, setLoading, setError } from '../../reducers/statusReducer'
+import { setNotification, setLoading } from '../../reducers/statusReducer'
 
 // eslint-disable-next-line react/prop-types
-const HistoryPage = ({ dictionaryDb }) => {
-  const downloadQueries = useLiveQuery(() => dictionaryDb.query.toArray(), []) || []
+const HistoryPage = ({ queryDb }) => {
+  const downloadQueries = useLiveQuery(() => queryDb.query.toArray(), []) || []
   const [selectedRows, setSelectedRows] = useState([])
   const dispatch = useDispatch()
   const { dhis2Url, username, password } = useSelector((state) => state.auth)
@@ -49,7 +48,7 @@ const HistoryPage = ({ dictionaryDb }) => {
               )
               resolve()
             } else if (e.data.type === 'error') {
-              dispatch(setError(e.data.message))
+              dispatch(setNotification({ message: e.data.message, type: 'error' }))
               reject(new Error(e.data.message))
             }
           }

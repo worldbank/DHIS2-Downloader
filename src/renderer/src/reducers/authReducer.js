@@ -7,8 +7,8 @@ import {
   getCategoryOptionCombos,
   getDataSets
 } from '../service/useApi'
-import { dictionaryDb, servicesDb } from '../service/db'
-import { setLoading, setError, setNotification } from '../reducers/statusReducer'
+import { dictionaryDb, servicesDb, queryDb } from '../service/db'
+import { triggerLoading, triggerNotification } from '../reducers/statusReducer'
 
 const initialState = {
   dhis2Url: '',
@@ -44,7 +44,7 @@ export const { setDhis2Url, setUsername, setPassword, setAccessToken, clearAuth 
   authSlice.actions
 
 export const initializeAuth = () => async (dispatch) => {
-  dispatch(setLoading(true))
+  dispatch(triggerLoading(true))
   try {
     const storedAccessToken = localStorage.getItem('accessToken')
     const storedDhis2Url = localStorage.getItem('dhis2Url')
@@ -61,17 +61,17 @@ export const initializeAuth = () => async (dispatch) => {
       dispatch(setUsername(storedUsername))
     }
   } catch (error) {
-    dispatch(setError('Failed to initialize authentication'))
+    dispatch(triggerNotification({ message: 'Failed to initialize authentication', type: 'error' }))
   } finally {
-    dispatch(setLoading(false))
+    dispatch(triggerLoading(false))
   }
 }
 
 export const connect = (dhis2Url, username, password) => async (dispatch) => {
-  dispatch(setLoading(true))
   try {
     const data = await getUserInfo(dhis2Url, username, password)
     if (data.id) {
+      dispatch(triggerLoading(true))
       const token = data.id
       dispatch(setAccessToken(token))
       localStorage.setItem('accessToken', token)
@@ -122,36 +122,42 @@ export const connect = (dhis2Url, username, password) => async (dispatch) => {
         dictionaryDb.dataSets.bulkAdd(dataSets)
       ])
 
-      dispatch(setNotification({ message: 'Connected successfully', type: 'success' }))
+      dispatch(triggerNotification({ message: 'Connected successfully', type: 'success' }))
     } else {
-      dispatch(setError('Invalid Username or Password'))
+      dispatch(triggerNotification({ message: 'Invalid Username or Password', type: 'error' }))
     }
   } catch (error) {
-    if (error.message) {
-      dispatch(setError(error.message))
-    } else {
-      dispatch(setError(error))
-    }
+    dispatch(triggerNotification({ message: error.message || error.toString(), type: 'error' }))
     localStorage.clear()
   } finally {
-    dispatch(setLoading(false))
+    dispatch(triggerLoading(false))
+  }
+}
+
+export const clearHistory = () => async (dispatch) => {
+  try {
+    await queryDb.close()
+    await queryDb.delete()
+    console.log('History deleted on logout.')
+  } catch (error) {
+    console.error('Failed to delete db:', error.stack)
   }
 }
 
 export const disconnect = () => async (dispatch) => {
-  dispatch(clearAuth())
-  localStorage.removeItem('accessToken')
-  localStorage.removeItem('password')
   try {
+    dispatch(clearAuth())
+    localStorage.removeItem('accessToken')
+    localStorage.removeItem('password')
     await servicesDb.close()
     await dictionaryDb.close()
     await servicesDb.delete()
     await dictionaryDb.delete()
-    console.log('Database deleted on logout.')
   } catch (error) {
     console.error('Failed to delete db:', error.stack)
+  } finally {
+    window.location.reload()
   }
-  window.location.reload()
 }
 
 export default authSlice.reducer

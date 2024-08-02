@@ -2,8 +2,13 @@ import Dexie from 'dexie'
 
 export const dictionaryDb = new Dexie('dictionary')
 export const servicesDb = new Dexie('services')
+export const queryDb = new Dexie('query')
 servicesDb.version(1).stores({
   services: '++id'
+})
+
+queryDb.version(1).stores({
+  query: '++id, ou, pe, dx, co, url'
 })
 
 dictionaryDb.version(1).stores({
@@ -11,8 +16,7 @@ dictionaryDb.version(1).stores({
   indicators: '++id, category, displayName, displayDescription, numerator, denominator',
   programIndicators: '++id, category, displayName, displayDescription',
   catOptionCombos: '++id, displayName',
-  dataSets: '++id, displayName',
-  query: '++id, ou, pe, dx, co, url'
+  dataSets: '++id, displayName'
 })
 
 export const changeSchema = async (db, schemaChanges) => {

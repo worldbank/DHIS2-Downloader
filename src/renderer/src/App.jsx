@@ -3,26 +3,27 @@ import { HashRouter as Router, Routes, Route, Link, Navigate } from 'react-route
 import { useSelector, useDispatch } from 'react-redux'
 import { initializeAuth, disconnect } from './reducers/authReducer'
 import MainPage from './pages/MainPage'
-import NotificationModal from './pages/Modal'
 import Login from './pages/Login'
 import Footer from './pages/Footer'
 import About from './pages/About'
 import NavBar from './pages/NavBar'
 import HistoryPage from './pages/DownloadHistory'
 import DataDictionary from './pages/DataDictionary'
-import { servicesDb, dictionaryDb } from './service/db'
+import ModalManager from './pages/Modals/ModalManager'
+import { servicesDb, dictionaryDb, queryDb } from './service/db'
+import { openModal } from './reducers/modalReducer'
 
 const App = () => {
   const dispatch = useDispatch()
   const { dhis2Url, username, password, accessToken } = useSelector((state) => state.auth)
-  const { isLoading, errorMessage } = useSelector((state) => state.status)
+  const { isLoading, notification } = useSelector((state) => state.status)
 
   useEffect(() => {
     dispatch(initializeAuth())
   }, [dispatch])
 
   const handleDisconnect = async () => {
-    dispatch(disconnect())
+    dispatch(openModal({ type: 'SIGN_OUT' }))
   }
 
   const PrivateRoute = ({ children }) => {
@@ -49,7 +50,7 @@ const App = () => {
             path="/history"
             element={
               <PrivateRoute>
-                <HistoryPage dictionaryDb={dictionaryDb} />
+                <HistoryPage queryDb={queryDb} />
               </PrivateRoute>
             }
           />
@@ -61,18 +62,12 @@ const App = () => {
             path="/home"
             element={
               <PrivateRoute>
-                <MainPage
-                  dhis2Url={dhis2Url}
-                  username={username}
-                  password={password}
-                  dictionaryDb={dictionaryDb}
-                  servicesDb={servicesDb}
-                />
+                <MainPage dictionaryDb={dictionaryDb} servicesDb={servicesDb} queryDb={queryDb} />
               </PrivateRoute>
             }
           />
         </Routes>
-        {(isLoading || errorMessage) && <NotificationModal />}
+        <ModalManager />
       </div>
       <Footer />
     </Router>

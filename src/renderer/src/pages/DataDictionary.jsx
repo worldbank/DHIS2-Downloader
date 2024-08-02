@@ -19,16 +19,7 @@ const DataDictionary = ({ dictionaryDb }) => {
     useLiveQuery(() => dictionaryDbRef.current.catOptionCombos.toArray(), []) || []
 
   const data = useMemo(
-    () => [
-      ...elements.map((item) => ({
-        ...item,
-        numerator: null,
-        denominator: null,
-        category: 'DataElement'
-      })),
-      ...indicators.map((item) => ({ ...item, category: 'Indicator' })),
-      ...catOptionCombos.map((item) => ({ ...item, category: 'Category Options' }))
-    ],
+    () => [...elements, ...indicators, ...catOptionCombos],
     [elements, indicators, catOptionCombos]
   )
 
