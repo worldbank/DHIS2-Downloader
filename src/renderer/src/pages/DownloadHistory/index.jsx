@@ -3,12 +3,15 @@ import { useDispatch, useSelector } from 'react-redux'
 import JSZip from 'jszip'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { objectToCsv, jsonToCsv } from '../../utils/downloadUtils'
-import { setNotification, setLoading } from '../../reducers/statusReducer'
+import { setNotification, setLoading, triggerNotification } from '../../reducers/statusReducer'
+import { queryHeaders } from '../../service/db'
 
 // eslint-disable-next-line react/prop-types
 const HistoryPage = ({ queryDb }) => {
   const downloadQueries = useLiveQuery(() => queryDb.query.toArray(), []) || []
   const [selectedRows, setSelectedRows] = useState([])
+  const [note, setNote] = useState('')
+  const [editableRowId, setEditableRowId] = useState(null)
   const dispatch = useDispatch()
   const { dhis2Url, username, password } = useSelector((state) => state.auth)
   const worker = new Worker(new URL('../../service/worker.js', import.meta.url))
@@ -17,6 +20,10 @@ const HistoryPage = ({ queryDb }) => {
     setSelectedRows((prev) =>
       prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]
     )
+  }
+
+  const handleDeleteRow = () => {
+    queryDb.query.bulkDelete(selectedRows)
   }
 
   const handleSelectAllChange = () => {
@@ -91,6 +98,27 @@ const HistoryPage = ({ queryDb }) => {
     document.body.removeChild(link)
   }
 
+  const handleEditClick = (id, currentNote) => {
+    setEditableRowId(id)
+    setNote(currentNote || '')
+  }
+
+  const handleNoteChange = (e) => {
+    setNote(e.target.value)
+  }
+
+  const handleSaveNotes = async (event) => {
+    event.preventDefault()
+    if (editableRowId !== null) {
+      await queryDb.query.update(editableRowId, { notes: note })
+      dispatch(
+        setNotification({ message: `Note ${editableRowId} updated successfully.`, type: 'success' })
+      )
+      setEditableRowId(null)
+      setNote('')
+    }
+  }
+
   if (downloadQueries.length === 0) {
     return <p className="text-center text-gray-500">No download history available.</p>
   }
@@ -98,65 +126,86 @@ const HistoryPage = ({ queryDb }) => {
   return (
     <div className="mb-8 w-full flex flex-col space-y-4 p-4">
       <div className="overflow-x-auto w-full">
-        <table className="w-full max-w-4xl mx-auto bg-white shadow-md rounded-lg">
-          <thead>
-            <tr className="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
-              <th className="py-3 px-4 text-left">
-                <input
-                  type="checkbox"
-                  className="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out"
-                  checked={selectedRows.length === downloadQueries.length}
-                  onChange={handleSelectAllChange}
-                />
-              </th>
-              <th className="py-3 px-4 text-left">Organization Level</th>
-              <th className="py-3 px-4 text-left">Period</th>
-              <th className="py-3 px-4 text-left">ID</th>
-              <th className="py-3 px-4 text-left">Disaggregation</th>
-              <th className="py-3 px-4 text-left">URL</th>
-            </tr>
-          </thead>
-          <tbody className="text-gray-600 text-xs font-light">
-            {downloadQueries.map((el) => (
-              <tr key={el.id} className="border-b border-gray-200 hover:bg-gray-100">
-                <td className="py-3 px-4 text-left">
+        <form onSubmit={handleSaveNotes}>
+          <table className="w-full max-w-4xl mx-auto bg-white rounded-lg">
+            <thead>
+              <tr className="bg-gray-100 text-gray-800 uppercase text-sm leading-normal">
+                <th className="py-3 px-4 text-left">
                   <input
                     type="checkbox"
-                    className="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out"
-                    checked={selectedRows.includes(el.id)}
-                    onChange={() => handleCheckboxChange(el.id)}
+                    className="form-checkbox h-4 w-4 text-gray-600 transition duration-150 ease-in-out"
+                    checked={selectedRows.length === downloadQueries.length}
+                    onChange={handleSelectAllChange}
                   />
-                </td>
-                <td className="py-1 px-1 border-r whitespace-normal">{el.ou}</td>
-                <td className="py-1 px-1 border-r whitespace-normal">{el.pe}</td>
-                <td className="py-1 px-1 border-r whitespace-normal">{el.dx}</td>
-                <td className="py-1 px-1 border-r whitespace-normal">{el.co}</td>
-                <td className="py-1 px-1 border-r whitespace-normal">
-                  <a
-                    href={el.url}
-                    className="text-blue-500 hover:text-blue-700"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {el.url}
-                  </a>
-                </td>
+                </th>
+
+                {queryHeaders.map((name, index) => (
+                  <th key={index} className="py-3 px-4 text-left">
+                    {name}
+                  </th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="text-gray-800 text-xs font-light">
+              {downloadQueries.map((el) => (
+                <tr key={el.id} className="hover:bg-gray-50">
+                  <td className="py-3 px-4 text-left">
+                    <input
+                      type="checkbox"
+                      className="form-checkbox h-4 w-4 text-gray-600 transition duration-150 ease-in-out"
+                      checked={selectedRows.includes(el.id)}
+                      onChange={() => handleCheckboxChange(el.id)}
+                    />
+                    <td className="py-3 text-left">
+                      <button type="button" onClick={() => handleEditClick(el.id, el.notes)}>
+                        Edit
+                      </button>
+                      {editableRowId === el.id && <button type="submit">Save</button>}
+                    </td>
+                  </td>
+
+                  {queryHeaders.map((header) => (
+                    <td key={header}>
+                      {editableRowId === el.id && header === 'notes' ? (
+                        <input type="text" name={header} value={note} onChange={handleNoteChange} />
+                      ) : header === 'url' ? (
+                        <a
+                          href={el[header]}
+                          className="text-blue-500 hover:text-blue-600"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {el[header]}
+                        </a>
+                      ) : (
+                        el[header]
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </form>
       </div>
       <div className="flex justify-end space-x-4">
         <button
+          onClick={handleDeleteRow}
+          className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition duration-150 ease-in-out"
+          disabled={downloadQueries.length === 0}
+        >
+          Delete
+        </button>
+        <button
           onClick={handleExportDownloadHistory}
-          className="bg-indigo-500 text-white px-4 py-2 rounded-md shadow-md hover:bg-indigo-600 transition duration-150 ease-in-out"
+          className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition duration-150 ease-in-out"
           disabled={downloadQueries.length === 0}
         >
           Export Downloading History
         </button>
         <button
           onClick={handleQuickRedownload}
-          className="bg-indigo-500 text-white px-4 py-2 rounded-md shadow-md hover:bg-indigo-600 transition duration-150 ease-in-out"
+          className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition duration-150 ease-in-out"
           disabled={selectedRows.length === 0}
         >
           Download Selected Record

@@ -7,8 +7,17 @@ servicesDb.version(1).stores({
   services: '++id'
 })
 
+export const queryHeaders = [
+  'notes',
+  'organizationLevel',
+  'period',
+  'dimension',
+  'disaggregation',
+  'url'
+]
+
 queryDb.version(1).stores({
-  query: '++id, ou, pe, dx, co, url'
+  query: `++id,${queryHeaders.join(',')}`
 })
 
 dictionaryDb.version(1).stores({
