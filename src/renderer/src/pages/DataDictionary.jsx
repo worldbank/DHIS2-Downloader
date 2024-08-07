@@ -3,6 +3,7 @@ import { useRef, useState, useEffect, useCallback, useMemo } from 'react'
 import { objectToCsv } from '../utils/downloadUtils'
 import { updateFormulaNames } from '../utils/helpers'
 import ExportLink from '../components/ExportLink'
+import { triggerLoading } from '../reducers/statusReducer'
 
 // eslint-disable-next-line react/prop-types
 const DataDictionary = ({ dictionaryDb }) => {
@@ -13,15 +14,9 @@ const DataDictionary = ({ dictionaryDb }) => {
   const [searchQuery, setSearchQuery] = useState('')
   const [searchInput, setSearchInput] = useState('')
   const dictionaryDbRef = useRef(dictionaryDb)
-  const elements = useLiveQuery(() => dictionaryDbRef.current.dataElements.toArray(), []) || []
-  const indicators = useLiveQuery(() => dictionaryDbRef.current.indicators.toArray(), []) || []
-  const catOptionCombos =
-    useLiveQuery(() => dictionaryDbRef.current.catOptionCombos.toArray(), []) || []
+  const allElements = useLiveQuery(() => dictionaryDbRef.current.elements.toArray(), []) || []
 
-  const data = useMemo(
-    () => [...elements, ...indicators, ...catOptionCombos],
-    [elements, indicators, catOptionCombos]
-  )
+  const data = useMemo(() => allElements, [allElements])
 
   const filteredData = useMemo(
     () =>
@@ -85,8 +80,6 @@ const DataDictionary = ({ dictionaryDb }) => {
       downloadLink.click()
     } catch (error) {
       console.log(error)
-    } finally {
-      setIsLoading('')
     }
   }
 

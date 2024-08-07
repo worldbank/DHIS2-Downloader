@@ -1,35 +1,47 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import JSZip from 'jszip'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { objectToCsv, jsonToCsv } from '../../utils/downloadUtils'
+import { objectToCsv } from '../../utils/downloadUtils'
 import { setNotification, setLoading, triggerNotification } from '../../reducers/statusReducer'
 import { queryHeaders } from '../../service/db'
+import {
+  selectAllRows,
+  setSelectedRows,
+  setEditedRow,
+  clearEditedRow
+} from '../../reducers/historyReducer'
+import { addSelectedElements } from '../../reducers/dataElementsReducer'
 
 // eslint-disable-next-line react/prop-types
-const HistoryPage = ({ queryDb }) => {
+const HistoryPage = ({ dictionaryDb, queryDb }) => {
   const downloadQueries = useLiveQuery(() => queryDb.query.toArray(), []) || []
-  const [selectedRows, setSelectedRows] = useState([])
-  const [note, setNote] = useState('')
-  const [editableRowId, setEditableRowId] = useState(null)
+  const [temporaryNote, setTemporaryNote] = useState('')
   const dispatch = useDispatch()
   const { dhis2Url, username, password } = useSelector((state) => state.auth)
+  const { selectedRows, editedRow } = useSelector((state) => state.history)
   const worker = new Worker(new URL('../../service/worker.js', import.meta.url))
+  const allElements = useLiveQuery(() => dictionaryDb.elements.toArray(), []) || []
+
+  useEffect(() => {
+    if (editedRow.rowId !== null) {
+      setTemporaryNote(editedRow.note || '')
+    }
+  }, [editedRow])
 
   const handleCheckboxChange = (id) => {
-    setSelectedRows((prev) =>
-      prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]
-    )
+    dispatch(setSelectedRows(id))
   }
 
   const handleDeleteRow = () => {
+    // eslint-disable-next-line react/prop-types
     queryDb.query.bulkDelete(selectedRows)
   }
 
   const handleSelectAllChange = () => {
     const allSelected = selectedRows.length === downloadQueries.length
     const newSelection = allSelected ? [] : downloadQueries.map((q) => q.id)
-    setSelectedRows(newSelection)
+    dispatch(selectAllRows(newSelection))
   }
 
   const handleQuickRedownload = async () => {
@@ -99,24 +111,55 @@ const HistoryPage = ({ queryDb }) => {
   }
 
   const handleEditClick = (id, currentNote) => {
-    setEditableRowId(id)
-    setNote(currentNote || '')
+    dispatch(setEditedRow({ id, note: currentNote }))
   }
 
   const handleNoteChange = (e) => {
-    setNote(e.target.value)
+    setTemporaryNote(e.target.value)
   }
 
   const handleSaveNotes = async (event) => {
     event.preventDefault()
-    if (editableRowId !== null) {
-      await queryDb.query.update(editableRowId, { notes: note })
-      dispatch(
-        setNotification({ message: `Note ${editableRowId} updated successfully.`, type: 'success' })
-      )
-      setEditableRowId(null)
-      setNote('')
+    if (editedRow.rowId !== null) {
+      try {
+        await queryDb.query.update(editedRow.rowId, { notes: temporaryNote })
+        dispatch(
+          triggerNotification({
+            message: `Note ${editedRow.rowId} updated successfully.`,
+            type: 'success'
+          })
+        )
+        dispatch(clearEditedRow())
+      } catch (error) {
+        console.error('Error updating note:', error)
+        dispatch(
+          triggerNotification({
+            message: `Failed to update note: ${error.message}`,
+            type: 'error'
+          })
+        )
+      }
     }
+  }
+
+  const handlePassParams = (id) => {
+    console.log(downloadQueries)
+    const params = downloadQueries.filter((el) => el.id === id)
+    const dimensions = params.flatMap((param) =>
+      param.dimension.includes(';') ? param.dimension.split(';') : param.dimension
+    )
+    console.log(dimensions)
+    const elementsInfo = allElements.filter((el) => dimensions.includes(el.id))
+    dispatch(
+      addSelectedElements(elementsInfo.map((el) => ({ id: el.id, displayName: el.displayName })))
+    )
+    dispatch(
+      triggerNotification({
+        message: `Parameters passed for row ${id}.`,
+        type: 'info'
+      })
+    )
+    dispatch(clearEditedRow())
   }
 
   if (downloadQueries.length === 0) {
@@ -124,13 +167,28 @@ const HistoryPage = ({ queryDb }) => {
   }
 
   return (
-    <div className="mb-8 w-full flex flex-col space-y-4 p-4">
-      <div className="overflow-x-auto w-full">
+    <div className="mb-8 w-full flex flex-col space-y-4">
+      {/* Toolbar Component */}
+      <div className="bg-white px-4 py-2 shadow-md">
+        <div className="flex justify-between">
+          <div className="flex space-x-2">
+            <button
+              className="text-blue-600 hover:text-blue-800 font-semibold"
+              onClick={handleExportDownloadHistory}
+              disabled={downloadQueries.length === 0}
+            >
+              Export
+            </button>
+          </div>
+        </div>
+      </div>
+      {/* Table Component */}
+      <div className="overflow-x-auto px-4">
         <form onSubmit={handleSaveNotes}>
-          <table className="w-full max-w-4xl mx-auto bg-white rounded-lg">
+          <table className="w-full max-w-4xl mx-auto bg-white rounded-lg shadow-lg">
             <thead>
               <tr className="bg-gray-100 text-gray-800 uppercase text-sm leading-normal">
-                <th className="py-3 px-4 text-left">
+                <th className="py-3 px-3 border-b-2 border-gray-300">
                   <input
                     type="checkbox"
                     className="form-checkbox h-4 w-4 text-gray-600 transition duration-150 ease-in-out"
@@ -140,7 +198,7 @@ const HistoryPage = ({ queryDb }) => {
                 </th>
 
                 {queryHeaders.map((name, index) => (
-                  <th key={index} className="py-3 px-4 text-left">
+                  <th key={index} className="py-3 px-3 border-b-2 border-gray-300">
                     {name}
                   </th>
                 ))}
@@ -149,7 +207,7 @@ const HistoryPage = ({ queryDb }) => {
             <tbody className="text-gray-800 text-xs font-light">
               {downloadQueries.map((el) => (
                 <tr key={el.id} className="hover:bg-gray-50">
-                  <td className="py-3 px-4 text-left">
+                  <td className="py-2 px-3 border-b border-gray-300">
                     <input
                       type="checkbox"
                       className="form-checkbox h-4 w-4 text-gray-600 transition duration-150 ease-in-out"
@@ -160,14 +218,26 @@ const HistoryPage = ({ queryDb }) => {
                       <button type="button" onClick={() => handleEditClick(el.id, el.notes)}>
                         Edit
                       </button>
-                      {editableRowId === el.id && <button type="submit">Save</button>}
+                      {editedRow.rowId === el.id && (
+                        <>
+                          <button type="submit">Save</button>
+                          <button type="button" onClick={() => handlePassParams(el.id)}>
+                            Pass
+                          </button>
+                        </>
+                      )}
                     </td>
                   </td>
 
                   {queryHeaders.map((header) => (
-                    <td key={header}>
-                      {editableRowId === el.id && header === 'notes' ? (
-                        <input type="text" name={header} value={note} onChange={handleNoteChange} />
+                    <td key={header} className="py-2 px-3 border-b border-gray-300">
+                      {editedRow.rowId === el.id && header === 'notes' ? (
+                        <input
+                          type="text"
+                          name={header}
+                          value={temporaryNote}
+                          onChange={handleNoteChange}
+                        />
                       ) : header === 'url' ? (
                         <a
                           href={el[header]}
@@ -195,13 +265,6 @@ const HistoryPage = ({ queryDb }) => {
           disabled={downloadQueries.length === 0}
         >
           Delete
-        </button>
-        <button
-          onClick={handleExportDownloadHistory}
-          className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition duration-150 ease-in-out"
-          disabled={downloadQueries.length === 0}
-        >
-          Export Downloading History
         </button>
         <button
           onClick={handleQuickRedownload}

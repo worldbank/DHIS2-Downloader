@@ -105,22 +105,21 @@ export const connect = (dhis2Url, username, password) => async (dispatch) => {
         }))
       )
 
-      await Promise.all([
-        dictionaryDb.dataElements.bulkAdd(
-          elements.dataElements.map((element) => ({ ...element, category: 'DataElement' }))
-        ),
-        dictionaryDb.indicators.bulkAdd(
-          indicators.indicators.map((indicator) => ({ ...indicator, category: 'Indicator' }))
-        ),
-        dictionaryDb.programIndicators.bulkAdd(
-          programIndicators.programIndicators.map((pi) => ({
-            ...pi,
-            category: 'ProgramIndicator'
-          }))
-        ),
-        dictionaryDb.catOptionCombos.bulkAdd(catOptionCombos.categoryOptionCombos),
-        dictionaryDb.dataSets.bulkAdd(dataSets)
-      ])
+      const allElements = [
+        ...elements.dataElements.map((element) => ({ ...element, category: 'DataElement' })),
+        ...indicators.indicators.map((indicator) => ({ ...indicator, category: 'Indicator' })),
+        ...programIndicators.programIndicators.map((pi) => ({
+          ...pi,
+          category: 'ProgramIndicator'
+        })),
+        ...catOptionCombos.categoryOptionCombos.map((el) => ({
+          ...el,
+          category: 'CategoryOptionCombos'
+        })),
+        ...dataSets
+      ]
+
+      await dictionaryDb.elements.bulkAdd(allElements)
 
       dispatch(triggerNotification({ message: 'Connected successfully', type: 'success' }))
     } else {

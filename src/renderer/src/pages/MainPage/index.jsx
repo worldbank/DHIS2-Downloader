@@ -1,8 +1,7 @@
-import { useState, useRef } from 'react'
 import OrganizationUnitTree from './OrganizationUnitTree'
 import OrgUnitLevelMenu from './OrgUnitLevelMenu'
 import DateRangeSelector from './DateRangeSelector'
-import { fetchData, fetchCsvData } from '../../service/useApi'
+import { fetchCsvData } from '../../service/useApi'
 import DataElementsMenu from './DataElements'
 import CategoryDropdownMenu from './CategoryCombo'
 import { generatePeriods } from '../../utils/dateUtils'
@@ -12,8 +11,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { triggerLoading, triggerNotification } from '../../reducers/statusReducer'
 
 // eslint-disable-next-line react/prop-types
-const MainPage = ({ dictionaryDb, servicesDb, queryDb }) => {
-  const servicesDbRef = useRef(servicesDb)
+const MainPage = ({ queryDb }) => {
   const dispatch = useDispatch()
   const { selectedOrgUnits, selectedOrgUnitLevels } = useSelector((state) => state.orgUnit)
   const { addedElements } = useSelector((state) => state.dataElements)
@@ -74,10 +72,10 @@ const MainPage = ({ dictionaryDb, servicesDb, queryDb }) => {
       const headerBlob = new Blob([header + '\n'], { type: 'text/csv' })
       if (dataChunks.length > 0) {
         await queryDb.query.add({
-          ou: ou,
-          pe: pe,
-          dx: dx,
-          co: co,
+          organizationLevel: ou,
+          period: pe,
+          dimension: dx,
+          disaggregation: co,
           url: downloadingUrl
         })
         const csvBlob = new Blob([headerBlob, ...dataChunks], { type: 'text/csv;charset=utf-8' })

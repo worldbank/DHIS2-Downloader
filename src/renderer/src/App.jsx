@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { HashRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
-import { initializeAuth, disconnect } from './reducers/authReducer'
+import { initializeAuth } from './reducers/authReducer'
 import MainPage from './pages/MainPage'
 import Login from './pages/Login'
 import Footer from './pages/Footer'
@@ -10,13 +10,13 @@ import NavBar from './pages/NavBar'
 import HistoryPage from './pages/DownloadHistory'
 import DataDictionary from './pages/DataDictionary'
 import ModalManager from './pages/Modals/ModalManager'
+import PrivacyPolicy from './pages/Privacy'
 import { servicesDb, dictionaryDb, queryDb } from './service/db'
 import { openModal } from './reducers/modalReducer'
 
 const App = () => {
   const dispatch = useDispatch()
   const { dhis2Url, username, password, accessToken } = useSelector((state) => state.auth)
-  const { isLoading, notification } = useSelector((state) => state.status)
 
   useEffect(() => {
     dispatch(initializeAuth())
@@ -50,7 +50,7 @@ const App = () => {
             path="/history"
             element={
               <PrivateRoute>
-                <HistoryPage queryDb={queryDb} />
+                <HistoryPage dictionaryDb={dictionaryDb} queryDb={queryDb} />
               </PrivateRoute>
             }
           />
@@ -66,6 +66,7 @@ const App = () => {
               </PrivateRoute>
             }
           />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
         </Routes>
         <ModalManager />
       </div>

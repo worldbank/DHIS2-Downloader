@@ -17,17 +17,16 @@ const DataElementsSelector = () => {
   const { data, selectedDataType, searchQuery, filteredElements, selectedElements } = useSelector(
     (state) => state.dataElements
   )
-  const elements = useLiveQuery(() => dictionaryDb.dataElements.toArray(), [])
-  const indicators = useLiveQuery(() => dictionaryDb.indicators.toArray(), [])
-  const programIndicators = useLiveQuery(() => dictionaryDb.programIndicators.toArray(), [])
-  const dataSets = useLiveQuery(() => dictionaryDb.dataSets.toArray(), [])
+  const allElements = useLiveQuery(() => dictionaryDb.elements.toArray(), [])
 
   useEffect(() => {
-    if (elements && indicators && programIndicators && dataSets) {
-      const allData = [...elements, ...indicators, ...programIndicators, ...dataSets]
-      dispatch(setData(allData))
+    if (allElements) {
+      const downloadableElements = allElements.filter(
+        (element) => element.category !== 'CategoryOptionCombos'
+      )
+      dispatch(setData(downloadableElements))
     }
-  }, [elements, indicators, programIndicators, dataSets, dispatch])
+  }, [allElements, dispatch])
 
   useEffect(() => {
     const filtered = data

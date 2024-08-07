@@ -8,6 +8,7 @@ servicesDb.version(1).stores({
 })
 
 export const queryHeaders = [
+  'id',
   'notes',
   'organizationLevel',
   'period',
@@ -17,15 +18,11 @@ export const queryHeaders = [
 ]
 
 queryDb.version(1).stores({
-  query: `++id,${queryHeaders.join(',')}`
+  query: `++${queryHeaders.join(',')}`
 })
 
 dictionaryDb.version(1).stores({
-  dataElements: '++id, category, displayName, displayDescription',
-  indicators: '++id, category, displayName, displayDescription, numerator, denominator',
-  programIndicators: '++id, category, displayName, displayDescription',
-  catOptionCombos: '++id, displayName',
-  dataSets: '++id, displayName'
+  elements: '++id, category, displayName, displayDescription, numerator, denominator'
 })
 
 export const changeSchema = async (db, schemaChanges) => {

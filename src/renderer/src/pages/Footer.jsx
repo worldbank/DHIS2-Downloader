@@ -1,5 +1,6 @@
 import WBGLogo from '../assets/WBG-SupportedBy-horizontal-white-web.png'
 import GFFLogo from '../assets/GFF_Logo_White_En.png'
+import { Link } from 'react-router-dom'
 
 const Footer = () => {
   return (
@@ -40,9 +41,9 @@ const Footer = () => {
           >
             Terms & Conditions
           </a>
-          <a href="#" className="hover:text-gray-300">
+          <Link to="/privacy" className="hover:text-gray-300">
             Privacy Policy
-          </a>
+          </Link>
         </div>
       </div>
     </footer>

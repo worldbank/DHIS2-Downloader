@@ -7,6 +7,7 @@ import orgUnitReducer from './reducers/orgUnitReducer'
 import dataElementsReducer from './reducers/dataElementsReducer'
 import mouseReducer from './reducers/mouseReducer'
 import modalReducer from './reducers/modalReducer'
+import historyReducer from './reducers/historyReducer'
 
 const store = configureStore({
   reducer: {
@@ -17,6 +18,7 @@ const store = configureStore({
     dateRange: dateRangeReducer,
     dataElements: dataElementsReducer,
     orgUnit: orgUnitReducer,
+    history: historyReducer,
     mouse: mouseReducer
   }
 })
