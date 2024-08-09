@@ -7,7 +7,6 @@ import { useEffect, useRef } from 'react'
 const NavBar = ({ accessToken, username, handleDisconnect }) => {
   const dispatch = useDispatch()
   const openDropdowns = useSelector((state) => state.mouse.openDropdowns)
-
   const timerRef = useRef(null)
 
   const handleMouseEnter = (dropdownId) => {
@@ -35,7 +34,7 @@ const NavBar = ({ accessToken, username, handleDisconnect }) => {
 
   return (
     <header className="w-full bg-gff-green py-4 shadow-md">
-      <nav className="container mx-auto px-4 flex justify-between items-center">
+      <nav className="container mx-auto flex justify-between items-center">
         <div className="text-left">
           <span className="text-2xl font-bold text-white">FASTR DHIS2 Data Downloader</span>
         </div>

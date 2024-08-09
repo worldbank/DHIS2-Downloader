@@ -9,6 +9,7 @@ import { generateDownloadingUrl, createDataChunks } from '../../utils/downloadUt
 import DownloadButton from './DownloadButton'
 import { useSelector, useDispatch } from 'react-redux'
 import { triggerLoading, triggerNotification } from '../../reducers/statusReducer'
+import Tooltip from '../../components/Tooltip'
 
 // eslint-disable-next-line react/prop-types
 const MainPage = ({ queryDb }) => {
@@ -23,7 +24,7 @@ const MainPage = ({ queryDb }) => {
     let ou = ''
     if (selectedOrgUnits.length > 0) {
       let levels = selectedOrgUnitLevels.map((level) => `LEVEL-${level}`).join(';')
-      ou = `${levels};${selectedOrgUnits.join(';')}&ouMode=SELECTED`
+      ou = `${levels};${selectedOrgUnits.join(';')}`
     } else {
       ou = selectedOrgUnitLevels.map((level) => `LEVEL-${level}`).join(';')
     }
@@ -76,7 +77,8 @@ const MainPage = ({ queryDb }) => {
           period: pe,
           dimension: dx,
           disaggregation: co,
-          url: downloadingUrl
+          url: downloadingUrl,
+          notes: ''
         })
         const csvBlob = new Blob([headerBlob, ...dataChunks], { type: 'text/csv;charset=utf-8' })
         const downloadLink = document.createElement('a')
@@ -97,47 +99,73 @@ const MainPage = ({ queryDb }) => {
     }
   }
 
-  const isDownloadDisabled =
-    new Date(startDate) >= new Date(endDate) ||
+  const isDownloadDisabled = !startDate || !endDate
+  new Date(startDate) >= new Date(endDate) ||
     addedElements.length == 0 ||
     selectedOrgUnitLevels.length == 0
 
   return (
     <div>
       <div dir="ltr">
-        <div className="flex px-4 py-8">
-          <div className="w-1/3 px-4 py-8" style={{ height: '70vh' }}>
-            <h3 className="text-xl font-bold mb-2">Organization Units</h3>
+        <div className="flex flex-col md:flex-row px-4 py-8 mt-1">
+          {/* Organization Units Column */}
+          <div
+            className="w-full md:w-1/3 px-4 py-8 mt-1 md:mt-0"
+            style={{ height: 'auto', minHeight: '70vh' }}
+          >
+            <h3 className="text-lg font-semibold mb-4 text-gray-700">
+              Organization Units
+              <Tooltip
+                text={
+                  'An organisational unit is usually a geographical unit, which exists within a hierarchy.'
+                }
+              />
+            </h3>
             <div
-              className="overflow-y-scroll border border-gray-300 p-4 bg-gray-100"
+              className="overflow-y-auto p-4 bg-gray-100 rounded shadow-sm"
               style={{ height: 'calc(70vh - 2rem)' }}
             >
               <OrganizationUnitTree dhis2Url={dhis2Url} username={username} password={password} />
             </div>
           </div>
-          <div className="w-1/3 px-4 py-8" style={{ height: '70vh' }}>
-            <h3 className="text-xl font-bold mb-2">Data Elements and Indicators</h3>
+
+          {/* Data Elements and Indicators Column */}
+          <div
+            className="w-full md:w-1/3 px-4 py-8 mt-1 md:mt-0"
+            style={{ height: 'auto', minHeight: '70vh' }}
+          >
+            <h3 className="text-lg font-semibold mb-4 text-gray-700">
+              Data Elements and Indicators
+            </h3>
             <div
-              className="overflow-y-scroll border border-gray-300 p-4 bg-gray-100"
+              className="overflow-y-auto p-4 bg-gray-100 rounded shadow-sm"
               style={{ height: 'calc(70vh - 2rem)' }}
             >
               <DataElementsMenu />
             </div>
           </div>
-          <div className="w-1/3 px-4 py-8">
-            <h3 className="text-xl font-bold mb-2">Organization Levels</h3>
-            <div className="mb-4">
+
+          {/* Third Column: Organization Levels, Date Range, Disaggregation */}
+          <div
+            className="w-full md:w-1/3 px-4 py-8 mt-1 md:mt-0"
+            style={{ height: 'auto', minHeight: '70vh' }}
+          >
+            <h3 className="text-lg font-semibold mb-4 text-gray-700">Organization Levels</h3>
+            <div className="mb-6" style={{ height: 'calc((70vh -2rem) / 3)' }}>
               <OrgUnitLevelMenu />
             </div>
-            <h3 className="text-xl font-bold mb-2">Date Range</h3>
-            <div className="overflow-y-auto">
+            <h3 className="text-lg font-semibold mb-4 text-gray-700">Date Range</h3>
+            <div className="mb-6" style={{ height: 'calc((70vh -2rem) / 3)' }}>
               <DateRangeSelector />
             </div>
-            <h3 className="text-xl font-bold mb-2">Category Combination</h3>
-            <div className="mb-4">
+            <h3 className="text-lg font-semibold mb-4 text-gray-700">Disaggregation</h3>
+            <div style={{ height: 'calc((70vh -2rem) / 3)' }}>
               <CategoryDropdownMenu />
             </div>
-            <div className="mt-4">
+
+            {/* Download Button */}
+            <div className="w-full mt-4">
+              <h3 className="text-lg font-semibold mb-4 text-gray-700">Download</h3>
               <DownloadButton
                 handleDownload={handleDownload}
                 isDownloadDisabled={isDownloadDisabled}

@@ -54,9 +54,9 @@ const OrgUnitLevelMenu = () => {
           <span className="absolute right-4 pointer-events-none">▼</span>
         </div>
         {openDropdowns[dropdownId] && (
-          <div className="absolute bg-white border border-gray-300 mt-1 z-10 rounded shadow-lg">
+          <div className="w-full absolute bg-white border border-gray-300 mt-1 z-10 rounded shadow-lg">
             <ul className="max-h-60 overflow-auto custom-scrollbar">
-              {allOrgUnitLevels.map((level) => (
+              {allOrgUnitLevels?.map((level) => (
                 <li
                   key={level.id}
                   className="px-4 py-2 text-base text-gray-700 transition-colors hover:bg-blue-100"
@@ -70,7 +70,7 @@ const OrgUnitLevelMenu = () => {
                       className="cursor-pointer"
                       onChange={(e) => handleOrgUnitLevelChange(level.level, e)}
                     />
-                    <span className="ml-2">{level.displayName}</span>
+                    <span className="ml-2 break-words w-4/5">{level.displayName}</span>
                   </label>
                 </li>
               ))}

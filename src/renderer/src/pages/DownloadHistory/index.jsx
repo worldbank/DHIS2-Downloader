@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import JSZip from 'jszip'
 import { useLiveQuery } from 'dexie-react-hooks'
@@ -12,9 +12,15 @@ import {
   clearEditedRow
 } from '../../reducers/historyReducer'
 import { addSelectedElements } from '../../reducers/dataElementsReducer'
+import { updateOrgUnitLevels, toggleOrgUnitSelection } from '../../reducers/orgUnitReducer'
+import { MicroArrowDownTray, MicroArrowTopRight, MicroTrash } from '../../components/Icons'
+import Pagination from '../../components/Pagination'
 
 // eslint-disable-next-line react/prop-types
 const HistoryPage = ({ dictionaryDb, queryDb }) => {
+  const [currentPage, setCurrentPage] = useState(1)
+  const [jumpToPage, setJumpToPage] = useState('')
+  const [itemsPerPage, setItemsPerPage] = useState(10)
   const downloadQueries = useLiveQuery(() => queryDb.query.toArray(), []) || []
   const [temporaryNote, setTemporaryNote] = useState('')
   const dispatch = useDispatch()
@@ -22,6 +28,35 @@ const HistoryPage = ({ dictionaryDb, queryDb }) => {
   const { selectedRows, editedRow } = useSelector((state) => state.history)
   const worker = new Worker(new URL('../../service/worker.js', import.meta.url))
   const allElements = useLiveQuery(() => dictionaryDb.elements.toArray(), []) || []
+
+  const totalPages = useMemo(() => {
+    return Math.ceil(downloadQueries.length / itemsPerPage)
+  }, [downloadQueries.length, itemsPerPage])
+
+  const currentPageData = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    return downloadQueries.slice(startIndex, endIndex)
+  }, [currentPage, itemsPerPage, downloadQueries])
+
+  useEffect(() => {}, [currentPageData])
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page)
+  }
+
+  const handleItemsPerPageChange = (event) => {
+    setItemsPerPage(Number(event.target.value))
+    setCurrentPage(1)
+  }
+
+  const handleJumpToPageSubmit = (event) => {
+    event.preventDefault()
+    const page = Number(jumpToPage)
+    if (page > 0 && page <= totalPages) {
+      setCurrentPage(page)
+    }
+  }
 
   useEffect(() => {
     if (editedRow.rowId !== null) {
@@ -143,12 +178,29 @@ const HistoryPage = ({ dictionaryDb, queryDb }) => {
   }
 
   const handlePassParams = (id) => {
-    console.log(downloadQueries)
     const params = downloadQueries.filter((el) => el.id === id)
     const dimensions = params.flatMap((param) =>
       param.dimension.includes(';') ? param.dimension.split(';') : param.dimension
     )
-    console.log(dimensions)
+    // organUnitLevel
+    params.forEach((param) => {
+      ;(param.organizationLevel.includes(';')
+        ? param.organizationLevel.split(';')
+        : [param.organizationLevel]
+      ).forEach((org) => {
+        if (org.includes('LEVEL')) {
+          const numericLevel = parseInt(org.replace(/LEVEL-/gi, ''), 10)
+          if (!isNaN(numericLevel)) {
+            dispatch(updateOrgUnitLevels(numericLevel))
+          }
+        } else if (org.length == 11) {
+          dispatch(toggleOrgUnitSelection(org))
+        }
+      })
+    })
+    // date
+
+    // dimension
     const elementsInfo = allElements.filter((el) => dimensions.includes(el.id))
     dispatch(
       addSelectedElements(elementsInfo.map((el) => ({ id: el.id, displayName: el.displayName })))
@@ -169,15 +221,33 @@ const HistoryPage = ({ dictionaryDb, queryDb }) => {
   return (
     <div className="mb-8 w-full flex flex-col space-y-4">
       {/* Toolbar Component */}
-      <div className="bg-white px-4 py-2 shadow-md">
+      <div className="flex justify-between items-center px-4 py-2 bg-gray-100 rounded-t-lg">
         <div className="flex justify-between">
           <div className="flex space-x-2">
             <button
-              className="text-blue-600 hover:text-blue-800 font-semibold"
+              className="text-blue-600 hover:text-blue-800 font-semibold px-4 text-sm"
               onClick={handleExportDownloadHistory}
               disabled={downloadQueries.length === 0}
             >
-              Export
+              <MicroArrowTopRight /> Export History
+            </button>
+          </div>
+          <div className="flex space-x-2">
+            <button
+              onClick={handleDeleteRow}
+              className="text-blue-600 hover:text-blue-800 font-semibold px-4 text-sm transition duration-150 ease-in-out"
+              disabled={downloadQueries.length === 0}
+            >
+              <MicroTrash /> Delete
+            </button>
+          </div>
+          <div className="flex space-x-2">
+            <button
+              onClick={handleQuickRedownload}
+              className="text-blue-600 hover:text-blue-800 font-semibold px-4 text-sm transition duration-150 ease-in-out"
+              disabled={selectedRows.length === 0}
+            >
+              <MicroArrowDownTray /> Re-download
             </button>
           </div>
         </div>
@@ -198,14 +268,14 @@ const HistoryPage = ({ dictionaryDb, queryDb }) => {
                 </th>
 
                 {queryHeaders.map((name, index) => (
-                  <th key={index} className="py-3 px-3 border-b-2 border-gray-300">
+                  <th key={index} className="py-2 px-2 border-b-2 border-gray-300">
                     {name}
                   </th>
                 ))}
               </tr>
             </thead>
             <tbody className="text-gray-800 text-xs font-light">
-              {downloadQueries.map((el) => (
+              {currentPageData.map((el) => (
                 <tr key={el.id} className="hover:bg-gray-50">
                   <td className="py-2 px-3 border-b border-gray-300">
                     <input
@@ -230,7 +300,10 @@ const HistoryPage = ({ dictionaryDb, queryDb }) => {
                   </td>
 
                   {queryHeaders.map((header) => (
-                    <td key={header} className="py-2 px-3 border-b border-gray-300">
+                    <td
+                      key={header}
+                      className="py-2 px-2 border-b border-gray-300 [word-break:break-word]"
+                    >
                       {editedRow.rowId === el.id && header === 'notes' ? (
                         <input
                           type="text"
@@ -257,22 +330,16 @@ const HistoryPage = ({ dictionaryDb, queryDb }) => {
             </tbody>
           </table>
         </form>
-      </div>
-      <div className="flex justify-end space-x-4">
-        <button
-          onClick={handleDeleteRow}
-          className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition duration-150 ease-in-out"
-          disabled={downloadQueries.length === 0}
-        >
-          Delete
-        </button>
-        <button
-          onClick={handleQuickRedownload}
-          className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition duration-150 ease-in-out"
-          disabled={selectedRows.length === 0}
-        >
-          Download Selected Record
-        </button>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          onItemsPerPageChange={handleItemsPerPageChange}
+          onJumpToPageSubmit={handleJumpToPageSubmit}
+          jumpToPage={jumpToPage}
+          setJumpToPage={setJumpToPage}
+          itemsPerPage={itemsPerPage}
+        />
       </div>
     </div>
   )

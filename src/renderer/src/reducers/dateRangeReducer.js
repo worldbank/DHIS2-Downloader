@@ -23,5 +23,4 @@ const dateRangeSlice = createSlice({
 })
 
 export const { setStartDate, setEndDate, setFrequency } = dateRangeSlice.actions
-
 export default dateRangeSlice.reducer

@@ -59,8 +59,8 @@ const CategoryDropdownMenu = () => {
           <span className="absolute right-4 pointer-events-none">▼</span>
         </div>
         {openDropdowns[dropdownId] && (
-          <div className="absolute bg-white border border-gray-300 mt-1 z-10 rounded shadow-lg">
-            <ul className="max-h-60 overflow-auto custom-scrollbar">
+          <div className="absolute mt-1 w-full rounded-lg shadow-lg bg-white border border-gray-200">
+            <ul className="max-h-60 overflow-y-auto custom-scrollbar">
               {category?.map((combo) => (
                 <li
                   key={combo.id}
@@ -75,7 +75,7 @@ const CategoryDropdownMenu = () => {
                       className="cursor-pointer"
                       onChange={(e) => handleSelectCategory(combo.id, e)}
                     />
-                    <span className="ml-2">{combo.displayName}</span>
+                    <span className="ml-2 break-words w-4/5">{combo.displayName}</span>
                   </label>
                 </li>
               ))}
