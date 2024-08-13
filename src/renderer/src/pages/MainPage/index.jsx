@@ -8,7 +8,11 @@ import { generatePeriods } from '../../utils/dateUtils'
 import { generateDownloadingUrl, createDataChunks } from '../../utils/downloadUtils'
 import DownloadButton from './DownloadButton'
 import { useSelector, useDispatch } from 'react-redux'
-import { triggerLoading, triggerNotification } from '../../reducers/statusReducer'
+import {
+  clearNotification,
+  triggerLoading,
+  triggerNotification
+} from '../../reducers/statusReducer'
 import Tooltip from '../../components/Tooltip'
 
 // eslint-disable-next-line react/prop-types
@@ -38,7 +42,6 @@ const MainPage = ({ queryDb }) => {
     console.log(downloadingUrl)
     const chunks = createDataChunks(elementIds, periods, ou)
 
-    let notificationMessages = ''
     let header = null
 
     const fetchChunk = async (chunk, index) => {
@@ -56,12 +59,12 @@ const MainPage = ({ queryDb }) => {
         if (!header) {
           header = headerText.slice(0, indexOfFirstNewline)
         }
-        notificationMessages += `Chunk ${index + 1}: \n${dx}(${firstPe}-${lastPe}) finished\n`
-        dispatch(triggerNotification({ message: notificationMessages, type: 'info' }))
+        const successMessage = `Chunk ${index + 1}: ${dx} (${firstPe}-${lastPe}) finished successfully.`
+        dispatch(triggerNotification({ message: successMessage, type: 'info' }))
         return blob
       } catch (error) {
-        notificationMessages += `Chunk ${index + 1}: \n${dx}(${firstPe}-${lastPe}) failed: ${error.message}\n`
-        dispatch(triggerNotification({ message: notificationMessages, type: 'error' }))
+        const errorMessage = `Chunk ${index + 1}: ${dx} (${firstPe}-${lastPe}) failed: ${error?.message}`
+        dispatch(triggerNotification({ message: errorMessage, type: 'error' }))
         return null
       }
     }

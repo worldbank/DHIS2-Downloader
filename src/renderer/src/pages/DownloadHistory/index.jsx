@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import JSZip from 'jszip'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { objectToCsv } from '../../utils/downloadUtils'
-import { setNotification, setLoading, triggerNotification } from '../../reducers/statusReducer'
+import { setLoading, triggerNotification } from '../../reducers/statusReducer'
 import { queryHeaders } from '../../service/db'
 import {
   selectAllRows,
@@ -98,11 +98,11 @@ const HistoryPage = ({ dictionaryDb, queryDb }) => {
               const csvBlob = new Blob([e.data.data], { type: 'text/csv;charset=utf-8' })
               zip.file(`history_${index}.csv`, csvBlob)
               dispatch(
-                setNotification({ message: `Finished downloading from ${url}`, type: 'info' })
+                triggerNotification({ message: `Finished downloading from ${url}`, type: 'info' })
               )
               resolve()
             } else if (e.data.type === 'error') {
-              dispatch(setNotification({ message: e.data.message, type: 'error' }))
+              dispatch(triggerNotification({ message: e.data.message, type: 'error' }))
               reject(new Error(e.data.message))
             }
           }

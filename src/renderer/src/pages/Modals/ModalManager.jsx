@@ -5,8 +5,6 @@ import SignoutModal from './SignoutModal'
 
 const ModalManager = () => {
   const modals = useSelector((state) => state.modal.modals)
-  const { isLoading, notification } = useSelector((state) => state.status)
-  const dispatch = useDispatch()
 
   if (modals.length === 0) return null
 
@@ -15,14 +13,7 @@ const ModalManager = () => {
       {modals.map((modal, index) => {
         switch (modal.type) {
           case 'NOTIFICATION':
-            return (
-              <NotificationModal
-                key={index}
-                isLoading={isLoading}
-                message={notification.message}
-                type={notification.type}
-              />
-            )
+            return <NotificationModal />
           case 'SIGN_OUT':
             return <SignoutModal key={index} />
           default:

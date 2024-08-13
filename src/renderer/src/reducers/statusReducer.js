@@ -3,10 +3,7 @@ import { openModal } from './modalReducer'
 
 const initialState = {
   isLoading: false,
-  notification: {
-    message: '',
-    type: ''
-  }
+  notification: []
 }
 
 const statusSlice = createSlice({
@@ -16,13 +13,11 @@ const statusSlice = createSlice({
     setLoading: (state, action) => {
       state.isLoading = action.payload
     },
-    setNotification: (state, action) => {
-      state.notification = { ...state.notification, ...action.payload }
+    addNotification: (state, action) => {
+      state.notification.push(action.payload)
     },
-    abortDownload: (state) => {
-      state.isLoading = false
-      state.notification.message = 'Download aborted'
-      state.notification.type = 'info'
+    clearNotification: (state) => {
+      state.notification = []
     },
     handleExit: (state) => {
       return initialState
@@ -34,7 +29,7 @@ export const triggerNotification = (payload) => (dispatch) => {
   dispatch(openModal({ type: 'NOTIFICATION' }))
 
   dispatch(
-    setNotification({
+    addNotification({
       message: payload.message,
       type: payload.type
     })
@@ -48,5 +43,5 @@ export const triggerLoading = (isLoading) => (dispatch) => {
   }
 }
 
-export const { setLoading, setNotification, abortDownload, handleExit } = statusSlice.actions
+export const { setLoading, addNotification, clearNotification, handleExit } = statusSlice.actions
 export default statusSlice.reducer
