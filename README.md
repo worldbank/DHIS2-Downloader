@@ -1,34 +1,35 @@
-# dhis2-downloader
+# DHIS2 Data Downloader
 
-An Electron application with React
+## Introduction
 
-## Recommended IDE Setup
+The DHIS2 (District Health Information Software 2) Data Downloader is a React-based Electron application that allows users to connect to a DHIS2 instance, select dimensions, periods, organization units and levels, and download respective data from DHIS2 servers.
 
-- [VSCode](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
+### Features
 
-## Project Setup
+- **Downloading DHIS2 Data** - The downloader allows downloading HMIS data with selected date ranges, data elements, organization levels, organization units, and disaggregated dimensions.
 
-### Install
+- **HMIS Data Dictionary**: The downloader allows users to search the relevant terms and get the 11-letter JSON ID for Data Elements, Indicators, and Category Combos. Additionally, it converts the JSON IDs to readable names for Indicators when the numerator and denominator are available.
+
+- **Manage Downloading History**: The downloader can record the successful downloads' parameters and allows users to add notes for each downloading record, fill in parameters, and quickly re-downloads for past downloads. Additionally, the user could select to keep or erase histories when logging out.
+
+## Build on Your Desktop
 
 ```bash
+$ git clone https://github.com/ccxzhang/dhis2-downloader.git
+$ cd dhis2-downloader
 $ npm install
-```
 
-### Development
+# Start the app
+$ npm run start
 
-```bash
-$ npm run dev
-```
-
-### Build
-
-```bash
 # For windows
 $ npm run build:win
-
 # For macOS
 $ npm run build:mac
-
 # For Linux
 $ npm run build:linux
 ```
+
+## Acknowledgements
+
+We would like to thank Damola Sheriff Olajide with the West African Health Organization who provided the software [prototype](https://github.com/dolajide/dhis2-poc) for the FASTR Data Downloader.
