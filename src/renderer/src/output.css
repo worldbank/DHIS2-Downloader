@@ -1324,20 +1324,21 @@ html {
 
 @keyframes spin {
   100% {
-    transform: rotate(360deg);
+    transform: rotate(360deg) translateZ(0);
   }
 }
 
 .loader {
-  border: 4px solid rgba(0, 0, 0, 0.1);
+  border: 0.25rem solid rgba(0, 0, 0, 0.1);
+  /* Use rem for scalable units */
   border-left-color: #4f46e5;
-  /* Tailwind's indigo-600 */
   border-radius: 50%;
-  width: 32px;
-  height: 32px;
-  animation: spin 1.2s linear infinite;
+  width: 2rem;
+  height: 2rem;
+  animation: spin 1s linear infinite;
+  /* Adjusted speed for smoother animation */
   will-change: transform;
-  /* Hint to the browser to optimize this element */
+  /* Optimization hint */
 }
 
 .hover\:bg-blue-100:hover {
@@ -1378,6 +1379,11 @@ html {
 .hover\:text-blue-600:hover {
   --tw-text-opacity: 1;
   color: rgb(37 99 235 / var(--tw-text-opacity));
+}
+
+.hover\:text-blue-700:hover {
+  --tw-text-opacity: 1;
+  color: rgb(29 78 216 / var(--tw-text-opacity));
 }
 
 .hover\:text-blue-800:hover {

@@ -1,7 +1,7 @@
 import React from 'react'
 import { useMemo } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { clearNotification, handleExit } from '../../reducers/statusReducer'
+import { clearNotification, handleExit, toggleNotifications } from '../../reducers/statusReducer'
 
 // eslint-disable-next-line react/display-name
 const Notification = React.memo(() => {
@@ -25,7 +25,7 @@ const Notification = React.memo(() => {
 
 const NotificationModal = () => {
   const dispatch = useDispatch()
-  const { isLoading, notification } = useSelector((state) => state.status)
+  const { isLoading, notification, showNotifications } = useSelector((state) => state.status)
 
   const handleClose = () => {
     dispatch(handleExit())
@@ -44,10 +44,19 @@ const NotificationModal = () => {
           </div>
         )}
 
-        {/* Notification Content */}
-        <div className="flex-grow overflow-y-auto max-h-48 w-full p-4 bg-gray-100 rounded-lg border border-gray-300">
-          <Notification />
-        </div>
+        <button
+          onClick={() => dispatch(toggleNotifications())}
+          className="text-blue-500 hover:text-blue-700 transition duration-150 ease-in-out focus:outline-none"
+        >
+          {showNotifications ? 'Hide Details' : 'Show Details ▼'}
+        </button>
+
+        {/* Conditional rendering based on toggle */}
+        {showNotifications && (
+          <div className="flex-grow w-full p-4 bg-gray-100 rounded-lg border border-gray-300 overflow-y-auto max-h-48">
+            <Notification />
+          </div>
+        )}
 
         <button
           onClick={handleClose}
