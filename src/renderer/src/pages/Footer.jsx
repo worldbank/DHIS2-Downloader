@@ -26,14 +26,6 @@ const Footer = () => {
         </div>
         <div className="right-side flex items-center space-x-10">
           <a
-            href="https://github.com/ccxzhang/dhis2-downloader"
-            target="_blank"
-            rel="noreferrer"
-            className="hover:text-gray-300"
-          >
-            Resources
-          </a>
-          <a
             href="https://www.worldbank.org/en/about/legal/terms-and-conditions"
             target="_blank"
             rel="noreferrer"
