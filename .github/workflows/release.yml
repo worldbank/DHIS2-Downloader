@@ -26,9 +26,6 @@ jobs:
       - name: Build application
         run: npm run build:${{ matrix.os == 'macos-latest' && 'mac' || 'win' }}
 
-      - name: Package application
-        run: npm run package:${{ matrix.os == 'macos-latest' && 'mac' || 'win' }}
-
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
