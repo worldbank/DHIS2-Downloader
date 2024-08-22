@@ -5,7 +5,8 @@ import {
   getIndicators,
   getProgramIndicators,
   getCategoryOptionCombos,
-  getDataSets
+  getDataSets,
+  getOrganizationUnitGroupSets
 } from '../service/useApi'
 import { dictionaryDb, servicesDb, queryDb } from '../service/db'
 import { triggerLoading, triggerNotification } from '../reducers/statusReducer'
@@ -79,14 +80,21 @@ export const connect = (dhis2Url, username, password) => async (dispatch) => {
       localStorage.setItem('password', password)
       localStorage.setItem('dhis2Url', dhis2Url)
 
-      const [elements, indicators, programIndicators, catOptionCombos, dataSetsRaw] =
-        await Promise.all([
-          getDataElements(dhis2Url, username, password),
-          getIndicators(dhis2Url, username, password),
-          getProgramIndicators(dhis2Url, username, password),
-          getCategoryOptionCombos(dhis2Url, username, password),
-          getDataSets(dhis2Url, username, password)
-        ])
+      const [
+        elements,
+        indicators,
+        programIndicators,
+        catOptionCombos,
+        dataSetsRaw,
+        orgUnitGroupSets
+      ] = await Promise.all([
+        getDataElements(dhis2Url, username, password),
+        getIndicators(dhis2Url, username, password),
+        getProgramIndicators(dhis2Url, username, password),
+        getCategoryOptionCombos(dhis2Url, username, password),
+        getDataSets(dhis2Url, username, password),
+        getOrganizationUnitGroupSets(dhis2Url, username, password)
+      ])
 
       const dataSetMetrics = [
         'REPORTING_RATE',
@@ -116,7 +124,11 @@ export const connect = (dhis2Url, username, password) => async (dispatch) => {
           ...el,
           category: 'CategoryOptionCombos'
         })),
-        ...dataSets
+        ...dataSets,
+        ...orgUnitGroupSets.organisationUnitGroupSets.map((og) => ({
+          ...og,
+          category: 'OrganizationUnitGroupSets'
+        }))
       ]
 
       await dictionaryDb.elements.bulkAdd(allElements)

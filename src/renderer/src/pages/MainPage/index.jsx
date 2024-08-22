@@ -9,7 +9,8 @@ import { generateDownloadingUrl, createDataChunks } from '../../utils/downloadUt
 import DownloadButton from './DownloadButton'
 import { useSelector, useDispatch } from 'react-redux'
 import {
-  clearNotification,
+  addLog,
+  clearLogs,
   triggerLoading,
   triggerNotification
 } from '../../reducers/statusReducer'
@@ -24,7 +25,16 @@ const MainPage = ({ queryDb }) => {
   const { frequency, startDate, endDate } = useSelector((state) => state.dateRange)
   const { dhis2Url, username, password } = useSelector((state) => state.auth)
 
-  const handleDownload = async () => {
+  const handleStreamDownload = async () => {
+    // Ask the user to select the save location and filename
+    const saveFilePath = await window.electronAPI.selectSaveLocation()
+    if (!saveFilePath) {
+      dispatch(triggerNotification({ message: 'Download canceled by user.', type: 'info' }))
+      return
+    }
+
+    const fileStream = window.fileSystem.createWriteStream(saveFilePath)
+
     let ou = ''
     if (selectedOrgUnits.length > 0) {
       let levels = selectedOrgUnitLevels.map((level) => `LEVEL-${level}`).join(';')
@@ -33,16 +43,14 @@ const MainPage = ({ queryDb }) => {
       ou = selectedOrgUnitLevels.map((level) => `LEVEL-${level}`).join(';')
     }
     const co = selectedCategory
-    console.log(co)
     const elementIds = addedElements.map((element) => element.id)
     const dx = elementIds.join(';')
     const periods = generatePeriods(frequency, startDate, endDate)
     const pe = periods.join(';')
     const downloadingUrl = generateDownloadingUrl(dhis2Url, ou, dx, pe, co)
-    console.log(downloadingUrl)
     const chunks = createDataChunks(elementIds, periods, ou)
 
-    let header = null
+    let headerWritten = false // Track if the header has been written
 
     const fetchChunk = async (chunk, index) => {
       const dx = chunk.dx.join(';')
@@ -50,53 +58,69 @@ const MainPage = ({ queryDb }) => {
       const firstPe = chunk.periods[0]
       const lastPe = chunk.periods[chunk.periods.length - 1]
       const ou = chunk.ou
+      let blob = null
       try {
         const chunkUrl = generateDownloadingUrl(dhis2Url, ou, dx, pe, co)
-        let blob = await fetchCsvData(chunkUrl, username, password)
-        const headerText = await blob.slice(0, 1024).text()
-        const indexOfFirstNewline = headerText.indexOf('\n')
-        blob = blob.slice(indexOfFirstNewline + 1)
-        if (!header) {
-          header = headerText.slice(0, indexOfFirstNewline)
+
+        // Use fetchCsvData method for consistent blob processing
+        blob = await fetchCsvData(chunkUrl, username, password)
+        const text = await blob.text()
+
+        if (!headerWritten) {
+          // Write the header from the first chunk
+          const indexOfFirstNewline = text.indexOf('\n')
+          const header = text.slice(0, indexOfFirstNewline)
+          fileStream.write(header + '\n')
+          const dataWithoutHeader = text.slice(indexOfFirstNewline + 1)
+          fileStream.write(dataWithoutHeader)
+          headerWritten = true
+        } else {
+          // For subsequent chunks, skip the header
+          const indexOfFirstNewline = text.indexOf('\n')
+          const dataWithoutHeader = text.slice(indexOfFirstNewline + 1)
+          fileStream.write(dataWithoutHeader)
         }
         const successMessage = `Chunk ${index + 1}: ${dx} (${firstPe}-${lastPe}) finished successfully.`
-        dispatch(triggerNotification({ message: successMessage, type: 'info' }))
-        return blob
+        dispatch(addLog({ message: successMessage, type: 'info' }))
       } catch (error) {
         const errorMessage = `Chunk ${index + 1}: ${dx} (${firstPe}-${lastPe}) failed: ${error?.message}`
-        dispatch(triggerNotification({ message: errorMessage, type: 'error' }))
-        return null
+        dispatch(addLog({ message: errorMessage, type: 'error' }))
+      } finally {
+        if (blob) {
+          blob = null
+        }
+        if (window.api.triggerGarbageCollection) {
+          window.api.triggerGarbageCollection()
+        }
       }
     }
+
     try {
+      dispatch(clearLogs())
       dispatch(triggerLoading(true))
+      // Fetch all chunks in parallel
       const fetchPromises = chunks.map((chunk, index) => fetchChunk(chunk, index))
-      const results = await Promise.all(fetchPromises)
-      const dataChunks = results.filter((result) => result !== null)
-      const headerBlob = new Blob([header + '\n'], { type: 'text/csv' })
-      if (dataChunks.length > 0) {
-        await queryDb.query.add({
-          organizationLevel: ou,
-          period: pe,
-          dimension: dx,
-          disaggregation: co,
-          url: downloadingUrl,
-          notes: ''
-        })
-        const csvBlob = new Blob([headerBlob, ...dataChunks], { type: 'text/csv;charset=utf-8' })
-        const downloadLink = document.createElement('a')
-        downloadLink.href = URL.createObjectURL(csvBlob)
-        downloadLink.download = 'dhis2_data.csv'
-        downloadLink.click()
-        dispatch(
-          triggerNotification({ message: 'Download completed successfully', type: 'success' })
-        )
-      } else {
-        throw new Error('No data chunks were successfully fetched.')
+      await Promise.all(fetchPromises) // Wait for all chunks to be fetched and processed
+
+      fileStream.end()
+      dispatch(triggerNotification({ message: 'Download completed successfully', type: 'success' }))
+
+      await queryDb.query.add({
+        organizationLevel: ou,
+        period: pe,
+        dimension: dx,
+        disaggregation: co,
+        url: downloadingUrl,
+        notes: ''
+      })
+
+      if (window.api.clearBrowserCache) {
+        window.api.clearBrowserCache()
       }
     } catch (error) {
       const errorMessage = error.message ? error.message : error
       dispatch(triggerNotification({ message: errorMessage, type: 'error' }))
+      fileStream.end()
     } finally {
       dispatch(triggerLoading(false))
     }
@@ -118,11 +142,14 @@ const MainPage = ({ queryDb }) => {
           >
             <h3 className="text-lg font-semibold mb-4 text-gray-700">
               Organization Units
-              <Tooltip
-                text={
-                  'An organisational unit is usually a geographical unit, which exists within a hierarchy.'
-                }
-              />
+              <Tooltip>
+                <div>
+                  <p>
+                    An organisational unit is usually a geographical unit, which exists within a
+                    hierarchy.
+                  </p>
+                </div>
+              </Tooltip>
             </h3>
             <div
               className="overflow-y-auto p-4 bg-gray-100 rounded shadow-sm"
@@ -161,7 +188,17 @@ const MainPage = ({ queryDb }) => {
             <div className="mb-6" style={{ height: 'calc((70vh -2rem) / 3)' }}>
               <DateRangeSelector />
             </div>
-            <h3 className="text-lg font-semibold mb-4 text-gray-700">Disaggregation</h3>
+            <h3 className="text-lg font-semibold mb-4 text-gray-700">
+              Disaggregation{' '}
+              <Tooltip>
+                <div>
+                  <p>
+                    Disaggregation includes <em>category combination options</em> and{' '}
+                    <em>organization Group sets</em>
+                  </p>
+                </div>
+              </Tooltip>
+            </h3>
             <div style={{ height: 'calc((70vh -2rem) / 3)' }}>
               <CategoryDropdownMenu />
             </div>
@@ -170,7 +207,7 @@ const MainPage = ({ queryDb }) => {
             <div className="w-full mt-4">
               <h3 className="text-lg font-semibold mb-4 text-gray-700">Download</h3>
               <DownloadButton
-                handleDownload={handleDownload}
+                handleDownload={handleStreamDownload}
                 isDownloadDisabled={isDownloadDisabled}
               />
             </div>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 
 // eslint-disable-next-line react/prop-types
-const Tooltip = ({ text }) => {
+const Tooltip = ({ children }) => {
   const [show, setShow] = useState(false)
 
   return (
@@ -24,8 +24,8 @@ const Tooltip = ({ text }) => {
       </svg>
 
       {show && (
-        <div className="absolute bottom-full mb-2 w-48 p-2 bg-gray-100 bg-opacity-75 text-black text-sm rounded shadow-lg">
-          {text}
+        <div className="absolute bottom-full mb-2 w-48 p-2 bg-gray-100 bg-opacity-75 text-gray-800 text-sm rounded shadow-lg">
+          {children}
         </div>
       )}
     </span>

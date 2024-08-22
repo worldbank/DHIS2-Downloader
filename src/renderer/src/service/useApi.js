@@ -99,7 +99,7 @@ export const getDataElements = (dhis2Url, username, password) => {
 }
 
 export const getIndicators = (dhis2Url, username, password) => {
-  const indicatorUrl = `${dhis2Url}/api/indicators.json?fields=id,code,displayName,displayDescription,numerator,denominator,indicatorGroups[id,code,displayName,attributeValues[value]]&paging=false`
+  const indicatorUrl = `${dhis2Url}/api/indicators.json?fields=id,code,displayName,displayDescription,numerator,denominator&paging=false`
   return fetchData(indicatorUrl, username, password)
 }
 

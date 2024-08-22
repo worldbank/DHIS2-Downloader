@@ -54,7 +54,7 @@ const CategoryDropdownMenu = () => {
           {selectedCategory.length > 0 ? (
             <span className="flex-grow">{selectedCategory?.length} selected</span>
           ) : (
-            <span className="flex-grow">Select Category Combination</span>
+            <span className="flex-grow">Select Disaggregation</span>
           )}
           <span className="absolute right-4 pointer-events-none">▼</span>
         </div>

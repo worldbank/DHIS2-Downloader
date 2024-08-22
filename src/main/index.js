@@ -1,8 +1,16 @@
-import { app, shell, BrowserWindow, ipcMain, protocol, net } from 'electron'
-import { path, join } from 'path'
+import { app, shell, BrowserWindow, ipcMain, protocol, net, dialog, session } from 'electron'
+import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import fs from 'fs'
 
 const iconPath = join(__dirname, '../../resources/icon')
+
+app.commandLine.appendSwitch('ignore-gpu-blacklist', 'true')
+app.commandLine.appendSwitch('enable-gpu-rasterization')
+app.commandLine.appendSwitch('enable-zero-copy')
+app.commandLine.appendSwitch('max-tiles-for-interest-area', '512')
+app.commandLine.appendSwitch('max-unused-resource-memory-usage-percentage', '70')
+app.commandLine.appendSwitch('js-flags', '--expose_gc')
 
 function createWindow() {
   // Create the browser window.
@@ -12,7 +20,6 @@ function createWindow() {
     show: false,
     autoHideMenuBar: true,
     icon: iconPath,
-    // ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
@@ -29,10 +36,6 @@ function createWindow() {
     return { action: 'deny' }
   })
 
-  // mainWindow.webContents.openDevTools()
-
-  // HMR for renderer base on electron-vite cli.
-  // Load the remote URL for development or the local html file for production.
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
@@ -40,62 +43,101 @@ function createWindow() {
   }
 }
 
-// Register protocal
-protocol.registerSchemesAsPrivileged([
-  {
-    scheme: 'media',
-    privileges: {
-      secure: true,
-      supportFetchAPI: true,
-      bypassCSP: true,
-      stream: true
-    }
-  }
-])
+function clearCache() {
+  session.defaultSession
+    .clearCache()
+    .then(() => {
+      console.log('Browser cache cleared.')
+    })
+    .catch((err) => {
+      console.error('Failed to clear browser cache:', err)
+    })
+}
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
+function logMemoryUsage() {
+  function logBytes(x) {
+    console.log(x[0], x[1] / (1000.0 * 1000), 'MB')
+  }
+
+  function getMemory() {
+    Object.entries(process.memoryUsage()).map(logBytes)
+  }
+
+  getMemory()
+}
+
+ipcMain.handle('dialog:saveFile', async () => {
+  const { canceled, filePath } = await dialog.showSaveDialog({
+    title: 'Save CSV File',
+    defaultPath: 'dhis2_data.csv',
+    buttonLabel: 'Save',
+    filters: [
+      { name: 'CSV Files', extensions: ['csv'] },
+      { name: 'All Files', extensions: ['*'] }
+    ]
+  })
+
+  if (canceled) {
+    return null
+  } else {
+    return filePath
+  }
+})
+
+ipcMain.handle('trigger-gc', () => {
+  if (global.gc) {
+    global.gc()
+  } else {
+    console.warn('Garbage collection is not exposed')
+  }
+})
+
+ipcMain.handle('clear-cache', () => {
+  return clearCache()
+})
+
+ipcMain.handle('file:write', (event, filePath, chunk) => {
+  return new Promise((resolve, reject) => {
+    fs.appendFile(filePath, chunk, (err) => {
+      if (err) reject(err)
+      else resolve()
+    })
+  })
+})
+
+ipcMain.handle('file:end', (event, filePath) => {
+  // Any cleanup needed when file writing is done
+  console.log(`File writing completed: ${filePath}`)
+})
+
 app.whenReady().then(() => {
-  // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
 
-  // Default open or close DevTools by F12 in development
-  // and ignore CommandOrControl + R in production.
-  // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // IPC test
   ipcMain.on('ping', () => console.log('pong'))
 
   createWindow()
 
+  // log memory usage every 10 seconds
+  setInterval(() => {
+    logMemoryUsage()
+  }, 10000)
+
   protocol.handle('media', (req) => {
-    // const basePath = app.getAppPath() // Get the base directory of your Electron app
-    // const pathToMedia = new URL(req.url).pathname
-    // const absolutePath = path.join(basePath, pathToMedia) // Resolve the absolute path
-    // return net.fetch(`file://${absolutePath}`)
     const pathToMedia = new URL(req.url).pathname
     return net.fetch(`file://${pathToMedia}`)
   })
 
   app.on('activate', function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
 })
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
   }
 })
-
-// In this file you can include the rest of your app"s specific main process
-// code. You can also put them in separate files and require them here.
