@@ -1,0 +1,60 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  package_and_release:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build application
+        run: npm run build:${{ matrix.os == 'macos-latest' && 'mac' || 'win' }}
+
+      - name: Package application
+        run: npm run package:${{ matrix.os == 'macos-latest' && 'mac' || 'win' }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ github.run_number }}-${{ matrix.os }}
+          path: out/make/**
+
+      - name: Create Release
+        if: startsWith(matrix.os, 'macos')
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+          body: 'Description of the release for ${{ matrix.os }}'
+
+      - name: Upload Release Asset
+        if: startsWith(matrix.os, 'macos')
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./out/make/my-electron-app-${{ matrix.os }}.zip
+          asset_name: my-electron-app-${{ matrix.os }}-${{ github.ref }}.zip
+          asset_content_type: application/zip

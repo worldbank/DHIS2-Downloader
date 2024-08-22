@@ -10,7 +10,7 @@
     "format": "prettier --write .",
     "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
     "test:playwright": "playwright test",
-    "start": "electron-vite preview",
+    "start": "electron-vite preview -- --js-flags='--expose_gc'",
     "dev": "electron-vite dev --watch",
     "build": "electron-vite build",
     "postinstall": "electron-builder install-app-deps",

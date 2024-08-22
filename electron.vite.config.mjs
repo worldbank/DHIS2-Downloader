@@ -4,7 +4,10 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   main: {
-    plugins: [externalizeDepsPlugin()]
+    plugins: [externalizeDepsPlugin()],
+    // Pass js-flags directly via the command and commandArgs
+    command: 'electron',
+    commandArgs: ['--js-flags="--expose_gc"']
   },
   preload: {
     plugins: [externalizeDepsPlugin()]
