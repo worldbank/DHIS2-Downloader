@@ -4,11 +4,12 @@ import { useSelector, useDispatch } from 'react-redux'
 import { clearNotification, handleExit, toggleNotifications } from '../../reducers/statusReducer'
 
 // eslint-disable-next-line react/display-name
-const Notification = React.memo(() => {
-  const { isLoading, notification } = useSelector((state) => state.status)
+const Logs = React.memo(() => {
+  const { logs } = useSelector((state) => state.status)
+  console.log(logs)
 
   const renderedMessages = useMemo(() => {
-    return notification.map((msg, index) => (
+    return logs.map((msg, index) => (
       <p
         key={index}
         className={`${msg?.type === 'error' ? 'text-red-600' : 'text-blue-600'} mb-2 whitespace-pre-wrap`}
@@ -16,16 +17,16 @@ const Notification = React.memo(() => {
         {msg?.message}
       </p>
     ))
-  }, [notification])
+  }, [logs])
 
-  if (notification.length === 0) return null
+  if (logs.length === 0) return null
 
   return <div>{renderedMessages}</div>
 })
 
 const NotificationModal = () => {
   const dispatch = useDispatch()
-  const { isLoading, notification, showNotifications } = useSelector((state) => state.status)
+  const { isLoading, notification, showLogs, logs } = useSelector((state) => state.status)
 
   const handleClose = () => {
     dispatch(handleExit())
@@ -44,18 +45,40 @@ const NotificationModal = () => {
           </div>
         )}
 
-        <button
-          onClick={() => dispatch(toggleNotifications())}
-          className="text-blue-500 hover:text-blue-700 transition duration-150 ease-in-out focus:outline-none"
-        >
-          {showNotifications ? 'Hide Details' : 'Show Details ▼'}
-        </button>
+        {/* Notification Content - Always shown */}
+        <div className="w-full mb-4">
+          {notification.length > 0
+            ? notification.map((notification, index) => (
+                <div
+                  key={index}
+                  className={`p-4 mb-2 rounded-lg ${
+                    notification.type === 'error'
+                      ? 'bg-red-100 text-red-600'
+                      : 'bg-blue-100 text-blue-600'
+                  }`}
+                >
+                  {notification.message}
+                </div>
+              ))
+            : null}
+        </div>
 
-        {/* Conditional rendering based on toggle */}
-        {showNotifications && (
-          <div className="flex-grow w-full p-4 bg-gray-100 rounded-lg border border-gray-300 overflow-y-auto max-h-48">
-            <Notification />
-          </div>
+        {!isLoading && logs.length > 0 && (
+          <>
+            <button
+              onClick={() => dispatch(toggleNotifications())}
+              className="text-blue-500 hover:text-blue-700 transition duration-150 ease-in-out focus:outline-none"
+            >
+              {showLogs ? 'Hide Logs' : 'View Logs ▼'}
+            </button>
+
+            {/* Conditional rendering based on toggle */}
+            {showLogs && (
+              <div className="flex-grow w-full p-4 bg-gray-100 rounded-lg border border-gray-300 overflow-y-auto max-h-48 mt-4">
+                <Logs />
+              </div>
+            )}
+          </>
         )}
 
         <button

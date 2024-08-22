@@ -4,8 +4,9 @@ import { throttle } from 'lodash'
 
 const initialState = {
   isLoading: false,
-  showNotifications: false,
-  notification: []
+  showLogs: false,
+  notification: [],
+  logs: []
 }
 
 const statusSlice = createSlice({
@@ -21,8 +22,14 @@ const statusSlice = createSlice({
     clearNotification: (state) => {
       state.notification = []
     },
+    addLog: (state, action) => {
+      state.logs.push(action.payload)
+    },
+    clearLogs: (state) => {
+      state.logs = []
+    },
     toggleNotifications: (state) => {
-      state.showNotifications = !state.showNotifications
+      state.showLogs = !state.showLogs
     },
     handleExit: (state) => {
       return initialState
@@ -32,7 +39,7 @@ const statusSlice = createSlice({
 
 const throttledDispatch = throttle((dispatch, notification) => {
   dispatch(addNotification(notification))
-}, 500) // Throttle interval is 500 ms
+}, 500)
 
 export const triggerNotification = (payload) => (dispatch) => {
   dispatch(openModal({ type: 'NOTIFICATION' }))
@@ -50,6 +57,17 @@ export const triggerLoading = (isLoading) => (dispatch) => {
   }
 }
 
-export const { setLoading, addNotification, clearNotification, toggleNotifications, handleExit } =
-  statusSlice.actions
+export const logActivity = (payload) => (dispatch) => {
+  dispatch(addLog({ message: payload.message, type: payload.type }))
+}
+
+export const {
+  setLoading,
+  addNotification,
+  clearNotification,
+  addLog,
+  clearLogs,
+  toggleNotifications,
+  handleExit
+} = statusSlice.actions
 export default statusSlice.reducer
