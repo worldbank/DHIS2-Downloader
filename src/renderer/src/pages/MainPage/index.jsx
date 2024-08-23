@@ -191,11 +191,21 @@ const MainPage = ({ queryDb }) => {
             <h3 className="text-lg font-semibold mb-4 text-gray-700">
               Disaggregation{' '}
               <Tooltip>
-                <div>
-                  <p>
-                    Disaggregation includes <em>category combination options</em> and{' '}
-                    <em>organization Group sets</em>
-                  </p>
+                <div className="text-gray-600 text-sm">
+                  Disaggregation includes:
+                  <ul className="list-disc pl-5">
+                    <li>
+                      <em>Category combination options</em> are dynamically composed of all of the
+                      different combinations of category options which compose a category
+                      combination. As an example, two categories "Gender" and "Age," might have
+                      options such as "Male" or "Female" and "{'<'}5 years" or "{'>'}5 years." One
+                      of the Category combination options would be "Male {'<'}5 years."
+                    </li>
+                    <li>
+                      <em>Organization Units Group Sets</em> are typically related to the attributes
+                      of organization units, such as "ownership," "type."
+                    </li>
+                  </ul>
                 </div>
               </Tooltip>
             </h3>
