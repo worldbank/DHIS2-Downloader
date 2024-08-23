@@ -1,9 +1,11 @@
 name: Release
-
 on:
   push:
     tags:
       - 'v*.*.*'
+
+permissions:
+  contents: write
 
 jobs:
   package_and_release:
@@ -26,35 +28,21 @@ jobs:
       - name: Build application
         run: npm run build:${{ matrix.os == 'macos-latest' && 'mac' || 'win' }}
 
-      - name: Package application
-        run: npm run package:${{ matrix.os == 'macos-latest' && 'mac' || 'win' }}
-
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: ${{ github.run_number }}-${{ matrix.os }}
-          path: out/make/**
+          path: dist/**
 
       - name: Create Release
-        if: startsWith(matrix.os, 'macos')
-        id: create_release
-        uses: actions/create-release@v1
+        uses: softprops/action-gh-release@v1
+        if: success()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false
-          body: 'Description of the release for ${{ matrix.os }}'
-
-      - name: Upload Release Asset
-        if: startsWith(matrix.os, 'macos')
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./out/make/my-electron-app-${{ matrix.os }}.zip
-          asset_name: my-electron-app-${{ matrix.os }}-${{ github.ref }}.zip
-          asset_content_type: application/zip
+          files: |
+            dist/*.zip
+            dist/*.dmg
+            dist/*.exe
