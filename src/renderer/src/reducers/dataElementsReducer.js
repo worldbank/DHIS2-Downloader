@@ -36,6 +36,9 @@ const dataElementsSlice = createSlice({
     },
     removeElement: (state, action) => {
       state.addedElements = state.addedElements.filter((element) => element.id !== action.payload)
+    },
+    clearSelectedElements: (state) => {
+      state.addedElements = []
     }
   }
 })
@@ -47,7 +50,8 @@ export const {
   setFilteredElements,
   setSelectedElements,
   addSelectedElements,
-  removeElement
+  removeElement,
+  clearSelectedElements
 } = dataElementsSlice.actions
 
 export default dataElementsSlice.reducer

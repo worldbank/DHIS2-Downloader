@@ -109,7 +109,7 @@ const MainPage = ({ queryDb }) => {
         organizationLevel: ou,
         period: pe,
         dimension: dx,
-        disaggregation: co,
+        disaggregation: co.join(';'),
         url: downloadingUrl,
         notes: ''
       })

@@ -62,6 +62,12 @@ const orgUnitSlice = createSlice({
       } else {
         state.selectedOrgUnitLevels.push(level)
       }
+    },
+    clearOrgUnitSelections: (state) => {
+      state.selectedOrgUnits = []
+    },
+    clearOrgUnitLevels: (state) => {
+      state.selectedOrgUnitLevels = []
     }
   },
   extraReducers: (builder) => {
@@ -96,7 +102,12 @@ const orgUnitSlice = createSlice({
   }
 })
 
-export const { toggleOrgUnitSelection, toggleOrgUnitExpansion, updateOrgUnitLevels } =
-  orgUnitSlice.actions
+export const {
+  toggleOrgUnitSelection,
+  toggleOrgUnitExpansion,
+  updateOrgUnitLevels,
+  clearOrgUnitSelections,
+  clearOrgUnitLevels
+} = orgUnitSlice.actions
 
 export default orgUnitSlice.reducer

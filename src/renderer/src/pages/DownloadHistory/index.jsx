@@ -11,8 +11,14 @@ import {
   setEditedRow,
   clearEditedRow
 } from '../../reducers/historyReducer'
-import { addSelectedElements } from '../../reducers/dataElementsReducer'
-import { updateOrgUnitLevels, toggleOrgUnitSelection } from '../../reducers/orgUnitReducer'
+import { addSelectedElements, clearSelectedElements } from '../../reducers/dataElementsReducer'
+import {
+  updateOrgUnitLevels,
+  toggleOrgUnitSelection,
+  clearOrgUnitLevels,
+  clearOrgUnitSelections
+} from '../../reducers/orgUnitReducer'
+import { clearSelectedCategory, setSelectedCategory } from '../../reducers/categoryReducer'
 import { MicroArrowDownTray, MicroArrowTopRight, MicroTrash } from '../../components/Icons'
 import Pagination from '../../components/Pagination'
 
@@ -177,7 +183,15 @@ const HistoryPage = ({ dictionaryDb, queryDb }) => {
     }
   }
 
+  const clearExistingParams = () => {
+    dispatch(clearSelectedElements())
+    dispatch(clearOrgUnitSelections())
+    dispatch(clearOrgUnitLevels())
+    dispatch(clearSelectedCategory())
+  }
+
   const handlePassParams = (id) => {
+    clearExistingParams()
     const params = downloadQueries.filter((el) => el.id === id)
     const dimensions = params.flatMap((param) =>
       param.dimension.includes(';') ? param.dimension.split(';') : param.dimension
@@ -198,7 +212,17 @@ const HistoryPage = ({ dictionaryDb, queryDb }) => {
         }
       })
     })
-    // date
+
+    // Disaggregation (Additional measures for disaggregations being '')
+    const disaggregations = params
+      .flatMap((param) =>
+        param.disaggregation.includes(';') ? param.disaggregation.split(';') : param.disaggregation
+      )
+      .filter((dis) => dis !== '')
+
+    if (disaggregations.length > 0) {
+      disaggregations.forEach((dis) => dispatch(setSelectedCategory(dis)))
+    }
 
     // dimension
     const elementsInfo = allElements.filter((el) => dimensions.includes(el.id))

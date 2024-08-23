@@ -31,6 +31,9 @@ const categorySlice = createSlice({
       } else {
         state.selectedCategory.push(coId)
       }
+    },
+    clearSelectedCategory: (state) => {
+      state.selectedCategory = []
     }
   },
   extraReducers: (builder) => {
@@ -44,6 +47,6 @@ const categorySlice = createSlice({
   }
 })
 
-export const { setSelectedCategory } = categorySlice.actions
+export const { setSelectedCategory, clearSelectedCategory } = categorySlice.actions
 
 export default categorySlice.reducer
