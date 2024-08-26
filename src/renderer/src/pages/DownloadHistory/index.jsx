@@ -279,80 +279,88 @@ const HistoryPage = ({ dictionaryDb, queryDb }) => {
       {/* Table Component */}
       <div className="overflow-x-auto px-4">
         <form onSubmit={handleSaveNotes}>
-          <table className="w-full max-w-4xl mx-auto bg-white rounded-lg shadow-lg">
-            <thead>
-              <tr className="bg-gray-100 text-gray-800 uppercase text-sm leading-normal">
-                <th className="py-3 px-3 border-b-2 border-gray-300">
-                  <input
-                    type="checkbox"
-                    className="form-checkbox h-4 w-4 text-gray-600 transition duration-150 ease-in-out"
-                    checked={selectedRows.length === downloadQueries.length}
-                    onChange={handleSelectAllChange}
-                  />
-                </th>
-
-                {queryHeaders.map((name, index) => (
-                  <th key={index} className="py-2 px-2 border-b-2 border-gray-300">
-                    {name}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="text-gray-800 text-xs font-light">
-              {currentPageData.map((el) => (
-                <tr key={el.id} className="hover:bg-gray-50">
-                  <td className="py-2 px-3 border-b border-gray-300">
+          <div className="w-full bg-white rounded-lg shadow-lg">
+            <table className="w-full table-auto">
+              <thead>
+                <tr className="bg-gray-100 text-gray-800 uppercase text-sm leading-normal">
+                  <th className="py-3 px-3 sticky left-0 z-10 bg-gray-100">
                     <input
                       type="checkbox"
                       className="form-checkbox h-4 w-4 text-gray-600 transition duration-150 ease-in-out"
-                      checked={selectedRows.includes(el.id)}
-                      onChange={() => handleCheckboxChange(el.id)}
+                      checked={selectedRows.length === downloadQueries.length}
+                      onChange={handleSelectAllChange}
                     />
-                    <td className="py-3 text-left">
-                      <button type="button" onClick={() => handleEditClick(el.id, el.notes)}>
-                        Edit
-                      </button>
-                      {editedRow.rowId === el.id && (
-                        <>
-                          <button type="submit">Save</button>
-                          <button type="button" onClick={() => handlePassParams(el.id)}>
-                            Pass
-                          </button>
-                        </>
-                      )}
-                    </td>
-                  </td>
-
-                  {queryHeaders.map((header) => (
-                    <td
-                      key={header}
-                      className="py-2 px-2 border-b border-gray-300 [word-break:break-word]"
-                    >
-                      {editedRow.rowId === el.id && header === 'notes' ? (
-                        <input
-                          type="text"
-                          name={header}
-                          value={temporaryNote}
-                          onChange={handleNoteChange}
-                        />
-                      ) : header === 'url' ? (
-                        <a
-                          href={el[header]}
-                          className="text-blue-500 hover:text-blue-600"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {el[header]}
-                        </a>
-                      ) : (
-                        el[header]
-                      )}
-                    </td>
+                  </th>
+                  {queryHeaders.map((name, index) => (
+                    <th key={index} className="py-2 px-2 whitespace-nowrap">
+                      {name}
+                    </th>
                   ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="text-gray-800 text-xs font-light">
+                {currentPageData.map((el) => (
+                  <tr key={el.id} className="hover:bg-gray-50">
+                    <td className="py-2 px-3 sticky left-0 z-10 bg-white">
+                      <input
+                        type="checkbox"
+                        className="form-checkbox h-4 w-4 text-gray-600 transition duration-150 ease-in-out"
+                        checked={selectedRows.includes(el.id)}
+                        onChange={() => handleCheckboxChange(el.id)}
+                      />
+                      <div className="flex space-x-2 mt-1">
+                        <button
+                          type="button"
+                          onClick={() => handleEditClick(el.id, el.notes)}
+                          className="text-blue-600 hover:text-blue-800"
+                        >
+                          Edit
+                        </button>
+                        {editedRow.rowId === el.id && (
+                          <>
+                            <button type="submit" className="text-green-600 hover:text-green-800">
+                              Save
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handlePassParams(el.id)}
+                              className="text-purple-600 hover:text-purple-800"
+                            >
+                              Pass
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                    {queryHeaders.map((header) => (
+                      <td key={header} className="py-2 px-2 [word-break:break-word]">
+                        {editedRow.rowId === el.id && header === 'notes' ? (
+                          <input
+                            type="text"
+                            name={header}
+                            value={temporaryNote}
+                            onChange={handleNoteChange}
+                            className="w-full p-1 border rounded"
+                          />
+                        ) : header === 'url' ? (
+                          <a
+                            href={el[header]}
+                            className="text-blue-500 hover:text-blue-600"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {el[header]}
+                          </a>
+                        ) : (
+                          el[header]
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </form>
         <Pagination
           currentPage={currentPage}

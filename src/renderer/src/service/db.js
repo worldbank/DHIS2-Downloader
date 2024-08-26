@@ -13,6 +13,7 @@ export const queryHeaders = [
   'organizationLevel',
   'period',
   'dimension',
+  'dimensionName',
   'disaggregation',
   'url'
 ]
