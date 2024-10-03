@@ -62,7 +62,7 @@ jobs:
           path: test-results/
 
       - name: Upload error screenshots
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: error-screenshots
