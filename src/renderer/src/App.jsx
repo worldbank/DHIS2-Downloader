@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { HashRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom'
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import { initializeAuth } from './reducers/authReducer'
 import MainPage from './pages/MainPage'
@@ -9,8 +9,8 @@ import About from './pages/About'
 import NavBar from './pages/NavBar'
 import HistoryPage from './pages/DownloadHistory'
 import DataDictionary from './pages/DataDictionary'
-import Map from './pages/Facility/map'
-import FacilityTable from './pages/Facility/table'
+import Map from './pages/Facility/Map'
+import FacilityTable from './pages/Facility/Table'
 import ModalManager from './pages/Modals/ModalManager'
 import PrivacyPolicy from './pages/Privacy'
 import { servicesDb, dictionaryDb, queryDb } from './service/db'
@@ -28,6 +28,7 @@ const App = () => {
     dispatch(openModal({ type: 'SIGN_OUT' }))
   }
 
+  // eslint-disable-next-line react/prop-types
   const PrivateRoute = ({ children }) => {
     return accessToken ? children : <Navigate to="/login" />
   }

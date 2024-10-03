@@ -38,7 +38,7 @@ const STYLES = {
 }
 
 // Tooltip Component
-// eslint-disable-next-line react/display-name
+// eslint-disable-next-line react/display-name, react/prop-types
 const Tooltip = React.memo(({ x, y, content }) => (
   <div
     className="absolute bg-white border border-gray-300 rounded px-2 py-1 text-sm shadow-lg pointer-events-none whitespace-nowrap"
