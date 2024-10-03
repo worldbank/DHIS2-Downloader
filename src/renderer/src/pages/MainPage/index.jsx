@@ -25,111 +25,161 @@ const MainPage = ({ queryDb }) => {
   const { frequency, startDate, endDate } = useSelector((state) => state.dateRange)
   const { dhis2Url, username, password } = useSelector((state) => state.auth)
 
-  const handleStreamDownload = async () => {
-    // Ask the user to select the save location and filename
+  const getOrganizationUnits = () => {
+    if (selectedOrgUnits.length > 0) {
+      const levels = selectedOrgUnitLevels.map((level) => `LEVEL-${level}`).join(';')
+      return `${levels};${selectedOrgUnits.join(';')}`
+    }
+    return selectedOrgUnitLevels.map((level) => `LEVEL-${level}`).join(';')
+  }
+
+  const getSaveFilePath = async () => {
     const saveFilePath = await window.electronAPI.selectSaveLocation()
     if (!saveFilePath) {
       dispatch(triggerNotification({ message: 'Download canceled by user.', type: 'info' }))
-      return
     }
+    return saveFilePath
+  }
 
-    const fileStream = window.fileSystem.createWriteStream(saveFilePath)
-
-    let ou = ''
-    if (selectedOrgUnits.length > 0) {
-      let levels = selectedOrgUnitLevels.map((level) => `LEVEL-${level}`).join(';')
-      ou = `${levels};${selectedOrgUnits.join(';')}`
-    } else {
-      ou = selectedOrgUnitLevels.map((level) => `LEVEL-${level}`).join(';')
-    }
-    const co = selectedCategory
+  const getDownloadParameters = () => {
+    const ou = getOrganizationUnits()
     const elementIds = addedElements.map((element) => element.id)
-    const dx = elementIds.join(';')
+    const elementNames = addedElements.map((element) => element.displayName)
     const periods = generatePeriods(frequency, startDate, endDate)
-    const pe = periods.join(';')
-    const downloadingUrl = generateDownloadingUrl(dhis2Url, ou, dx, pe, co)
-    const chunks = createDataChunks(elementIds, periods, ou)
 
-    let headerWritten = false // Track if the header has been written
+    return {
+      ou,
+      co: selectedCategory,
+      dx: elementIds.join(';'),
+      dxNames: elementNames.join(';'),
+      pe: periods.join(';'),
+      periods,
+      elementIds,
+      downloadingUrl: generateDownloadingUrl(
+        dhis2Url,
+        ou,
+        elementIds.join(';'),
+        periods.join(';'),
+        selectedCategory
+      )
+    }
+  }
 
-    const fetchChunk = async (chunk, index) => {
-      const dx = chunk.dx.join(';')
-      const pe = chunk.periods.join(';')
-      const firstPe = chunk.periods[0]
-      const lastPe = chunk.periods[chunk.periods.length - 1]
-      const ou = chunk.ou
-      let blob = null
-      try {
-        const chunkUrl = generateDownloadingUrl(dhis2Url, ou, dx, pe, co)
+  const processChunks = async (chunks, fileStream, downloadParams) => {
+    const headerState = { written: false } // Use an object to track header state
+    const fetchPromises = chunks.map((chunk, index) =>
+      fetchAndProcessChunk(chunk, index, fileStream, downloadParams, headerState)
+    )
+    await Promise.all(fetchPromises)
+  }
 
-        // Use fetchCsvData method for consistent blob processing
-        blob = await fetchCsvData(chunkUrl, username, password)
-        const text = await blob.text()
+  const fetchAndProcessChunk = async (chunk, index, fileStream, downloadParams, headerState) => {
+    const { dx, periods, ou } = chunk
+    const chunkUrl = generateDownloadingUrl(
+      dhis2Url,
+      ou,
+      dx.join(';'),
+      periods.join(';'),
+      downloadParams.co
+    )
 
-        if (!headerWritten) {
-          // Write the header from the first chunk
-          const indexOfFirstNewline = text.indexOf('\n')
-          const header = text.slice(0, indexOfFirstNewline)
-          fileStream.write(header + '\n')
-          const dataWithoutHeader = text.slice(indexOfFirstNewline + 1)
-          fileStream.write(dataWithoutHeader)
-          headerWritten = true
-        } else {
-          // For subsequent chunks, skip the header
-          const indexOfFirstNewline = text.indexOf('\n')
-          const dataWithoutHeader = text.slice(indexOfFirstNewline + 1)
-          fileStream.write(dataWithoutHeader)
-        }
-        const successMessage = `Chunk ${index + 1}: ${dx} (${firstPe}-${lastPe}) finished successfully.`
-        dispatch(addLog({ message: successMessage, type: 'info' }))
-      } catch (error) {
-        const errorMessage = `Chunk ${index + 1}: ${dx} (${firstPe}-${lastPe}) failed: ${error?.message}`
-        dispatch(addLog({ message: errorMessage, type: 'error' }))
-      } finally {
-        if (blob) {
-          blob = null
-        }
-        if (window.api.triggerGarbageCollection) {
-          window.api.triggerGarbageCollection()
-        }
+    try {
+      const blob = await fetchCsvData(chunkUrl, username, password)
+      const text = await blob.text()
+
+      writeChunkToFile(text, fileStream, headerState)
+
+      dispatch(
+        addLog({
+          message: `Chunk ${index + 1}: ${dx.join(';')} (${periods[0]}-${periods[periods.length - 1]}) finished successfully.`,
+          type: 'info'
+        })
+      )
+    } catch (error) {
+      dispatch(
+        addLog({
+          message: `Chunk ${index + 1}: ${dx.join(';')} (${periods[0]}-${periods[periods.length - 1]}) failed: ${error?.message}`,
+          type: 'error'
+        })
+      )
+    } finally {
+      if (window.api.triggerGarbageCollection) {
+        window.api.triggerGarbageCollection()
       }
     }
+  }
+
+  const writeChunkToFile = (text, fileStream, headerState) => {
+    const indexOfFirstNewline = text.indexOf('\n')
+    if (!headerState.written) {
+      const header = text.slice(0, indexOfFirstNewline)
+      fileStream.write(header + '\n')
+      headerState.written = true // Update the shared header state
+    }
+    const dataWithoutHeader = text.slice(indexOfFirstNewline + 1)
+    fileStream.write(dataWithoutHeader)
+  }
+
+  const saveQueryToDatabase = async (downloadParams) => {
+    await queryDb.query.add({
+      organizationLevel: downloadParams.ou,
+      period: downloadParams.pe,
+      dimension: downloadParams.dx,
+      dimensionName: downloadParams.dxNames,
+      disaggregation: downloadParams.co.join(';'),
+      url: downloadParams.downloadingUrl,
+      notes: ''
+    })
+  }
+
+  const clearCacheIfPossible = () => {
+    if (window.api.clearBrowserCache) {
+      window.api.clearBrowserCache()
+    }
+  }
+
+  const handleDownloadError = (error, fileStream) => {
+    const errorMessage = error.message || error
+    dispatch(triggerNotification({ message: errorMessage, type: 'error' }))
+    fileStream.end()
+  }
+
+  const handleStreamDownload = async () => {
+    const saveFilePath = await getSaveFilePath()
+    if (!saveFilePath) return
+
+    const fileStream = window.fileSystem.createWriteStream(saveFilePath)
+    const downloadParams = getDownloadParameters()
+    const chunks = createDataChunks(
+      downloadParams.elementIds,
+      downloadParams.periods,
+      downloadParams.ou
+    )
 
     try {
       dispatch(clearLogs())
       dispatch(triggerLoading(true))
-      // Fetch all chunks in parallel
-      const fetchPromises = chunks.map((chunk, index) => fetchChunk(chunk, index))
-      await Promise.all(fetchPromises) // Wait for all chunks to be fetched and processed
+
+      await processChunks(chunks, fileStream, downloadParams)
 
       fileStream.end()
       dispatch(triggerNotification({ message: 'Download completed successfully', type: 'success' }))
 
-      await queryDb.query.add({
-        organizationLevel: ou,
-        period: pe,
-        dimension: dx,
-        disaggregation: co.join(';'),
-        url: downloadingUrl,
-        notes: ''
-      })
-
-      if (window.api.clearBrowserCache) {
-        window.api.clearBrowserCache()
-      }
+      await saveQueryToDatabase(downloadParams)
+      clearCacheIfPossible()
     } catch (error) {
-      const errorMessage = error.message ? error.message : error
-      dispatch(triggerNotification({ message: errorMessage, type: 'error' }))
-      fileStream.end()
+      handleDownloadError(error, fileStream)
     } finally {
       dispatch(triggerLoading(false))
     }
   }
 
-  const isDownloadDisabled = !startDate || !endDate
-  new Date(startDate) >= new Date(endDate) ||
-    addedElements.length == 0 ||
-    selectedOrgUnitLevels.length == 0
+  const isDownloadDisabled =
+    !startDate ||
+    !endDate ||
+    new Date(startDate) >= new Date(endDate) ||
+    addedElements.length === 0 ||
+    selectedOrgUnitLevels.length === 0
 
   return (
     <div>
@@ -227,4 +277,5 @@ const MainPage = ({ queryDb }) => {
     </div>
   )
 }
+
 export default MainPage
