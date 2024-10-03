@@ -122,3 +122,23 @@ export const getDataSets = (dhis2Url, username, password) => {
   const dataSetsUrl = `${dhis2Url}/api/dataSets?fields=id,displayName&paging=false`
   return fetchData(dataSetsUrl, username, password)
 }
+
+export const getOrganizationUnits = (dhis2Url, username, password) => {
+  const url = `${dhis2Url}/api/organisationUnits?fields=id,displayName,level,ancestor,organisationUnitGroups,coordinates&paging=False`
+  return fetchData(url, username, password)
+}
+
+export const getFacilityLists = (dhis2Url, username, password) => {
+  const url = `${dhis2Url}/api/organisationUnits.json?fields=id,displayName,path,level,coordinates,geometry,organisationUnitGroups[id,name]&paging=False`
+  return fetchData(url, username, password)
+}
+
+export const getGeoFeatures = (dhis2Url, username, password, levelSpec) => {
+  const url = `${dhis2Url}/api/geoFeatures?ou=ou:${levelSpec}`
+  return fetchData(url, username, password)
+}
+
+export const getOrganizationUnitGroups = (dhis2Url, username, password) => {
+  const url = `${dhis2Url}/api/organisationUnitGroups.json?paging=False`
+  return fetchData(url, username, password)
+}

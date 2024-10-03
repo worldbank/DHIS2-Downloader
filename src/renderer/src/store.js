@@ -8,6 +8,7 @@ import dataElementsReducer from './reducers/dataElementsReducer'
 import mouseReducer from './reducers/mouseReducer'
 import modalReducer from './reducers/modalReducer'
 import historyReducer from './reducers/historyReducer'
+import facilityReducer from './reducers/facilityReducer'
 
 const store = configureStore({
   reducer: {
@@ -18,6 +19,7 @@ const store = configureStore({
     dateRange: dateRangeReducer,
     dataElements: dataElementsReducer,
     orgUnit: orgUnitReducer,
+    facility: facilityReducer,
     history: historyReducer,
     mouse: mouseReducer
   }

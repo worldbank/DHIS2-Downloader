@@ -3,7 +3,6 @@ import { useRef, useState, useEffect, useCallback, useMemo } from 'react'
 import { objectToCsv } from '../utils/downloadUtils'
 import { updateFormulaNames } from '../utils/helpers'
 import ExportLink from '../components/ExportLink'
-import { MicroChevronLeft, MicroChevronRight } from '../components/Icons'
 import Pagination from '../components/Pagination'
 
 // eslint-disable-next-line react/prop-types

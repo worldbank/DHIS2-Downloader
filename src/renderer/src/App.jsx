@@ -9,6 +9,8 @@ import About from './pages/About'
 import NavBar from './pages/NavBar'
 import HistoryPage from './pages/DownloadHistory'
 import DataDictionary from './pages/DataDictionary'
+import Map from './pages/Facility/map'
+import FacilityTable from './pages/Facility/table'
 import ModalManager from './pages/Modals/ModalManager'
 import PrivacyPolicy from './pages/Privacy'
 import { servicesDb, dictionaryDb, queryDb } from './service/db'
@@ -51,6 +53,22 @@ const App = () => {
             element={
               <PrivateRoute>
                 <HistoryPage dictionaryDb={dictionaryDb} queryDb={queryDb} />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/map"
+            element={
+              <PrivateRoute>
+                <Map />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/facility"
+            element={
+              <PrivateRoute>
+                <FacilityTable />
               </PrivateRoute>
             }
           />

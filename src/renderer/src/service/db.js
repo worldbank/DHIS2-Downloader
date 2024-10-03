@@ -26,6 +26,10 @@ dictionaryDb.version(1).stores({
   elements: '++id, category, displayName, displayDescription, numerator, denominator'
 })
 
+dictionaryDb.version(1).stores({
+  facility: '++id, displayName, level, geometry, coordinates, organisationUnitGroups'
+})
+
 export const changeSchema = async (db, schemaChanges) => {
   db.close()
   const newDb = new Dexie(db.name)
