@@ -49,21 +49,21 @@
     ],
     "shard": null,
     "updateSnapshots": "missing",
-    "version": "1.45.1",
+    "version": "1.47.2",
     "workers": 5,
     "webServer": null
   },
   "suites": [
     {
-      "title": "example.spec.js",
-      "file": "example.spec.js",
+      "title": "main.spec.js",
+      "file": "main.spec.js",
       "column": 0,
       "line": 0,
       "specs": [],
       "suites": [
         {
           "title": "Electron app",
-          "file": "example.spec.js",
+          "file": "main.spec.js",
           "line": 11,
           "column": 6,
           "specs": [
@@ -82,14 +82,14 @@
                     {
                       "workerIndex": 0,
                       "status": "passed",
-                      "duration": 251,
+                      "duration": 229,
                       "errors": [],
                       "stdout": [
                         {
                           "buffer": "Cj4gZGhpczItZG93bmxvYWRlckAwLjAuMSBidWlsZAo+IGVsZWN0cm9uLXZpdGUgYnVpbGQKCg=="
                         },
                         {
-                          "buffer": "G1szNm12aXRlIHY1LjIuMTMgG1szMm1idWlsZGluZyBTU1IgYnVuZGxlIGZvciBwcm9kdWN0aW9uLi4uG1szNm0bWzM5bQo="
+                          "buffer": "G1szNm12aXRlIHY1LjQuOCAbWzMybWJ1aWxkaW5nIFNTUiBidW5kbGUgZm9yIHByb2R1Y3Rpb24uLi4bWzM2bRtbMzltCg=="
                         },
                         {
                           "buffer": "dHJhbnNmb3JtaW5nLi4uCg=="
@@ -101,13 +101,13 @@
                           "buffer": "cmVuZGVyaW5nIGNodW5rcy4uLgo="
                         },
                         {
-                          "buffer": "G1sybW91dC9tYWluLxtbMjJtG1szNm1pbmRleC5qcyAgG1szOW0bWzFtG1sybTEuOTMga0IbWzIybRtbMW0bWzIybQo="
+                          "buffer": "G1sybW91dC9tYWluLxtbMjJtG1szNm1pbmRleC5qcyAgG1szOW0bWzFtG1sybTMuNTkga0IbWzIybRtbMW0bWzIybQo="
                         },
                         {
-                          "buffer": "G1szMm3inJMgYnVpbHQgaW4gMzFtcxtbMzltCg=="
+                          "buffer": "G1szMm3inJMgYnVpbHQgaW4gMzVtcxtbMzltCg=="
                         },
                         {
-                          "buffer": "G1szNm12aXRlIHY1LjIuMTMgG1szMm1idWlsZGluZyBTU1IgYnVuZGxlIGZvciBwcm9kdWN0aW9uLi4uG1szNm0bWzM5bQo="
+                          "buffer": "G1szNm12aXRlIHY1LjQuOCAbWzMybWJ1aWxkaW5nIFNTUiBidW5kbGUgZm9yIHByb2R1Y3Rpb24uLi4bWzM2bRtbMzltCg=="
                         },
                         {
                           "buffer": "dHJhbnNmb3JtaW5nLi4uCg=="
@@ -119,58 +119,55 @@
                           "buffer": "cmVuZGVyaW5nIGNodW5rcy4uLgo="
                         },
                         {
-                          "buffer": "G1sybW91dC9wcmVsb2FkLxtbMjJtG1szNm1pbmRleC5qcyAgG1szOW0bWzFtG1sybTAuNDIga0IbWzIybRtbMW0bWzIybQo="
+                          "buffer": "G1sybW91dC9wcmVsb2FkLxtbMjJtG1szNm1pbmRleC5qcyAgG1szOW0bWzFtG1sybTEuMjkga0IbWzIybRtbMW0bWzIybQo="
                         },
                         {
-                          "buffer": "G1szMm3inJMgYnVpbHQgaW4gNW1zG1szOW0K"
+                          "buffer": "G1szMm3inJMgYnVpbHQgaW4gNm1zG1szOW0K"
                         },
                         {
-                          "buffer": "G1szNm12aXRlIHY1LjIuMTMgG1szMm1idWlsZGluZyBmb3IgcHJvZHVjdGlvbi4uLhtbMzZtG1szOW0K"
+                          "buffer": "G1szNm12aXRlIHY1LjQuOCAbWzMybWJ1aWxkaW5nIGZvciBwcm9kdWN0aW9uLi4uG1szNm0bWzM5bQo="
                         },
                         {
                           "buffer": "dHJhbnNmb3JtaW5nLi4uCg=="
                         },
                         {
-                          "buffer": "G1szMm3inJMbWzM5bSA3NiBtb2R1bGVzIHRyYW5zZm9ybWVkLgo="
+                          "buffer": "G1szMm3inJMbWzM5bSA3MDQgbW9kdWxlcyB0cmFuc2Zvcm1lZC4K"
                         },
                         {
                           "buffer": "cmVuZGVyaW5nIGNodW5rcy4uLgo="
                         },
                         {
-                          "buffer": "G1sybS4uLy4uL291dC9yZW5kZXJlci8bWzIybRtbMzJtaW5kZXguaHRtbCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAbWzM5bRtbMW0bWzJtICAwLjY3IGtCG1syMm0bWzFtG1syMm0KG1sybS4uLy4uL291dC9yZW5kZXJlci8bWzIybRtbMm1hc3NldHMvG1syMm0bWzMybUZBU1RSX0xvZ29fV2hpdGVfRW4tQlFSSGdEdVcucG5nICAbWzM5bRtbMW0bWzJtICA3LjY1IGtCG1syMm0bWzFtG1syMm0K"
+                          "buffer": "G1sybS4uLy4uL291dC9yZW5kZXJlci8bWzIybRtbMzJtaW5kZXguaHRtbCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgG1szOW0bWzFtG1sybSAgICAwLjY3IGtCG1syMm0bWzFtG1syMm0KG1sybS4uLy4uL291dC9yZW5kZXJlci8bWzIybRtbMm1hc3NldHMvG1syMm0bWzMybXdvcmtlci01MnE0cnc1ZC5qcyAgICAgICAgICAgICAgG1szOW0bWzFtG1sybSAgICAwLjkzIGtCG1syMm0bWzFtG1syMm0K"
                         },
                         {
-                          "buffer": "G1sybS4uLy4uL291dC9yZW5kZXJlci8bWzIybRtbMm1hc3NldHMvG1syMm0bWzM1bWluZGV4LUNIVkxiOXY2LmNzcyAgICAgICAgICAgICAgICAbWzM5bRtbMW0bWzJtIDIxLjA4IGtCG1syMm0bWzFtG1syMm0K"
+                          "buffer": "G1sybS4uLy4uL291dC9yZW5kZXJlci8bWzIybRtbMm1hc3NldHMvG1syMm0bWzMybUdGRl9Mb2dvX1doaXRlX0VuLUJGa3pXVzF6LnBuZyAgG1szOW0bWzFtG1sybSAgIDU4Ljk2IGtCG1syMm0bWzFtG1syMm0KG1sybS4uLy4uL291dC9yZW5kZXJlci8bWzIybRtbMm1hc3NldHMvG1syMm0bWzM1bWluZGV4LWhmZnFyYVh1LmNzcyAgICAgICAgICAgICAgG1szOW0bWzFtG1sybSAgIDI3LjEzIGtCG1syMm0bWzFtG1syMm0KG1sybS4uLy4uL291dC9yZW5kZXJlci8bWzIybRtbMm1hc3NldHMvG1syMm0bWzM2bWluZGV4LUNHVmw2Q1VZLmpzICAgICAgICAgICAgICAgG1szOW0bWzFtG1szM20xLDE2OS4zNyBrQhtbMzltG1syMm0K"
                         },
                         {
-                          "buffer": "G1sybS4uLy4uL291dC9yZW5kZXJlci8bWzIybRtbMm1hc3NldHMvG1syMm0bWzM2bWluZGV4LUJibXBpaEY1LmpzICAgICAgICAgICAgICAgICAbWzM5bRtbMW0bWzMzbTU1OC41NyBrQhtbMzltG1syMm0K"
-                        },
-                        {
-                          "buffer": "G1szMm3inJMgYnVpbHQgaW4gNjA1bXMbWzM5bQo="
+                          "buffer": "G1szMm3inJMgYnVpbHQgaW4gMS40MXMbWzM5bQo="
                         },
                         {
                           "text": "Running on platform: darwin\n"
                         },
                         {
-                          "text": "App path: /Users/czhang/Desktop/GFF/dhis2-downloader/dist/mac-arm64/DHIS2 Downloader.app/Contents/MacOS/DHIS2 Downloader\n"
+                          "text": "App path: /Users/czhang/Desktop/GFF/dhis2-downloader/dist/mac/DHIS2 Downloader.app/Contents/MacOS/DHIS2 Downloader\n"
                         }
                       ],
                       "stderr": [
                         {
-                          "buffer": "InBhdGgiIGlzIGltcG9ydGVkIGZyb20gZXh0ZXJuYWwgbW9kdWxlICJwYXRoIiBidXQgbmV2ZXIgdXNlZCBpbiAic3JjL21haW4vaW5kZXguanMiLgo="
+                          "buffer": "G1szM213b3JrZXIucGx1Z2lucyBpcyBub3cgYSBmdW5jdGlvbiB0aGF0IHJldHVybnMgYW4gYXJyYXkgb2YgcGx1Z2lucy4gUGxlYXNlIHVwZGF0ZSB5b3VyIFZpdGUgY29uZmlnIGFjY29yZGluZ2x5LgobWzM5bQo="
                         }
                       ],
                       "retry": 0,
-                      "startTime": "2024-07-22T20:02:41.929Z",
+                      "startTime": "2024-10-08T16:37:15.336Z",
                       "attachments": []
                     }
                   ],
                   "status": "expected"
                 }
               ],
-              "id": "dd9b2edffe9b7501040c-7c3a2968a83df7425d60",
-              "file": "example.spec.js",
-              "line": 59,
+              "id": "89836371d14dc78a5411-aec05290c400f4431aba",
+              "file": "main.spec.js",
+              "line": 57,
               "column": 7
             },
             {
@@ -188,25 +185,21 @@
                     {
                       "workerIndex": 0,
                       "status": "passed",
-                      "duration": 418,
+                      "duration": 1846,
                       "errors": [],
-                      "stdout": [
-                        {
-                          "text": "TEST_DHIS2_URL: https://moph-dw.gov.af\n"
-                        }
-                      ],
+                      "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2024-07-22T20:02:43.733Z",
+                      "startTime": "2024-10-08T16:37:41.174Z",
                       "attachments": []
                     }
                   ],
                   "status": "expected"
                 }
               ],
-              "id": "dd9b2edffe9b7501040c-9134eabeecb37c1be8ad",
-              "file": "example.spec.js",
-              "line": 70,
+              "id": "89836371d14dc78a5411-532a8b79d4376fa47f04",
+              "file": "main.spec.js",
+              "line": 68,
               "column": 7
             }
           ]
@@ -216,8 +209,8 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2024-07-22T20:02:41.648Z",
-    "duration": 2713.9500000000003,
+    "startTime": "2024-10-08T16:37:15.089Z",
+    "duration": 28238.693,
     "expected": 2,
     "skipped": 0,
     "unexpected": 0,

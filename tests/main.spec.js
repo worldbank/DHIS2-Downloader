@@ -16,15 +16,13 @@ test.describe('Electron app', () => {
     execSync('npm run build', { stdio: 'inherit' })
 
     const platform = os.platform()
-    let arch
     let appPath
     if (platform == 'darwin') {
-      arch = os.arch()
       appPath = path.join(
         __dirname,
         '..',
         'dist',
-        `mac-${arch}`,
+        `mac`,
         'DHIS2 Downloader.app',
         'Contents',
         'MacOS',
@@ -71,7 +69,6 @@ test.describe('Electron app', () => {
     const window = await electronApp.firstWindow()
     try {
       const dhis2UrlInput = await window.locator('xpath=//form//input[@placeholder="DHIS2 URL"]')
-      console.log('TEST_DHIS2_URL:', process.env.TEST_DHIS2_URL)
       await dhis2UrlInput.fill(process.env.TEST_DHIS2_URL)
 
       // Fill in other input fields (example)
@@ -89,12 +86,4 @@ test.describe('Electron app', () => {
       throw error
     }
   })
-
-  // test('Could Click ', async () => {
-  //   const window = await electronApp.firstWindow()
-  //   const dictionaryNavLink = await window.$('xpath=//navbar//a[@href="#/dictionary"]')
-  //   const isClickable = await dictionaryNavLink.isClickable()
-  //   expect(isClickable).toBe(true)
-  //   await dictionaryNavLink.click()
-  // })
 })
