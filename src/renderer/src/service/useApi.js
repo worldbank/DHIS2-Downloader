@@ -1,4 +1,4 @@
-export const fetchData = async (apiUrl, username, password, timeout = 1200000) => {
+export const fetchData = async (apiUrl, username, password, timeout = 3600000) => {
   const controller = new AbortController()
   const { signal } = controller
   const fetchOptions = {
