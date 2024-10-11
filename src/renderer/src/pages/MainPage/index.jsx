@@ -24,6 +24,7 @@ const MainPage = ({ queryDb }) => {
   const { selectedCategory } = useSelector((state) => state.category)
   const { frequency, startDate, endDate } = useSelector((state) => state.dateRange)
   const { dhis2Url, username, password } = useSelector((state) => state.auth)
+  const currentDate = new Date().toISOString().split('T')[0]
 
   const getOrganizationUnits = () => {
     if (selectedOrgUnits.length > 0) {
@@ -111,13 +112,22 @@ const MainPage = ({ queryDb }) => {
 
   const writeChunkToFile = (text, fileStream, headerState) => {
     const indexOfFirstNewline = text.indexOf('\n')
+
     if (!headerState.written) {
-      const header = text.slice(0, indexOfFirstNewline)
+      // Add 'downloaded_date' column to the header
+      const header = text.slice(0, indexOfFirstNewline) + ',downloaded_date'
       fileStream.write(header + '\n')
-      headerState.written = true // Update the shared header state
+      headerState.written = true
     }
-    const dataWithoutHeader = text.slice(indexOfFirstNewline + 1)
-    fileStream.write(dataWithoutHeader)
+
+    // Append currentDate to each row
+    const dataRows = text
+      .slice(indexOfFirstNewline + 1)
+      .split('\n')
+      .filter(Boolean) // Ensure no empty rows
+    const dataWithDate = dataRows.map((row) => row + `,${currentDate}`).join('\n')
+
+    fileStream.write(dataWithDate + '\n')
   }
 
   const saveQueryToDatabase = async (downloadParams) => {
