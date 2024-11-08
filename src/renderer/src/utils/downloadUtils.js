@@ -90,7 +90,8 @@ export const objectToCsv = (array) => {
     return
   }
 
-  const headers = Object.keys(array[0])
+  // Get all unique headers across all objects
+  const headers = Array.from(new Set(array.flatMap((obj) => Object.keys(obj))))
   const csvRows = []
 
   // Add the headers row
@@ -99,7 +100,8 @@ export const objectToCsv = (array) => {
   // Add each row of data
   for (const obj of array) {
     const values = headers.map((header) => {
-      const escapedValue = ('' + obj[header]).replace(/"/g, '\\"')
+      const value = obj[header] !== undefined ? obj[header] : ''
+      const escapedValue = ('' + value).replace(/"/g, '\\"')
       return `"${escapedValue}"`
     })
     csvRows.push(values.join(','))
