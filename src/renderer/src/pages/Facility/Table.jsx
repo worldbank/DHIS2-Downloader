@@ -144,12 +144,13 @@ const FacilityTable = () => {
 
   const handleExportToCSV = () => {
     const csvData = facilities.map((item) => {
-      // Flatten the data as needed
       const flatItem = {
         Level: item.level,
         Name: item.displayName,
         ID: item.id,
-        Coordinates: formatGeometrySummary(item.geometry),
+        Coordinates: item.geometry
+          ? JSON.stringify(item.geometry.coordinates)
+          : 'No geometry available',
         'Organization Unit Groups': item.organisationUnitGroups
           ? item.organisationUnitGroups.map((group) => group.name).join(', ')
           : 'N/A'
@@ -162,6 +163,7 @@ const FacilityTable = () => {
 
       return flatItem
     })
+
     const csv = Papa.unparse(csvData)
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
