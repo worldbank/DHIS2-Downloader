@@ -33,7 +33,7 @@ const AboutPage = () => {
         </section>
 
         <section className="feature-info mt-10">
-          <h2 className="text-2xl font-medium text-gray-800 mb-6">Features</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4">Features</h2>
           <AccordionGroup>
             <Accordion title="Downloading Data from DHIS2">
               <p className="mb-4">
@@ -46,11 +46,11 @@ const AboutPage = () => {
                 <li>Valid username</li>
                 <li>Valid password</li>
               </ul>
-              <p className="mb-4 text-sm">
-                Note: FASTR DHIS2 Data Downloader is not responsible for registering account for any
-                DHIS2 system and can only access to DHIS2 systems for which you have already
-                processed valid credentials. The Downloader will not transmit or store your DHIS2
-                credentials to any places other than your laptop.
+              <p style={{ fontStyle: 'italic' }} className="mb-4 text-sm">
+                Note: The FASTR DHIS2 Data Downloader does not handle DHIS2 account registration. It
+                can only access DHIS2 systems for which you have valid credentials. The Downloader
+                will not transmit or store your DHIS2 credentials anywhere other than on your
+                laptop.
               </p>
             </Accordion>
             <Accordion title="Data Dictionary">
@@ -65,15 +65,21 @@ const AboutPage = () => {
                 to keep or erase history upon logging out.
               </p>
             </Accordion>
+            <Accordion title="Accessing Facility">
+              <p className="mb-4">
+                Record successful downloads, add notes, and quickly re-download past records. Option
+                to keep or erase history upon logging out.
+              </p>
+            </Accordion>
           </AccordionGroup>
         </section>
 
         <section className="Resources-info mt-10">
-          <h2 className="text-3xl font-semibold text-gray-900 mb-4">Additional Resources</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4">Additional Resources</h2>
           <p>
             Learn more about how to use the FASTR DHIS2 Data Downloader by visiting our{' '}
             <a
-              href="https://gffklportal.org/"
+              href="https://data.gffportal.org/key-theme-pages/rmncah-n-service-use-monitoring"
               target="_blank"
               rel="noreferrer"
               className="text-blue-500 hover:underline"
@@ -85,7 +91,7 @@ const AboutPage = () => {
           <p>
             The code is accessible via{' '}
             <a
-              href="https://github.com/ccxzhang/dhis2-downloader"
+              href="https://github.com/worldbank/dhis2-downloader"
               target="_blank"
               rel="noreferrer"
               className="text-blue-500 hover:underline"
@@ -107,10 +113,84 @@ const AboutPage = () => {
           </p>
         </section>
 
+        <section className="faq-info mt-10">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+            Frequently Asked Questions (FAQ)
+          </h2>
+          <AccordionGroup>
+            <Accordion title="Why did the download fail, and how can I find out what went wrong?">
+              <p className="mb-4">
+                The data downloader produces a log of errors. Here are some common errors with an
+                explanation and suggestions for solutions.
+              </p>
+              <p className="mb-4">
+                <strong>Error: "Cannot read properties of null (reading 'textContent')" </strong>
+                <br />
+                <em>Cause:</em> This usually happens when the requested time periods or indicators
+                are missing. This could mean there is no data stored in DHIS2 for a specific
+                indicator in a specific month or time period. To troubleshoot:
+              </p>
+              <ul className="list-disc pl-5 text-gray-700 mb-4">
+                <li>
+                  Make sure you’ve selected the correct time periods and data indicators before
+                  starting the download.
+                </li>
+                <li>
+                  This error won’t interrupt the data download process. When a request fails, the
+                  system will continue, and you can review any failed requests once the download is
+                  complete.
+                </li>
+              </ul>
+              <p className="mb-4">
+                <strong>Error: &quot;HTTP Status 500 – Internal Server Error&quot;</strong>
+                <br />
+                <em>Cause:</em> This error usually means there’s an issue with the server, often due
+                to a disconnection. To troubleshoot:
+              </p>
+              <ul className="list-disc pl-5 text-gray-700 mb-4">
+                <li>
+                  Ensure all required data fields (like time periods and data elements/indicators)
+                  are selected.
+                </li>
+                <li>Verify that your login credentials are correct.</li>
+                <li>Check that the server is up and not experiencing any issues.</li>
+              </ul>
+            </Accordion>
+
+            <Accordion title="Why do I need to change the filename even though it says the file will be replaced?">
+              <p className="mb-4">
+                The downloader splits large requests into smaller parts and then combines them into
+                a single file. Even if it says it’s replacing an existing file with the same name,
+                the Data Downloader actually adds new data to that file. To avoid confusion, give
+                each new download a unique name to ensure the data is correctly added.
+              </p>
+            </Accordion>
+            <Accordion title="How can I avoid download timeouts with large data requests?">
+              <p className="mb-4">
+                Downloads have a 1-hour time limit, meaning requests that take longer than 1 hour
+                will automatically time out. To avoid this, split your requests into smaller batches
+                to ensure each download is completed within the time frame. Each DHIS2 system
+                operates uniquely, with variations in data download speeds. You may need to
+                experiment to find the optimal data volume that can be requested in a single
+                download.
+              </p>
+            </Accordion>
+            <Accordion title="How much data can I download into an Excel file?">
+              <p className="mb-4">
+                Excel can handle around 1 million rows, so if you’re downloading large datasets
+                (e.g., data from thousands of facilities across multiple months), you might reach
+                Excel’s limit. To manage this, try downloading the data in smaller batches. If you
+                exceed Excel’s capacity, you can still open the CSV file in statistical software to
+                access the full dataset.
+              </p>
+            </Accordion>
+          </AccordionGroup>
+        </section>
+
         <section className="contact-info mt-10 flex flex-col md:flex-row">
           <div className="flex-1">
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">Get In Touch</h2>
-            <p className="text-gray-700">For support feedbacks or inquiries, contact us at:</p>
+            <p className="text-gray-700">For support, feedback, or inquiries, contact us at:</p>
             <ul className="list-none m-4">
               <li>
                 Email:{' '}
@@ -118,7 +198,6 @@ const AboutPage = () => {
                   FASTR@worldbank.org
                 </a>
               </li>
-              <li>Phone: (123) 456-7890</li>
             </ul>
           </div>
           <div className="flex-1">
@@ -143,8 +222,8 @@ const AboutPage = () => {
 
         {/* Acknowledgements */}
         <section>
-          <h2 className="text-3xl font-semibold text-gray-900 mb-4">Acknowledgements</h2>
-          <p>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Acknowledgements</h2>
+          <p className="text-sm">
             We would like to thank Damola Sheriff Olajide with the West African Health Organization
             who provided the software prototype for the FASTR DHIS2 Data Downloader.
           </p>

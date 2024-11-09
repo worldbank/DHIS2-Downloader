@@ -276,6 +276,9 @@ const MainPage = ({ queryDb }) => {
             {/* Download Button */}
             <div className="w-full mt-4">
               <h3 className="text-lg font-semibold mb-4 text-gray-700">Download</h3>
+              <p className="text-xs text-gray-500 mb-2">
+                <em>Note:</em> Use a unique file name to prevent overwriting.
+              </p>
               <DownloadButton
                 handleDownload={handleStreamDownload}
                 isDownloadDisabled={isDownloadDisabled}
