@@ -65,54 +65,16 @@ const AboutPage = () => {
                 to keep or erase history upon logging out.
               </p>
             </Accordion>
-            <Accordion title="Accessing Facility">
+            <Accordion title="Accessing Facility Information">
               <p className="mb-4">
-                Record successful downloads, add notes, and quickly re-download past records. Option
-                to keep or erase history upon logging out.
+                The facility table feature offers a list of all health facilities registered in the
+                DHIS2 system, along with key attributes, which can be exported as a CSV file.
+                Additionally, the facility map feature allows you to view all facilities with GPS
+                coordinates in a map format.
               </p>
             </Accordion>
           </AccordionGroup>
         </section>
-
-        <section className="Resources-info mt-10">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">Additional Resources</h2>
-          <p>
-            Learn more about how to use the FASTR DHIS2 Data Downloader by visiting our{' '}
-            <a
-              href="https://data.gffportal.org/key-theme-pages/rmncah-n-service-use-monitoring"
-              target="_blank"
-              rel="noreferrer"
-              className="text-blue-500 hover:underline"
-            >
-              Training Resources
-            </a>
-            .
-          </p>
-          <p>
-            The code is accessible via{' '}
-            <a
-              href="https://github.com/worldbank/dhis2-downloader"
-              target="_blank"
-              rel="noreferrer"
-              className="text-blue-500 hover:underline"
-            >
-              GitHub
-            </a>{' '}
-            under BSD-2 License.
-          </p>
-        </section>
-
-        <section className="team-info mt-10">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">Our Team</h2>
-          <p>
-            The FASTR DHIS2 Data Downloader was developed by the Results and Learning team at the
-            Global Financing Facility for Women, Children and Adolescents (GFF). The Frequent
-            Assessments and System Tools for Resilience (FASTR) initiative, aims to enable
-            rapid-cycle monitoring for strengthening PHC systems and improving RMNCAH-N outcomes
-            through the timely and high-frequency analysis and use of data.
-          </p>
-        </section>
-
         <section className="faq-info mt-10">
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">
             Frequently Asked Questions (FAQ)
@@ -185,6 +147,45 @@ const AboutPage = () => {
               </p>
             </Accordion>
           </AccordionGroup>
+        </section>
+
+        <section className="Resources-info mt-10">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4">Additional Resources</h2>
+          <p>
+            Learn more about how to use the FASTR DHIS2 Data Downloader by visiting our{' '}
+            <a
+              href="https://data.gffportal.org/key-theme-pages/rmncah-n-service-use-monitoring"
+              target="_blank"
+              rel="noreferrer"
+              className="text-blue-500 hover:underline"
+            >
+              Training Resources
+            </a>
+            .
+          </p>
+          <p>
+            The code is accessible via{' '}
+            <a
+              href="https://github.com/worldbank/dhis2-downloader"
+              target="_blank"
+              rel="noreferrer"
+              className="text-blue-500 hover:underline"
+            >
+              GitHub
+            </a>{' '}
+            under BSD-2 License.
+          </p>
+        </section>
+
+        <section className="team-info mt-10">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4">Our Team</h2>
+          <p>
+            The FASTR DHIS2 Data Downloader was developed by the Results and Learning team at the
+            Global Financing Facility for Women, Children and Adolescents (GFF). The Frequent
+            Assessments and System Tools for Resilience (FASTR) initiative, aims to enable
+            rapid-cycle monitoring for strengthening PHC systems and improving RMNCAH-N outcomes
+            through the timely and high-frequency analysis and use of data.
+          </p>
         </section>
 
         <section className="contact-info mt-10 flex flex-col md:flex-row">
