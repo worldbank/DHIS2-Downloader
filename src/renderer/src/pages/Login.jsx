@@ -20,11 +20,13 @@ const Login = () => {
             <div>
               <label className="block mb-2">
                 DHIS2 URL
-                <Tooltip
-                  text={
-                    'Enter the DHIS2 Link without the last forward slash, e.g. https://your-dhis2.com instead of https://your-dhis2.com/.'
-                  }
-                />
+                <Tooltip>
+                  <p>
+                    Enter the DHIS2 Link without the last forward slash, e.g.,{' '}
+                    <code> https://your-dhis2.com</code> instead of{' '}
+                    <code> https://your-dhis2.com/</code>.
+                  </p>
+                </Tooltip>
               </label>
               <input
                 type="text"

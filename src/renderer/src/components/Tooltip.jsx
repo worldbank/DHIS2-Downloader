@@ -8,13 +8,12 @@ const Tooltip = ({ children }) => {
 
   useEffect(() => {
     if (tooltipRef.current && show) {
-      const { offsetTop, offsetHeight } = tooltipRef.current
-      const newTooltipPosition = {
-        bottom: `calc(100% + ${offsetHeight / 2}px)`, // Adjust this calculation as needed
+      const { offsetHeight } = tooltipRef.current
+      setTooltipPosition({
+        top: `-${offsetHeight + 8}px`,
         left: '50%',
         transform: 'translateX(-50%)'
-      }
-      setTooltipPosition(newTooltipPosition)
+      })
     }
   }, [show])
 

@@ -111,23 +111,27 @@ const MainPage = ({ queryDb }) => {
   }
 
   const writeChunkToFile = (text, fileStream, headerState) => {
-    const indexOfFirstNewline = text.indexOf('\n')
+    const rows = text.split('\n').filter(Boolean)
+
+    if (rows.length === 0) return
 
     if (!headerState.written) {
-      // Add 'downloaded_date' column to the header
-      const header = text.slice(0, indexOfFirstNewline) + ',downloaded_date'
+      // Write header only for the first chunk
+      const header = rows[0] + ',downloaded_date'
       fileStream.write(header + '\n')
       headerState.written = true
+      rows.shift()
+    } else {
+      const firstRow = rows[0]
+      if (firstRow.toLowerCase().includes('period') || firstRow.toLowerCase().includes('orgunit')) {
+        rows.shift()
+      }
     }
 
-    // Append currentDate to each row
-    const dataRows = text
-      .slice(indexOfFirstNewline + 1)
-      .split('\n')
-      .filter(Boolean) // Ensure no empty rows
-    const dataWithDate = dataRows.map((row) => row + `,${currentDate}`).join('\n')
-
-    fileStream.write(dataWithDate + '\n')
+    if (rows.length > 0) {
+      const dataWithDate = rows.map((row) => row + `,${currentDate}`).join('\n')
+      fileStream.write(dataWithDate + '\n')
+    }
   }
 
   const saveQueryToDatabase = async (downloadParams) => {
@@ -151,30 +155,35 @@ const MainPage = ({ queryDb }) => {
   const handleDownloadError = (error, fileStream) => {
     const errorMessage = error.message || error
     dispatch(triggerNotification({ message: errorMessage, type: 'error' }))
-    fileStream.end()
+    if (fileStream) {
+      fileStream.end()
+    }
   }
 
   const handleStreamDownload = async () => {
-    const saveFilePath = await getSaveFilePath()
-    if (!saveFilePath) return
-
-    const fileStream = window.fileSystem.createWriteStream(saveFilePath)
-    const downloadParams = getDownloadParameters()
-    const chunks = createDataChunks(
-      downloadParams.elementIds,
-      downloadParams.periods,
-      downloadParams.ou
-    )
-
+    let fileStream = null
     try {
+      const saveFilePath = await getSaveFilePath()
+      if (!saveFilePath) return
+
+      fileStream = window.fileSystem.createWriteStream(saveFilePath)
+      const downloadParams = getDownloadParameters()
+      const chunks = createDataChunks(
+        downloadParams.elementIds,
+        downloadParams.periods,
+        downloadParams.ou
+      )
+
       dispatch(clearLogs())
       dispatch(triggerLoading(true))
 
-      await processChunks(chunks, fileStream, downloadParams)
+      // Initialize header state
+      const headerState = { written: false }
+
+      await processChunks(chunks, fileStream, downloadParams, headerState)
 
       fileStream.end()
       dispatch(triggerNotification({ message: 'Download completed successfully', type: 'success' }))
-
       await saveQueryToDatabase(downloadParams)
       clearCacheIfPossible()
     } catch (error) {
@@ -187,7 +196,7 @@ const MainPage = ({ queryDb }) => {
   const isDownloadDisabled =
     !startDate ||
     !endDate ||
-    new Date(startDate) >= new Date(endDate) ||
+    new Date(startDate) > new Date(endDate) ||
     addedElements.length === 0 ||
     selectedOrgUnitLevels.length === 0
 
