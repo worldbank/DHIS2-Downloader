@@ -80,6 +80,21 @@ const AboutPage = () => {
             Frequently Asked Questions (FAQ)
           </h2>
           <AccordionGroup>
+            <Accordion title="Why Do I Need to Select a Chunk Size?">
+              <p className="mb-4">
+                Chunk size refers to how many periods of data are grouped together. For example, if
+                you are downloading facility-level monthly out-patient visits from January to
+                December 2021, and you select the 3 as the chunk size, which means the Downloader
+                will group 3 months together as a single request and make four requests in total to
+                finish the download. Selecting a chunk size helps split large datasets into
+                manageable parts, ensuring faster processing, easier downloads, and reduced risk of
+                system overload.{' '}
+                <b>
+                  Always select the appropriate chunk size based on your country's DHIS2 system
+                  situations.
+                </b>
+              </p>
+            </Accordion>
             <Accordion title="Why did the download fail, and how can I find out what went wrong?">
               <p className="mb-4">
                 The data downloader produces a log of errors. Here are some common errors with an

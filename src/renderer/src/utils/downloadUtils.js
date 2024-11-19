@@ -1,7 +1,7 @@
 export const generateDownloadingUrl = (dhis2Url, ou, dx, pe, co, format = 'csv') => {
   let parameters = `api/analytics.${format}?dimension=ou:${ou}&dimension=pe:${pe}&dimension=dx:${dx}`
   let defaultFormat =
-    '&displayProperty=NAME&ignoreLimit=TRUE&hierarchyMeta=true&hideEmptyRows=TRUE&showHierarchy=true&rows=ou;pe;dx'
+    '&displayProperty=NAME&ignoreLimit=TRUE&hierarchyMeta=TRUE&hideEmptyRows=TRUE&showHierarchy=TRUE&rows=ou;pe;dx'
 
   if (co.length !== 0) {
     parameters += co.map((el) => `&dimension=${el}`).join('')
@@ -13,13 +13,13 @@ export const generateDownloadingUrl = (dhis2Url, ou, dx, pe, co, format = 'csv')
   return url
 }
 
-export const createDataChunks = (dxs, pe, ou) => {
+export const createDataChunks = (dxs, pe, ou, chunkSize) => {
   const chunks = []
   dxs.forEach((dx) => {
-    for (let i = 0; i < pe.length; i += 3) {
+    for (let i = 0; i < pe.length; i += chunkSize) {
       chunks.push({
         dx: [dx],
-        periods: pe.slice(i, i + 3),
+        periods: pe.slice(i, i + chunkSize),
         ou: ou
       })
     }

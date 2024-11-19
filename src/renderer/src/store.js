@@ -9,6 +9,7 @@ import mouseReducer from './reducers/mouseReducer'
 import modalReducer from './reducers/modalReducer'
 import historyReducer from './reducers/historyReducer'
 import facilityReducer from './reducers/facilityReducer'
+import downloadReducer from './reducers/downloadReducer'
 
 const store = configureStore({
   reducer: {
@@ -21,7 +22,8 @@ const store = configureStore({
     orgUnit: orgUnitReducer,
     facility: facilityReducer,
     history: historyReducer,
-    mouse: mouseReducer
+    mouse: mouseReducer,
+    download: downloadReducer
   }
 })
 

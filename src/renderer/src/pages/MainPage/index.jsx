@@ -1,12 +1,10 @@
 import OrganizationUnitTree from './OrganizationUnitTree'
 import OrgUnitLevelMenu from './OrgUnitLevelMenu'
 import DateRangeSelector from './DateRangeSelector'
-import { fetchCsvData } from '../../service/useApi'
 import DataElementsMenu from './DataElements'
 import CategoryDropdownMenu from './CategoryCombo'
-import { generatePeriods } from '../../utils/dateUtils'
-import { generateDownloadingUrl, createDataChunks } from '../../utils/downloadUtils'
 import DownloadButton from './DownloadButton'
+import store from '../../store'
 import { useSelector, useDispatch } from 'react-redux'
 import {
   addLog,
@@ -15,6 +13,10 @@ import {
   triggerNotification
 } from '../../reducers/statusReducer'
 import Tooltip from '../../components/Tooltip'
+import { openModal } from '../../reducers/modalReducer'
+import { fetchCsvData } from '../../service/useApi'
+import { generatePeriods } from '../../utils/dateUtils'
+import { generateDownloadingUrl, createDataChunks } from '../../utils/downloadUtils'
 
 // eslint-disable-next-line react/prop-types
 const MainPage = ({ queryDb }) => {
@@ -66,11 +68,44 @@ const MainPage = ({ queryDb }) => {
     }
   }
 
-  const processChunks = async (chunks, fileStream, downloadParams) => {
-    const headerState = { written: false } // Use an object to track header state
-    const fetchPromises = chunks.map((chunk, index) =>
-      fetchAndProcessChunk(chunk, index, fileStream, downloadParams, headerState)
+  const saveQueryToDatabase = async (downloadParams) => {
+    await queryDb.query.add({
+      organizationLevel: downloadParams.ou,
+      period: downloadParams.pe,
+      dimension: downloadParams.dx,
+      dimensionName: downloadParams.dxNames,
+      disaggregation: downloadParams.co.join(';'),
+      url: downloadParams.downloadingUrl,
+      notes: ''
+    })
+  }
+
+  const processChunks = async (chunks, fileStream, downloadParams, headerState) => {
+    let index = 0
+
+    // Process chunks sequentially until the header is written
+    while (!headerState.written && index < chunks.length) {
+      await fetchAndProcessChunk(chunks[index], index, fileStream, downloadParams, headerState)
+      index++
+    }
+
+    // If no header was written after processing all chunks, exit early
+    if (!headerState.written) {
+      dispatch(
+        addLog({
+          message: `No data available in any chunk to write the header.`,
+          type: 'error'
+        })
+      )
+      return
+    }
+
+    // Process the remaining chunks in parallel
+    const remainingChunks = chunks.slice(index)
+    const fetchPromises = remainingChunks.map((chunk, idx) =>
+      fetchAndProcessChunk(chunk, index + idx, fileStream, downloadParams, headerState)
     )
+
     await Promise.all(fetchPromises)
   }
 
@@ -87,7 +122,6 @@ const MainPage = ({ queryDb }) => {
     try {
       const blob = await fetchCsvData(chunkUrl, username, password)
       const text = await blob.text()
-
       writeChunkToFile(text, fileStream, headerState)
 
       dispatch(
@@ -113,15 +147,21 @@ const MainPage = ({ queryDb }) => {
   const writeChunkToFile = (text, fileStream, headerState) => {
     const rows = text.split('\n').filter(Boolean)
 
-    if (rows.length === 0) return
-
     if (!headerState.written) {
-      // Write header only for the first chunk
-      const header = rows[0] + ',downloaded_date'
-      fileStream.write(header + '\n')
-      headerState.written = true
-      rows.shift()
-    } else {
+      // Attempt to write the header
+      if (rows.length === 0) {
+        return
+      } else {
+        // Write header from the first row
+        const header = rows[0] + ',downloaded_date'
+        fileStream.write(header + '\n')
+        headerState.written = true
+        rows.shift()
+      }
+    }
+
+    // Remove header row if present in subsequent chunks
+    if (rows.length > 0) {
       const firstRow = rows[0]
       if (firstRow.toLowerCase().includes('period') || firstRow.toLowerCase().includes('orgunit')) {
         rows.shift()
@@ -134,16 +174,53 @@ const MainPage = ({ queryDb }) => {
     }
   }
 
-  const saveQueryToDatabase = async (downloadParams) => {
-    await queryDb.query.add({
-      organizationLevel: downloadParams.ou,
-      period: downloadParams.pe,
-      dimension: downloadParams.dx,
-      dimensionName: downloadParams.dxNames,
-      disaggregation: downloadParams.co.join(';'),
-      url: downloadParams.downloadingUrl,
-      notes: ''
-    })
+  const handleDownloadClick = () => {
+    dispatch(
+      openModal({
+        type: 'CHUNKING_STRATEGY',
+        props: {
+          onStrategySelect: () => handleStreamDownload()
+        }
+      })
+    )
+  }
+
+  const handleStreamDownload = async () => {
+    let fileStream = null
+    try {
+      const currentChunkingStrategy = store.getState().download.chunkingStrategy
+      const saveFilePath = await getSaveFilePath()
+      if (!saveFilePath) return
+
+      fileStream = window.fileSystem.createWriteStream(saveFilePath)
+
+      const downloadParams = getDownloadParameters()
+      const chunks = createDataChunks(
+        downloadParams.elementIds,
+        downloadParams.periods,
+        downloadParams.ou,
+        parseInt(currentChunkingStrategy, 10)
+      )
+
+      // Debugging for Generated Chunks
+      console.log('Generated Chunks:', chunks)
+
+      dispatch(clearLogs())
+      dispatch(triggerLoading(true))
+
+      // Initialize header state
+      const headerState = { written: false }
+      await processChunks(chunks, fileStream, downloadParams, headerState)
+      fileStream.end()
+
+      dispatch(triggerNotification({ message: 'Download completed successfully', type: 'success' }))
+      await saveQueryToDatabase(downloadParams)
+      clearCacheIfPossible()
+    } catch (error) {
+      handleDownloadError(error, fileStream)
+    } finally {
+      dispatch(triggerLoading(false))
+    }
   }
 
   const clearCacheIfPossible = () => {
@@ -157,39 +234,6 @@ const MainPage = ({ queryDb }) => {
     dispatch(triggerNotification({ message: errorMessage, type: 'error' }))
     if (fileStream) {
       fileStream.end()
-    }
-  }
-
-  const handleStreamDownload = async () => {
-    let fileStream = null
-    try {
-      const saveFilePath = await getSaveFilePath()
-      if (!saveFilePath) return
-
-      fileStream = window.fileSystem.createWriteStream(saveFilePath)
-      const downloadParams = getDownloadParameters()
-      const chunks = createDataChunks(
-        downloadParams.elementIds,
-        downloadParams.periods,
-        downloadParams.ou
-      )
-
-      dispatch(clearLogs())
-      dispatch(triggerLoading(true))
-
-      // Initialize header state
-      const headerState = { written: false }
-
-      await processChunks(chunks, fileStream, downloadParams, headerState)
-
-      fileStream.end()
-      dispatch(triggerNotification({ message: 'Download completed successfully', type: 'success' }))
-      await saveQueryToDatabase(downloadParams)
-      clearCacheIfPossible()
-    } catch (error) {
-      handleDownloadError(error, fileStream)
-    } finally {
-      dispatch(triggerLoading(false))
     }
   }
 
@@ -289,7 +333,7 @@ const MainPage = ({ queryDb }) => {
                 <em>Note:</em> Use a unique file name to prevent overwriting.
               </p>
               <DownloadButton
-                handleDownload={handleStreamDownload}
+                handleDownload={handleDownloadClick}
                 isDownloadDisabled={isDownloadDisabled}
               />
             </div>
