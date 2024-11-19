@@ -10,12 +10,14 @@ The DHIS2 (District Health Information Software 2) Data Downloader is a React-ba
 
 - **HMIS Data Dictionary**: The downloader allows users to search the relevant terms and get the 11-letter JSON ID for Data Elements, Indicators, and Category Combos. Additionally, it converts the JSON IDs to readable names for Indicators when the numerator and denominator are available.
 
-- **Manage Downloading History**: The downloader can record the successful downloads' parameters and allows users to add notes for each downloading record, fill in parameters, and quickly re-downloads for past downloads. Additionally, the user could select to keep or erase histories when logging out.
+- **Manage Downloading History**: The downloader can record the parameters of successful downloads and allows users to add notes for each downloading record, fill in parameters, and quickly re-download past downloads. Additionally, the user could select to keep or erase histories when logging out.
+
+- **Access Facility Information**: The facility table feature offers a list of all health facilities registered in the DHIS2 system and key attributes, which can be exported as a CSV file. Additionally, the facility map feature allows you to view all facilities with GPS coordinates in a map format.
 
 ## Build on Your Desktop
 
 ```bash
-$ git clone https://github.com/ccxzhang/dhis2-downloader.git
+$ git clone https://github.com/worldbank/DHIS2-Downloader
 $ cd dhis2-downloader
 $ npm install
 
