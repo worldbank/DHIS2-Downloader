@@ -1,3 +1,5 @@
+![E2E Workflow Status](https://github.com/worldbank/DHIS2-Downloader/actions/workflows/e2e.yml/badge.svg) ![Total Downloads](https://img.shields.io/github/downloads/worldbank/dhis2-downloader/total) ![GitHub License](https://img.shields.io/github/license/worldbank/dhis2-downloader)
+
 # DHIS2 Data Downloader
 
 ## Introduction
