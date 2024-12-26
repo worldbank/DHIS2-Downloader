@@ -1,4 +1,5 @@
 name: Release
+
 on:
   push:
     tags:
@@ -27,6 +28,8 @@ jobs:
 
       - name: Build application
         run: npm run build:${{ matrix.os == 'macos-latest' && 'mac' || 'win' }}
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
