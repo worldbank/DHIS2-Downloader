@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import { initializeAuth } from './reducers/authReducer'
+import { initializeSecretKey } from './utils/sessionManager'
 import MainPage from './pages/MainPage'
 import Login from './pages/Login'
 import Footer from './pages/Footer'
@@ -21,7 +22,14 @@ const App = () => {
   const { dhis2Url, username, password, accessToken } = useSelector((state) => state.auth)
 
   useEffect(() => {
-    dispatch(initializeAuth())
+    ;(async () => {
+      try {
+        await initializeSecretKey()
+        dispatch(initializeAuth())
+      } catch (error) {
+        console.error('Failed to initialize application:', error)
+      }
+    })()
   }, [dispatch])
 
   const handleDisconnect = async () => {

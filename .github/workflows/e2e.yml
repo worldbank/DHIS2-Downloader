@@ -35,6 +35,8 @@ jobs:
 
       - name: Build project
         run: npm run build:linux
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
       - name: List dist directory contents
         run: ls -R dist
@@ -48,6 +50,7 @@ jobs:
       - name: Run Playwright tests
         run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" npm run test:playwright
         env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
           ELECTRON_NO_ATTACH_CONSOLE: true
           ELECTRON_DISABLE_SANDBOX: true
           DEBUG: pw:api
@@ -84,10 +87,13 @@ jobs:
 
       - name: Build project
         run: npm run build:mac
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
       - name: Run Playwright tests
         run: npm run test:playwright
         env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
           ELECTRON_NO_ATTACH_CONSOLE: true
           ELECTRON_DISABLE_SANDBOX: true
           DEBUG: pw:api
@@ -111,10 +117,13 @@ jobs:
 
       - name: Build project
         run: npm run build:win
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
       - name: Run Playwright tests
         run: npm run test:playwright
         env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
           ELECTRON_NO_ATTACH_CONSOLE: true
           ELECTRON_DISABLE_SANDBOX: true
           DEBUG: pw:api
