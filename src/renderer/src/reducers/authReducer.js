@@ -10,6 +10,8 @@ import {
 } from '../service/useApi'
 import { dictionaryDb, servicesDb, queryDb } from '../service/db'
 import { triggerLoading, triggerNotification } from '../reducers/statusReducer'
+import { getSecretKey } from '../utils/sessionManager'
+import { encryptPassword, decryptPassword } from '../utils/cryptoUtils'
 
 const initialState = {
   dhis2Url: '',
@@ -50,13 +52,17 @@ export const initializeAuth = () => async (dispatch) => {
     const storedAccessToken = localStorage.getItem('accessToken')
     const storedDhis2Url = localStorage.getItem('dhis2Url')
     const storedUsername = localStorage.getItem('username')
-    const storedPassword = localStorage.getItem('password')
+    const encryptedPassword = localStorage.getItem('encryptedPassword')
+    let password
+    if (encryptedPassword) {
+      password = decryptPassword(encryptedPassword, getSecretKey())
+    }
 
-    if (storedAccessToken && storedDhis2Url && storedUsername && storedPassword) {
+    if (storedAccessToken && storedDhis2Url && storedUsername && password) {
       dispatch(setAccessToken(storedAccessToken))
       dispatch(setDhis2Url(storedDhis2Url))
       dispatch(setUsername(storedUsername))
-      dispatch(setPassword(storedPassword))
+      dispatch(setPassword(password))
     } else if (storedDhis2Url && storedUsername) {
       dispatch(setDhis2Url(storedDhis2Url))
       dispatch(setUsername(storedUsername))
@@ -77,8 +83,10 @@ export const connect = (dhis2Url, username, password) => async (dispatch) => {
       dispatch(setAccessToken(token))
       localStorage.setItem('accessToken', token)
       localStorage.setItem('username', username)
-      localStorage.setItem('password', password)
+      // localStorage.setItem('password', password)
       localStorage.setItem('dhis2Url', dhis2Url)
+      const encryptedPassword = encryptPassword(password, getSecretKey())
+      localStorage.setItem('encryptedPassword', encryptedPassword)
 
       const [
         elements,

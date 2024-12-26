@@ -23,10 +23,15 @@ const fileSystemAPI = {
   }
 }
 
+const secureAPI = {
+  getSecretKey: () => ipcRenderer.invoke('get-secret-key')
+}
+
 if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld('electron', electronAPI)
     contextBridge.exposeInMainWorld('api', api)
+    contextBridge.exposeInMainWorld('secureApi', secureAPI)
     contextBridge.exposeInMainWorld('fileSystem', fileSystemAPI)
     contextBridge.exposeInMainWorld('electronAPI', {
       selectSaveLocation: () => ipcRenderer.invoke('dialog:saveFile')
@@ -37,6 +42,7 @@ if (process.contextIsolated) {
 } else {
   window.electron = electronAPI
   window.api = api
+  window.secureApi = secureAPI
   window.fileSystem = fileSystemAPI
   window.electronAPI = {
     selectSaveLocation: () => ipcRenderer.invoke('dialog:saveFile')

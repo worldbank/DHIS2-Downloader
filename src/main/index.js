@@ -3,6 +3,9 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import fs from 'fs'
 
+const dotenv = require('dotenv')
+dotenv.config()
+
 const iconPath = join(__dirname, '../../resources/icon')
 
 app.commandLine.appendSwitch('ignore-gpu-blacklist', 'true')
@@ -82,6 +85,10 @@ ipcMain.handle('dialog:saveFile', async () => {
   } else {
     return filePath
   }
+})
+
+ipcMain.handle('get-secret-key', async () => {
+  return process.env.SECRET_KEY
 })
 
 ipcMain.handle('trigger-gc', () => {
