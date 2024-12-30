@@ -101,7 +101,7 @@ export const objectToCsv = (array) => {
   for (const obj of array) {
     const values = headers.map((header) => {
       const value = obj[header] !== undefined ? obj[header] : ''
-      const escapedValue = ('' + value).replace(/"/g, '\\"')
+      const escapedValue = ('' + value).replace(/\\/g, '\\\\').replace(/"/g, '\\"')
       return `"${escapedValue}"`
     })
     csvRows.push(values.join(','))
