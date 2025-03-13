@@ -32,7 +32,7 @@ jobs:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ github.run_number }}-${{ matrix.os }}
           path: dist/**
