@@ -15,10 +15,14 @@ win:
   executableName: DHIS2 Downloader
   icon: resources/icon.png
 nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createStartMenuShortcut: false
+  createDesktopShortcut: always
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
-  createDesktopShortcut: always
 mac:
   icon: resources/icon.png
   entitlementsInherit: build/entitlements.mac.plist
