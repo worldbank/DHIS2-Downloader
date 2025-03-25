@@ -17,10 +17,12 @@ import { openModal } from '../../reducers/modalReducer'
 import { fetchCsvData } from '../../service/useApi'
 import { generatePeriods } from '../../utils/dateUtils'
 import { generateDownloadingUrl, createDataChunks } from '../../utils/downloadUtils'
+import { useTranslation } from 'react-i18next'
 
 // eslint-disable-next-line react/prop-types
 const MainPage = ({ queryDb }) => {
   const dispatch = useDispatch()
+  const { t } = useTranslation()
   const { selectedOrgUnits, selectedOrgUnitLevels } = useSelector((state) => state.orgUnit)
   const { addedElements } = useSelector((state) => state.dataElements)
   const { selectedCategory } = useSelector((state) => state.category)
@@ -39,7 +41,7 @@ const MainPage = ({ queryDb }) => {
   const getSaveFilePath = async () => {
     const saveFilePath = await window.electronAPI.selectSaveLocation()
     if (!saveFilePath) {
-      dispatch(triggerNotification({ message: 'Download canceled by user.', type: 'info' }))
+      dispatch(triggerNotification({ message: t('downloadCanceled'), type: 'info' }))
     }
     return saveFilePath
   }
@@ -89,11 +91,10 @@ const MainPage = ({ queryDb }) => {
       index++
     }
 
-    // If no header was written after processing all chunks, exit early
     if (!headerState.written) {
       dispatch(
         addLog({
-          message: `No data available in any chunk to write the header.`,
+          message: t('noDataForHeader'),
           type: 'error'
         })
       )
@@ -126,14 +127,25 @@ const MainPage = ({ queryDb }) => {
 
       dispatch(
         addLog({
-          message: `Chunk ${index + 1}: ${dx.join(';')} (${periods[0]}-${periods[periods.length - 1]}) finished successfully.`,
+          message: t('chunkSuccess', {
+            index: index + 1,
+            dx: dx.join(';'),
+            startPeriod: periods[0],
+            endPeriod: periods[periods.length - 1]
+          }),
           type: 'info'
         })
       )
     } catch (error) {
       dispatch(
         addLog({
-          message: `Chunk ${index + 1}: ${dx.join(';')} (${periods[0]}-${periods[periods.length - 1]}) failed: ${error?.message}`,
+          message: t('chunkFailed', {
+            index: index + 1,
+            dx: dx.join(';'),
+            startPeriod: periods[0],
+            endPeriod: periods[periods.length - 1],
+            error: error?.message
+          }),
           type: 'error'
         })
       )
@@ -148,19 +160,13 @@ const MainPage = ({ queryDb }) => {
     const rows = text.split('\n').filter(Boolean)
 
     if (!headerState.written) {
-      // Attempt to write the header
-      if (rows.length === 0) {
-        return
-      } else {
-        // Write header from the first row
-        const header = rows[0] + ',downloaded_date'
-        fileStream.write(header + '\n')
-        headerState.written = true
-        rows.shift()
-      }
+      if (rows.length === 0) return
+      const header = rows[0] + ',downloaded_date'
+      fileStream.write(header + '\n')
+      headerState.written = true
+      rows.shift()
     }
 
-    // Remove header row if present in subsequent chunks
     if (rows.length > 0) {
       const firstRow = rows[0]
       if (firstRow.toLowerCase().includes('period') || firstRow.toLowerCase().includes('orgunit')) {
@@ -202,18 +208,16 @@ const MainPage = ({ queryDb }) => {
         parseInt(currentChunkingStrategy, 10)
       )
 
-      // Debugging for Generated Chunks
       console.log('Generated Chunks:', chunks)
 
       dispatch(clearLogs())
       dispatch(triggerLoading(true))
 
-      // Initialize header state
       const headerState = { written: false }
       await processChunks(chunks, fileStream, downloadParams, headerState)
       fileStream.end()
 
-      dispatch(triggerNotification({ message: 'Download completed successfully', type: 'success' }))
+      dispatch(triggerNotification({ message: t('downloadSuccess'), type: 'success' }))
       await saveQueryToDatabase(downloadParams)
       clearCacheIfPossible()
     } catch (error) {
@@ -254,13 +258,10 @@ const MainPage = ({ queryDb }) => {
             style={{ height: 'auto', minHeight: '70vh' }}
           >
             <h3 className="text-lg font-semibold mb-4 text-gray-700">
-              Organization Units
+              {t('mainPage.organizationUnits')}
               <Tooltip>
                 <div>
-                  <p>
-                    An organisational unit is usually a geographical unit, which exists within a
-                    hierarchy.
-                  </p>
+                  <p>{t('mainPage.organizationUnitsTooltip')}</p>
                 </div>
               </Tooltip>
             </h3>
@@ -278,7 +279,7 @@ const MainPage = ({ queryDb }) => {
             style={{ height: 'auto', minHeight: '70vh' }}
           >
             <h3 className="text-lg font-semibold mb-4 text-gray-700">
-              Data Elements and Indicators
+              {t('mainPage.dataElementsAndIndicators')}
             </h3>
             <div
               className="overflow-y-auto p-4 bg-gray-100 rounded shadow-sm"
@@ -288,36 +289,33 @@ const MainPage = ({ queryDb }) => {
             </div>
           </div>
 
-          {/* Third Column: Organization Levels, Date Range, Disaggregation */}
+          {/* Third Column: Organization Levels, Date Range, Disaggregation, Download */}
           <div
             className="w-full md:w-1/3 px-4 py-8 mt-1 md:mt-0"
             style={{ height: 'auto', minHeight: '70vh' }}
           >
-            <h3 className="text-lg font-semibold mb-4 text-gray-700">Organization Levels</h3>
+            <h3 className="text-lg font-semibold mb-4 text-gray-700">
+              {t('mainPage.organizationLevels')}
+            </h3>
             <div className="mb-6" style={{ height: 'calc((70vh -2rem) / 3)' }}>
               <OrgUnitLevelMenu />
             </div>
-            <h3 className="text-lg font-semibold mb-4 text-gray-700">Date Range</h3>
+            <h3 className="text-lg font-semibold mb-4 text-gray-700">{t('mainPage.dateRange')}</h3>
             <div className="mb-6" style={{ height: 'calc((70vh -2rem) / 3)' }}>
               <DateRangeSelector />
             </div>
             <h3 className="text-lg font-semibold mb-4 text-gray-700">
-              Disaggregation{' '}
+              {t('mainPage.disaggregation')}{' '}
               <Tooltip>
                 <div className="text-gray-600 text-sm">
-                  Disaggregation includes:
+                  <p>{t('mainPage.disaggregationTooltip.header')}</p>
                   <ul className="list-disc pl-5">
-                    <li>
-                      <em>Category combination options</em> are dynamically composed of all of the
-                      different combinations of category options which compose a category
-                      combination. As an example, two categories "Gender" and "Age," might have
-                      options such as "Male" or "Female" and "{'<'}5 years" or "{'>'}5 years." One
-                      of the Category combination options would be "Male {'<'}5 years."
-                    </li>
-                    <li>
-                      <em>Organization Units Group Sets</em> are typically related to the attributes
-                      of organization units, such as "ownership," "type."
-                    </li>
+                    {t('mainPage.disaggregationTooltip.list', { returnObjects: true }).map(
+                      (item, index) => (
+                        <li key={index} dangerouslySetInnerHTML={{ __html: item }} />
+                      ),
+                      []
+                    )}
                   </ul>
                 </div>
               </Tooltip>
@@ -328,9 +326,9 @@ const MainPage = ({ queryDb }) => {
 
             {/* Download Button */}
             <div className="w-full mt-4">
-              <h3 className="text-lg font-semibold mb-4 text-gray-700">Download</h3>
+              <h3 className="text-lg font-semibold mb-4 text-gray-700">{t('mainPage.download')}</h3>
               <p className="text-xs text-gray-500 mb-2">
-                <em>Note:</em> Use a unique file name to prevent overwriting.
+                <em>{t('mainPage.downloadNote')}</em>
               </p>
               <DownloadButton
                 handleDownload={handleDownloadClick}

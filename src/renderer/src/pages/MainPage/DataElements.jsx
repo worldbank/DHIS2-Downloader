@@ -11,9 +11,11 @@ import {
 } from '../../reducers/dataElementsReducer'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { dictionaryDb } from '../../service/db'
+import { useTranslation } from 'react-i18next'
 
 const DataElementsSelector = () => {
   const dispatch = useDispatch()
+  const { t } = useTranslation()
   const { data, selectedDataType, searchQuery, filteredElements, selectedElements } = useSelector(
     (state) => state.dataElements
   )
@@ -55,20 +57,20 @@ const DataElementsSelector = () => {
 
   return (
     <div className="mb-4">
-      Data Type
+      <div className="mb-1 font-semibold">{t('dataElementsMenu.dataTypeLabel')}</div>
       <select
         onChange={(e) => dispatch(setSelectedDataType(e.target.value))}
         className="mb-2 w-full px-4 py-2 border border-gray-700 rounded"
       >
-        <option value="All">All Data Types</option>
-        <option value="DataElement">Data Element</option>
-        <option value="Indicator">Indicator</option>
-        <option value="ProgramIndicator">Program Indicator</option>
-        <option value="dataSets">DataSet</option>
+        <option value="All">{t('dataElementsMenu.dataTypeOptions.all')}</option>
+        <option value="DataElement">{t('dataElementsMenu.dataTypeOptions.dataElement')}</option>
+        <option value="Indicator">{t('dataElementsMenu.dataTypeOptions.indicator')}</option>
+        <option value="ProgramIndicator">{t('dataElementsMenu.dataTypeOptions.programIndicator')}</option>
+        <option value="dataSets">{t('dataElementsMenu.dataTypeOptions.dataSet')}</option>
       </select>
       <input
         type="text"
-        placeholder="Search"
+        placeholder={t('dataElementsMenu.searchPlaceholder')}
         value={searchQuery}
         onChange={(e) => dispatch(setSearchQuery(e.target.value))}
         className="mb-2 w-full px-4 py-2 border border-gray-700 rounded"
@@ -89,7 +91,7 @@ const DataElementsSelector = () => {
         onClick={handleAddSelectedElements}
         className="mt-2 mr-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
       >
-        Select
+        {t('dataElementsMenu.selectButton')}
       </button>
     </div>
   )
@@ -97,6 +99,7 @@ const DataElementsSelector = () => {
 
 const SelectedDataElementsDisplay = () => {
   const dispatch = useDispatch()
+  const { t } = useTranslation()
   const addedDataElements = useSelector((state) => state.dataElements?.addedElements)
 
   const handleRemoveElement = (id) => {
@@ -105,13 +108,13 @@ const SelectedDataElementsDisplay = () => {
 
   return (
     <div className="mb-4">
-      <h3 className="text-xl font-bold mb-2">Selected Items</h3>
+      <h3 className="text-xl font-bold mb-2">{t('dataElementsMenu.selectedItemsTitle')}</h3>
       <ul>
         {addedDataElements?.map((element) => (
           <li key={element.id} className="text-sm">
             {element.displayName}
             <button onClick={() => handleRemoveElement(element.id)} className="ml-2 text-red-500">
-              Remove
+              {t('dataElementsMenu.removeButton')}
             </button>
           </li>
         ))}

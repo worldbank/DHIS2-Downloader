@@ -1,8 +1,11 @@
+import React, { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { setStartDate, setEndDate, setFrequency } from '../../reducers/dateRangeReducer'
+import { useTranslation } from 'react-i18next'
 
 const DateRangeSelector = () => {
   const dispatch = useDispatch()
+  const { t } = useTranslation()
   const { frequency, startDate, endDate } = useSelector((state) => state.dateRange)
 
   const handleStartDateChange = (event) => {
@@ -22,7 +25,9 @@ const DateRangeSelector = () => {
   return (
     <div className="flex">
       <div className="w-1/2 space-y-4">
-        <legend className="text-sm font-medium text-gray-700">Frequency</legend>
+        <legend className="text-sm font-medium text-gray-700">
+          {t('dateRange.frequencyLabel')}
+        </legend>
         <div className="mt-2">
           <label className="inline-flex items-center">
             <input
@@ -34,7 +39,7 @@ const DateRangeSelector = () => {
               checked={frequency === 'year'}
               className="form-radio text-blue-600"
             />
-            <span className="ml-2">Year</span>
+            <span className="ml-2">{t('dateRange.frequencyOptions.year')}</span>
           </label>
         </div>
         <div className="mt-2">
@@ -48,7 +53,7 @@ const DateRangeSelector = () => {
               onChange={handleFrequencyChange}
               className="form-radio text-blue-600"
             />
-            <span className="ml-2">Quarter</span>
+            <span className="ml-2">{t('dateRange.frequencyOptions.quarter')}</span>
           </label>
         </div>
         <div className="mt-2">
@@ -62,14 +67,14 @@ const DateRangeSelector = () => {
               onChange={handleFrequencyChange}
               className="form-radio text-blue-600"
             />
-            <span className="ml-2">Month</span>
+            <span className="ml-2">{t('dateRange.frequencyOptions.month')}</span>
           </label>
         </div>
       </div>
       <div className="w-1/2 space-y-4">
         <div className="w-full">
           <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">
-            Start Date
+            {t('dateRange.startDateLabel')}
           </label>
           <input
             type="month"
@@ -82,7 +87,7 @@ const DateRangeSelector = () => {
         </div>
         <div className="w-full">
           <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">
-            End Date
+            {t('dateRange.endDateLabel')}
           </label>
           <input
             type="month"
