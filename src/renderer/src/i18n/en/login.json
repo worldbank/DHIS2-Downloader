@@ -1,0 +1,11 @@
+{
+  "title": "Welcome!",
+  "dhis2UrlLabel": "DHIS2 URL",
+  "dhis2UrlTooltip": "Enter the DHIS2 Link without the last forward slash, e.g., <code>https://your-dhis2.com</code> instead of <code>https://your-dhis2.com/</code>.",
+  "usernameLabel": "Username",
+  "passwordLabel": "Password",
+  "connectButton": "Connect",
+  "dhis2UrlPlaceholder": "DHIS2 URL",
+  "usernamePlaceholder": "Username",
+  "passwordPlaceholder": "Password"
+}

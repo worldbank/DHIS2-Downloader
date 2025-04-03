@@ -1,0 +1,17 @@
+{
+  "organizationUnits": "Organization Units",
+  "organizationUnitsTooltip": "An organisational unit is usually a geographical unit, which exists within a hierarchy.",
+  "dataElementsAndIndicators": "Data Elements and Indicators",
+  "organizationLevels": "Organization Levels",
+  "dateRange": "Date Range",
+  "disaggregation": "Disaggregation",
+  "disaggregationTooltip": {
+    "header": "Disaggregation includes:",
+    "list": [
+      "<em>Category combination options</em> are dynamically composed of all of the different combinations of category options which compose a category combination. For example, two categories \"Gender\" and \"Age\" might have options such as \"Male\" or \"Female\" and \"<5 years\" or \">5 years.\" One combination might be \"Male <5 years.\"",
+      "<em>Organization Units Group Sets</em> are typically related to the attributes of organization units, such as \"ownership\" and \"type.\""
+    ]
+  },
+  "download": "Download",
+  "downloadNote": "Note: Use a unique file name to prevent overwriting."
+}
