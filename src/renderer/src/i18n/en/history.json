@@ -1,0 +1,15 @@
+{
+  "exportHistory": "Export History",
+  "delete": "Delete",
+  "reDownload": "Re-download",
+  "noHistory": "No download history available.",
+  "edit": "Edit",
+  "save": "Save",
+  "pass": "Pass",
+  "noteUpdateSuccess": "Note {{id}} updated successfully.",
+  "noteUpdateFail": "Failed to update note: {{error}}",
+  "paramsPassed": "Parameters passed for row {{id}}.",
+  "finishedDownloading": "Finished downloading from {{url}}",
+  "noSelectedRedownload": "No worker or no URLs selected for redownload.",
+  "errorProcessingDownloads": "Error processing downloads:"
+}

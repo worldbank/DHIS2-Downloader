@@ -21,6 +21,7 @@ import {
 import { clearSelectedCategory, setSelectedCategory } from '../../reducers/categoryReducer'
 import { MicroArrowDownTray, MicroArrowTopRight, MicroTrash } from '../../components/Icons'
 import Pagination from '../../components/Pagination'
+import { useTranslation } from 'react-i18next'
 
 // eslint-disable-next-line react/prop-types
 const HistoryPage = ({ dictionaryDb, queryDb }) => {
@@ -34,6 +35,7 @@ const HistoryPage = ({ dictionaryDb, queryDb }) => {
   const { selectedRows, editedRow } = useSelector((state) => state.history)
   const worker = new Worker(new URL('../../service/worker.js', import.meta.url))
   const allElements = useLiveQuery(() => dictionaryDb.elements.toArray(), []) || []
+  const { t } = useTranslation()
 
   const totalPages = useMemo(() => {
     return Math.ceil(downloadQueries.length / itemsPerPage)
@@ -104,7 +106,10 @@ const HistoryPage = ({ dictionaryDb, queryDb }) => {
               const csvBlob = new Blob([e.data.data], { type: 'text/csv;charset=utf-8' })
               zip.file(`history_${index}.csv`, csvBlob)
               dispatch(
-                triggerNotification({ message: `Finished downloading from ${url}`, type: 'info' })
+                triggerNotification({
+                  message: t('history.finishedDownloading', { url: url }),
+                  type: 'info'
+                })
               )
               resolve()
             } else if (e.data.type === 'error') {
@@ -166,7 +171,7 @@ const HistoryPage = ({ dictionaryDb, queryDb }) => {
         await queryDb.query.update(editedRow.rowId, { notes: temporaryNote })
         dispatch(
           triggerNotification({
-            message: `Note ${editedRow.rowId} updated successfully.`,
+            message: t('history.updateSuccess', { id: editedRow.rowId }),
             type: 'success'
           })
         )
@@ -175,7 +180,7 @@ const HistoryPage = ({ dictionaryDb, queryDb }) => {
         console.error('Error updating note:', error)
         dispatch(
           triggerNotification({
-            message: `Failed to update note: ${error.message}`,
+            message: t('history.noteUpdateFail', { error: error.message }),
             type: 'error'
           })
         )
@@ -231,7 +236,7 @@ const HistoryPage = ({ dictionaryDb, queryDb }) => {
     )
     dispatch(
       triggerNotification({
-        message: `Parameters passed for row ${id}.`,
+        message: t('history.paramsPassed', { id: id }),
         type: 'info'
       })
     )
@@ -239,7 +244,7 @@ const HistoryPage = ({ dictionaryDb, queryDb }) => {
   }
 
   if (downloadQueries.length === 0) {
-    return <p className="text-center text-gray-500">No download history available.</p>
+    return <p className="text-center text-gray-500">{t('history.noHistory')}</p>
   }
 
   return (
@@ -253,7 +258,7 @@ const HistoryPage = ({ dictionaryDb, queryDb }) => {
               onClick={handleExportDownloadHistory}
               disabled={downloadQueries.length === 0}
             >
-              <MicroArrowTopRight /> Export History
+              <MicroArrowTopRight /> {t('history.exportHistory')}
             </button>
           </div>
           <div className="flex space-x-2">
@@ -262,7 +267,7 @@ const HistoryPage = ({ dictionaryDb, queryDb }) => {
               className="text-blue-600 hover:text-blue-800 font-semibold px-4 text-sm transition duration-150 ease-in-out"
               disabled={downloadQueries.length === 0}
             >
-              <MicroTrash /> Delete
+              <MicroTrash /> {t('history.delete')}
             </button>
           </div>
           <div className="flex space-x-2">
@@ -271,7 +276,7 @@ const HistoryPage = ({ dictionaryDb, queryDb }) => {
               className="text-blue-600 hover:text-blue-800 font-semibold px-4 text-sm transition duration-150 ease-in-out"
               disabled={selectedRows.length === 0}
             >
-              <MicroArrowDownTray /> Re-download
+              <MicroArrowDownTray /> {t('history.reDownload')}
             </button>
           </div>
         </div>
@@ -314,19 +319,19 @@ const HistoryPage = ({ dictionaryDb, queryDb }) => {
                           onClick={() => handleEditClick(el.id, el.notes)}
                           className="text-blue-600 hover:text-blue-800"
                         >
-                          Edit
+                          {t('history.edit')}
                         </button>
                         {editedRow.rowId === el.id && (
                           <>
                             <button type="submit" className="text-green-600 hover:text-green-800">
-                              Save
+                              {t('history.save')}
                             </button>
                             <button
                               type="button"
                               onClick={() => handlePassParams(el.id)}
                               className="text-purple-600 hover:text-purple-800"
                             >
-                              Pass
+                              {t('history.pass')}
                             </button>
                           </>
                         )}

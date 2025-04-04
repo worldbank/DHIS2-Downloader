@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { MicroArrowTopRight } from '../../components/Icons'
 import { fetchFacilityData, loadDataFromDexie } from '../../reducers/facilityReducer'
 import { triggerLoading } from '../../reducers/statusReducer'
+import { useTranslation } from 'react-i18next'
 
 // Constants
 const MAP_CONFIG = {
@@ -84,6 +85,7 @@ const D3Map = () => {
   const dispatch = useDispatch()
   const { dhis2Url, username, password } = useSelector((state) => state.auth)
   const { geoJsonData, dataProcessed } = useSelector((state) => state.facility)
+  const { t } = useTranslation()
 
   const [tooltip, setTooltip] = useState({
     visible: false,
@@ -324,7 +326,7 @@ const D3Map = () => {
           className="text-blue-500 hover:text-blue-700 font-medium text-sm"
           onClick={handleGeoJsonExport}
         >
-          <MicroArrowTopRight /> Export GeoJson
+          <MicroArrowTopRight /> {t('mainPage.exportGeoJSON')}
         </button>
       </div>
       <LevelSelector

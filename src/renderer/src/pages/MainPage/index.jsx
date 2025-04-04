@@ -41,7 +41,7 @@ const MainPage = ({ queryDb }) => {
   const getSaveFilePath = async () => {
     const saveFilePath = await window.electronAPI.selectSaveLocation()
     if (!saveFilePath) {
-      dispatch(triggerNotification({ message: t('downloadCanceled'), type: 'info' }))
+      dispatch(triggerNotification({ message: t('mainPage.downloadCanceled'), type: 'info' }))
     }
     return saveFilePath
   }
@@ -94,7 +94,7 @@ const MainPage = ({ queryDb }) => {
     if (!headerState.written) {
       dispatch(
         addLog({
-          message: t('noDataForHeader'),
+          message: t('mainPage.noDataForHeader'),
           type: 'error'
         })
       )
@@ -127,7 +127,7 @@ const MainPage = ({ queryDb }) => {
 
       dispatch(
         addLog({
-          message: t('chunkSuccess', {
+          message: t('mainPage.chunkSuccess', {
             index: index + 1,
             dx: dx.join(';'),
             startPeriod: periods[0],
@@ -139,7 +139,7 @@ const MainPage = ({ queryDb }) => {
     } catch (error) {
       dispatch(
         addLog({
-          message: t('chunkFailed', {
+          message: t('mainPage.chunkFailed', {
             index: index + 1,
             dx: dx.join(';'),
             startPeriod: periods[0],
@@ -217,7 +217,7 @@ const MainPage = ({ queryDb }) => {
       await processChunks(chunks, fileStream, downloadParams, headerState)
       fileStream.end()
 
-      dispatch(triggerNotification({ message: t('downloadSuccess'), type: 'success' }))
+      dispatch(triggerNotification({ message: t('mainPage.downloadSuccess'), type: 'success' }))
       await saveQueryToDatabase(downloadParams)
       clearCacheIfPossible()
     } catch (error) {

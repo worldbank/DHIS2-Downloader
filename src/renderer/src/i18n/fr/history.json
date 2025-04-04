@@ -1,0 +1,15 @@
+{
+  "exportHistory": "Exporter l'historique",
+  "delete": "Supprimer",
+  "reDownload": "Re-télécharger",
+  "noHistory": "Aucun historique de téléchargement disponible.",
+  "edit": "Modifier",
+  "save": "Enregistrer",
+  "pass": "Transférer",
+  "noteUpdateSuccess": "Note {{id}} mise à jour avec succès.",
+  "noteUpdateFail": "Échec de la mise à jour de la note : {{error}}",
+  "paramsPassed": "Paramètres transférés pour la ligne {{id}}.",
+  "finishedDownloading": "Téléchargement terminé depuis {{url}}",
+  "noSelectedRedownload": "Aucun worker ou URL sélectionné pour le re-téléchargement.",
+  "errorProcessingDownloads": "Erreur lors du traitement des téléchargements :"
+}

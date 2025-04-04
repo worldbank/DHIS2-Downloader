@@ -1,0 +1,15 @@
+{
+  "title": "Diviser les données en segments plus petits",
+  "description": "Entrez le nombre de périodes temporelles pour chaque segment.",
+  "placeholder": "Entrez un nombre",
+  "cancel": "Annuler",
+  "confirm": "Confirmer",
+  "loading": "Chargement...",
+  "viewlogs": "Afficher les journaux ▼",
+  "hidelogs": "Masquer les journaux",
+  "invalidInput": "Veuillez entrer un nombre positif valide pour la taille du segment.",
+  "signoutTitle": "Effacer l’historique des téléchargements lors de la déconnexion ?",
+  "signoutDescription": "Souhaitez-vous supprimer l’historique des téléchargements enregistré sur cet appareil ? Cette opération est irréversible.",
+  "yes": "Oui",
+  "no": "Non"
+}

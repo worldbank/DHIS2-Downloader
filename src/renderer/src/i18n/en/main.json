@@ -1,4 +1,9 @@
 {
+  "chunkSuccess": "Chunk {{index}} downloaded: {{dx}} ({{startPeriod}} to {{endPeriod}})",
+  "chunkFailed": "Chunk {{index}} failed: {{dx}} ({{startPeriod}} to {{endPeriod}}) - {{error}}",
+  "downloadSuccess": "Download completed successfully.",
+  "downloadCanceled": "Download canceled.",
+  "noDataForHeader": "No data found for the header. Download skipped.",
   "organizationUnits": "Organization Units",
   "organizationUnitsTooltip": "An organisational unit is usually a geographical unit, which exists within a hierarchy.",
   "dataElementsAndIndicators": "Data Elements and Indicators",
@@ -13,5 +18,7 @@
     ]
   },
   "download": "Download",
-  "downloadNote": "Note: Use a unique file name to prevent overwriting."
+  "downloadNote": "Note: Use a unique file name to prevent overwriting.",
+  "exportGeoJSON": "Export GeoJSON",
+  "exportCSV": "Export CSV"
 }
