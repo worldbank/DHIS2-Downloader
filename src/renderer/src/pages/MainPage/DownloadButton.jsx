@@ -1,5 +1,9 @@
+import { useTranslation } from 'react-i18next'
+
 // eslint-disable-next-line react/prop-types
 const DownloadButton = ({ handleDownload, isDownloadDisabled }) => {
+  const { t } = useTranslation()
+
   return (
     <div className="mb-4 w-full md:w-1/2 lg:w-1/3 flex flex-col space-y-2">
       <button
@@ -9,7 +13,7 @@ const DownloadButton = ({ handleDownload, isDownloadDisabled }) => {
           isDownloadDisabled ? 'opacity-50 cursor-not-allowed' : ''
         }`}
       >
-        Download
+        {t('mainPage.download')}
       </button>
     </div>
   )

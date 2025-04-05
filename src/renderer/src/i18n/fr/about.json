@@ -1,0 +1,85 @@
+{
+  "overviewTitle": "À propos de FASTR DHIS2 Data Downloader",
+  "welcomeText": "Bienvenue sur le système de téléchargement de données FASTR DHIS2 (FASTR DHIS2 Data Downloader), votre solution idéale pour extraire facilement les données des systèmes DHIS2. Cet outil simplifie le téléchargement de données DHIS2 pour différents utilisateurs, qu'il s'agisse de fonctionnaires du ministère de la Santé, de chercheurs, d'ONG ou de bailleurs de fonds.",
+  "features": {
+    "title": "Fonctionnalités",
+    "downloadingData": {
+      "title": "Téléchargement des données du DHIS2",
+      "description": "Pour télécharger les données du DHIS2, veuillez sélectionner les plages de dates, les éléments/indicateurs de données, les niveaux organisationnels, les unités et les dimensions de désagrégation. Les données sont téléchargées au format CSV.",
+      "requirements": "L'utilisation du téléchargeur de données FASTR DHIS2 nécessite :",
+      "requirementsList": [
+        "L’URL de l’instance DHIS2",
+        "Un identifiant valide",
+        "Un mot de passe valide"
+      ],
+      "note": "Il est à noter que le système de téléchargement de données FASTR DHIS2 ne gère pas l'enregistrement de comptes DHIS2. Son utilisation est strictement limitée aux systèmes DHIS2 pour lesquels des identifiants valides sont disponibles. Les informations d'identification restent confinées à l'appareil utilisé, sans transmission externe."
+    },
+    "dataDictionary": {
+      "title": "Dictionnaire de données",
+      "description": "La recherche d'éléments de données et d'indicateurs peut s'effectuer par dénomination ou par code JSON. Il est possible d'accéder à des métadonnées supplémentaires et de les exporter au format CSV."
+    },
+    "downloadHistory": {
+      "title": "Gestion de l’historique des téléchargements",
+      "description": "Le système permet d'enregistrer les téléchargements réussis, d'ajouter des notes explicatives et de relancer rapidement des extractions précédentes. Les utilisateurs ont la possibilité de conserver ou supprimer l'historique lors de la déconnexion."
+    },
+    "facilityInfo": {
+      "title": "Accéder aux informations sur les établissements",
+      "description": "La fonctionnalité « répertoire des établissements » fournit la liste exhaustive des établissements de santé enregistrés dans le système DHIS2, accompagnée de leurs principaux attributs, avec possibilité d'exportation au format CSV. Parallèlement, la fonctionnalité « Cartographie des établissements » permet d'obtenir une visualisation géographique de l'ensemble des établissements disposant de coordonnées GPS."
+    }
+  },
+  "faq": {
+    "title": "Questions Fréquemment Posées (FAQ)",
+    "q1": {
+      "question": "Pourquoi est-il nécessaire de sélectionner une taille de segment (« chunk size »)?",
+      "answer": "La taille de segment détermine le regroupement des périodes de données. Par exemple, pour un téléchargement mensuel des consultations externes par établissement couvrant la période de janvier à décembre 2021, un découpage trimestriel générera quatre requêtes distinctes. Cette approche permet de fractionner les volumes importants de données en unités gérables, d'optimiser les temps de traitement, de faciliter les téléchargements et de réduire les risques de surcharge système. Il est recommandé d'adapter la taille de segment aux spécificités techniques du système DHIS2 de votre pays."
+    },
+    "q2": {
+      "question": "Cas d'échec de téléchargement - Diagnostic et résolution",
+      "answer1": "L'outil de téléchargement génère systématiquement un journal des erreurs. Une liste des anomalies récurrentes est fournie ci-après, incluant leur analyse technique et les mesures correctives applicables.",
+      "answer2": "Erreur : « Impossible de lire les propriétés de null (lecture 'textContent') »\nCause : Cette erreur survient généralement lorsque les périodes ou indicateurs demandés sont manquants dans le système DHIS2. Cela peut indiquer l'absence de données enregistrées pour un indicateur spécifique durant une période donnée. Pour résoudre le problème :",
+      "requirements": [
+        "Vérifier que les périodes et les indicateurs de données sélectionnés sont corrects, avant de lancer le téléchargement.",
+        "Cette erreur n'interrompt pas le processus de téléchargement des données. En cas d'échec d'une requête, le système poursuit le téléchargement ; et les requêtes en échec peuvent être consultées une fois le téléchargement terminé."
+      ],
+      "answer3": "Erreur : « HTTP Status 500 – Erreur interne du serveur »\nCause : Cette erreur indique généralement un dysfonctionnement du serveur, souvent dû à une interruption de connexion. Pour résoudre le problème :",
+      "serverIssues": [
+        "S'assurer que tous les champs obligatoires (périodes, éléments de données/indicateurs) sont sélectionnés.",
+        "Vérifier l'exactitude des identifiants de connexion.",
+        "Contrôler l'état du serveur pour s'assurer qu'il est opérationnel et ne rencontre aucun incident."
+      ]
+    },
+    "q3": {
+      "question": "Pourquoi est-il nécessaire de modifier le nom du fichier malgré l'indication de remplacement ?",
+      "answer": "Le système de téléchargement divise les requêtes volumineuses en plusieurs parties, avant de les consolider dans un fichier unique. Bien que l'interface indique qu'un fichier existant portant le même nom sera écrasé, le téléchargeur de données procède en réalité à un ajout de nouvelles données à ce fichier. Il est conseillé d'attribuer systématiquement un nom unique à chaque opération de téléchargement, afin d'éviter toute confusion dans le traitement des données."
+    },
+    "q4": {
+      "question": "Comment prévenir les interruptions de téléchargement pour les requêtes volumineuses ?",
+      "answer": "Les téléchargements de données volumineuses dans les DHIS2 sont soumis à une limite de temps incompressible d'une heure, conduisant à l'échec systématique des requêtes excédant cette durée. Pour contourner cette limitation, il est impératif d'adopter une stratégie de segmentation des extractions. Les systèmes DHIS2 fonctionnent de manière unique, avec des vitesses de téléchargement variables. Une phase préalable d'expérimentation permettant de déterminer le volume optimal de données extractibles en une seule opération s'avère donc nécessaire pour optimiser l'efficacité du processus."
+    },
+    "q5": {
+      "question": "Quelle quantité de données peut être téléchargée dans un fichier Excel ?",
+      "answer": "Les fichiers Excel prennent en charge environ un million de lignes. Par conséquent, lors du téléchargement de grands ensembles de données (par exemple, des données provenant de milliers d'établissements sur plusieurs mois), il est possible d'atteindre la limite de capacité d'Excel. Pour résoudre cela, il est recommandé de procéder à des téléchargements par lots plus réduits. Dans le cas d'un dépassement de la capacité d'Excel, il est possible d'ouvrir le fichier CSV à l'aide d'un logiciel statistique, afin d'accéder à l'ensemble complet des données."
+    }
+  },
+  "resources": {
+    "title": "Ressources Complémentaires",
+    "description": "Pour en savoir plus sur l'utilisation du système de téléchargement de données FASTR DHIS2, veuillez consulter nos ressources de formation. Le code est accessible via GitHub sous licence BSD-2."
+  },
+  "team": {
+    "title": "Notre équipe",
+    "description": "Le système de téléchargement de données FASTR DHIS2 a été développé par l'équipe « Résultats et apprentissage » du Mécanisme de financement mondial pour les femmes, les enfants et les adolescents (GFF). L'initiative FASTR (Frequent Assessments and System Tools for Resilience - ou Évaluations fréquentes et outils systémiques pour la résilience) vise à permettre un suivi en cycles rapides, pour renforcer les systèmes de soins de santé primaires et améliorer les résultats en matière de SRMNEA-N, grâce à une analyse et une utilisation opportunes et fréquentes des données."
+  },
+  "contact": {
+    "title": "Nous Contacter",
+    "contactText": "Pour toute demande d'assistance, retour d'information ou question, veuillez nous contacter à l'adresse suivante :",
+    "emailLabel": "Email",
+    "email": "fastr@worldbank.org",
+    "sendMessageTitle": "Envoyer un message",
+    "messagePlaceholder": "Tapez votre message ici...",
+    "sendButton": "Envoyer un courriel"
+  },
+  "acknowledgements": {
+    "title": "Remerciements",
+    "description": "Nous tenons à remercier Damola Sheriff Olajide de l'Organisation Ouest Africaine de la Santé, pour avoir fourni le prototype logiciel ayant servi de base au développement du système de téléchargement de données FASTR DHIS2."
+  }
+}

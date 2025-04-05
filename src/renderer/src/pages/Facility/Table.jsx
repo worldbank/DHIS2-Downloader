@@ -5,6 +5,7 @@ import { fetchFacilityData, loadDataFromDexie } from '../../reducers/facilityRed
 import { triggerLoading } from '../../reducers/statusReducer'
 import Papa from 'papaparse'
 import { MicroArrowTopRight } from '../../components/Icons'
+import { useTranslation } from 'react-i18next'
 
 // Format Polygon/MultiPolygon
 const formatGeometrySummary = (geometry) => {
@@ -88,7 +89,7 @@ const FacilityTable = () => {
   const dispatch = useDispatch()
   const { dhis2Url, username, password } = useSelector((state) => state.auth)
   const { mergedData: facilities } = useSelector((state) => state.facility)
-  console.log(facilities)
+  const { t } = useTranslation()
 
   useEffect(() => {
     const loadData = async () => {
@@ -184,7 +185,7 @@ const FacilityTable = () => {
               className="text-blue-500 hover:text-blue-700 font-medium text-sm"
               onClick={handleExportToCSV}
             >
-              <MicroArrowTopRight /> Export CSV
+              <MicroArrowTopRight /> {t('mainPage.exportCSV')}
             </button>
           </div>
           {/* DataTable component with no container */}

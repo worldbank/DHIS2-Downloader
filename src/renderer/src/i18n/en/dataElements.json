@@ -1,0 +1,14 @@
+{
+  "dataTypeLabel": "Data Type",
+  "dataTypeOptions": {
+    "all": "All Data Types",
+    "dataElement": "Data Element",
+    "indicator": "Indicator",
+    "programIndicator": "Program Indicator",
+    "dataSet": "DataSet"
+  },
+  "searchPlaceholder": "Search",
+  "selectButton": "Select",
+  "selectedItemsTitle": "Selected Items",
+  "removeButton": "Remove"
+}

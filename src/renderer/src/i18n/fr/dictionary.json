@@ -1,0 +1,14 @@
+{
+  "searchPlaceholder": "Rechercher par nom ou ID",
+  "search": "Rechercher",
+  "exportAll": "Exporter tout",
+  "exportPage": "Exporter cette page",
+  "type": "Type",
+  "id": "ID JSON",
+  "name": "Nom",
+  "description": "Description",
+  "numerator": "Numérateur",
+  "numeratorName": "Nom du numérateur",
+  "denominator": "Dénominateur",
+  "denominatorName": "Nom du dénominateur"
+}

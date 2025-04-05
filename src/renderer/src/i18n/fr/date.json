@@ -1,0 +1,10 @@
+{
+  "frequencyLabel": "Fréquence",
+  "frequencyOptions": {
+    "year": "Année",
+    "quarter": "Trimestre",
+    "month": "Mois"
+  },
+  "startDateLabel": "Date de début",
+  "endDateLabel": "Date de fin"
+}

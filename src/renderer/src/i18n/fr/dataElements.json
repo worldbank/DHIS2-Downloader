@@ -1,0 +1,14 @@
+{
+  "dataTypeLabel": "Type de données",
+  "dataTypeOptions": {
+    "all": "Tous les types de données",
+    "dataElement": "Élément de données",
+    "indicator": "Indicateur",
+    "programIndicator": "Indicateur de programme",
+    "dataSet": "Jeu de données"
+  },
+  "searchPlaceholder": "Recherche",
+  "selectButton": "Sélectionner",
+  "selectedItemsTitle": "Éléments sélectionnés",
+  "removeButton": "Supprimer"
+}

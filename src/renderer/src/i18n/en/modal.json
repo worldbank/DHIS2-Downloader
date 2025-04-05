@@ -1,0 +1,15 @@
+{
+  "title": "Split Data Into Smaller Chunks",
+  "description": "Enter the number of time periods for each chunk.",
+  "placeholder": "Enter a number",
+  "cancel": "Cancel",
+  "confirm": "Confirm",
+  "loading": "Loading...",
+  "viewlogs": "View Logs ▼",
+  "hidelogs": "Hide Logs",
+  "invalidInput": "Please enter a valid positive number for chunk size.",
+  "signoutTitle": "Clear downloading histories on sign out?",
+  "signoutDescription": "Do you want to remove recorded downloading histories from this device? This operation cannot be undone.",
+  "yes": "Yes",
+  "no": "No"
+}

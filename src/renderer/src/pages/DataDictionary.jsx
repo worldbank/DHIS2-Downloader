@@ -1,5 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useRef, useState, useEffect, useCallback, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { objectToCsv } from '../utils/downloadUtils'
 import { updateFormulaNames } from '../utils/helpers'
 import ExportLink from '../components/ExportLink'
@@ -14,6 +15,8 @@ const DataDictionary = ({ dictionaryDb }) => {
   const [searchQuery, setSearchQuery] = useState('')
   const [searchInput, setSearchInput] = useState('')
   const dictionaryDbRef = useRef(dictionaryDb)
+  const { t } = useTranslation()
+
   const allElements =
     useLiveQuery(() => dictionaryDbRef.current.elements.orderBy('category').toArray(), []) || []
 
@@ -56,7 +59,7 @@ const DataDictionary = ({ dictionaryDb }) => {
 
   const handleItemsPerPageChange = (event) => {
     setItemsPerPage(Number(event.target.value))
-    setCurrentPage(1) // Reset to first page when items per page changes
+    setCurrentPage(1)
   }
 
   const handleJumpToPageSubmit = (event) => {
@@ -100,7 +103,7 @@ const DataDictionary = ({ dictionaryDb }) => {
   const handleSearchSubmit = (event) => {
     event.preventDefault()
     setSearchQuery(searchInput)
-    setCurrentPage(1) // Reset to first page when search query changes
+    setCurrentPage(1)
   }
 
   return (
@@ -111,11 +114,11 @@ const DataDictionary = ({ dictionaryDb }) => {
             type="text"
             value={searchInput}
             onChange={handleSearchChange}
-            placeholder="Search by Name or ID"
+            placeholder={t('dictionary.searchPlaceholder')}
             className="w-full px-4 py-2 border border-gray-300 rounded"
           />
           <button type="submit" className="ml-2 px-4 py-2 bg-blue-500 text-white rounded">
-            Search
+            {t('dictionary.search')}
           </button>
         </form>
       </div>
@@ -124,29 +127,27 @@ const DataDictionary = ({ dictionaryDb }) => {
           <table className="w-full max-w-4xl mx-auto bg-white shadow-md rounded-lg">
             <thead>
               <tr className="bg-gray-100 text-gray-800 uppercase text-sm leading-normal">
-                <th className="py-1 px-1 border-r">Type</th>
-                <th className="py-1 px-1 border-r">JSON ID</th>
-                <th className="py-1 px-1 border-r">Name</th>
-                <th className="py-1 px-1 border-r">Description</th>
-                <th className="py-1 px-1 border-r">Numerator</th>
-                <th className="py-1 px-1 border-r">Numerator Name</th>
-                <th className="py-1 px-1 border-r">Denominator</th>
-                <th className="py-1 px-1 border-r">Denominator Name</th>
+                <th className="py-1 px-1 border-r">{t('dictionary.type')}</th>
+                <th className="py-1 px-1 border-r">{t('dictionary.id')}</th>
+                <th className="py-1 px-1 border-r">{t('dictionary.name')}</th>
+                <th className="py-1 px-1 border-r">{t('dictionary.description')}</th>
+                <th className="py-1 px-1 border-r">{t('dictionary.numerator')}</th>
+                <th className="py-1 px-1 border-r">{t('dictionary.numeratorName')}</th>
+                <th className="py-1 px-1 border-r">{t('dictionary.denominator')}</th>
+                <th className="py-1 px-1 border-r">{t('dictionary.denominatorName')}</th>
               </tr>
             </thead>
             <tbody className="text-gray-600 text-xs font-light">
               {currentPageData.map((el) => (
                 <tr key={el.id} className="border-b">
                   <td className="py-1 px-1 border-r break-words">{el.category}</td>
-                  <td className="py-1 px-1 border-r [word-break:break-word]">{el.id}</td>
+                  <td className="py-1 px-1 border-r break-words">{el.id}</td>
                   <td className="py-1 px-1 border-r break-words">{el.displayName}</td>
                   <td className="py-1 px-1 border-r break-words">{el.displayDescription}</td>
-                  <td className="py-1 px-1 border-r [word-break:break-word]">{el.numerator}</td>
-                  <td className="py-1 px-1 border-r [word-break:break-word]">{el.numeratorName}</td>
-                  <td className="py-1 px-1 border-r [word-break:break-word]">{el.denominator}</td>
-                  <td className="py-1 px-1 border-r [word-break:break-word]">
-                    {el.denominatorName}
-                  </td>
+                  <td className="py-1 px-1 border-r break-words">{el.numerator}</td>
+                  <td className="py-1 px-1 border-r break-words">{el.numeratorName}</td>
+                  <td className="py-1 px-1 border-r break-words">{el.denominator}</td>
+                  <td className="py-1 px-1 border-r break-words">{el.denominatorName}</td>
                 </tr>
               ))}
             </tbody>
@@ -164,8 +165,8 @@ const DataDictionary = ({ dictionaryDb }) => {
         itemsPerPage={itemsPerPage}
       />
       <div className="mt-4 w-full max-w-4xl mx-auto flex justify-between items-center">
-        <ExportLink onClick={handleExportAll} text="Export All" />
-        <ExportLink onClick={handleExportCurrent} text="Export This Page" />
+        <ExportLink onClick={handleExportAll} text={t('dictionary.exportAll')} />
+        <ExportLink onClick={handleExportCurrent} text={t('dictionary.exportPage')} />
       </div>
     </div>
   )

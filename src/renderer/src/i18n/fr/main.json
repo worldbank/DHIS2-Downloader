@@ -1,0 +1,24 @@
+{
+  "chunkSuccess": "Bloc {{index}} téléchargé : {{dx}} ({{startPeriod}} à {{endPeriod}})",
+  "chunkFailed": "Échec du téléchargement du bloc {{index}} : {{dx}} ({{startPeriod}} à {{endPeriod}}) - {{error}}",
+  "downloadSuccess": "Téléchargement terminé avec succès.",
+  "downloadCanceled": "Téléchargement annulé.",
+  "noDataForHeader": "Aucune donnée trouvée pour l'en-tête. Téléchargement annulé.",
+  "organizationUnits": "Unités organisationnelles",
+  "organizationUnitsTooltip": "Une unité organisationnelle est généralement une unité géographique qui s’inscrit dans une hiérarchie.",
+  "dataElementsAndIndicators": "Éléments de données et indicateurs",
+  "organizationLevels": "Niveaux d'organisation",
+  "dateRange": "Plage de dates",
+  "disaggregation": "Désagrégation",
+  "disaggregationTooltip": {
+    "header": "La désagrégation comprend :",
+    "list": [
+      "<em>Les options de combinaisons de catégories</em> sont générées dynamiquement à partir de toutes les combinaisons possibles d'options de catégories qui composent une combinaison. Par exemple, deux catégories « Genre » et « Âge » peuvent avoir des options telles que « Masculin » ou « Féminin » et « <5 ans » ou « >5 ans ». Une combinaison pourrait être « Masculin <5 ans ».",
+      "<em>Les groupes d’unités organisationnelles</em> sont généralement liés aux attributs des unités organisationnelles, comme la « propriété » ou le « type »."
+    ]
+  },
+  "download": "Télécharger",
+  "downloadNote": "Remarque : utilisez un nom de fichier unique pour éviter tout écrasement.",
+  "exportGeoJSON": "Exporter GeoJSON",
+  "exportCSV": "Exporter CSV"
+}
