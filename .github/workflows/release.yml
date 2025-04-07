@@ -39,15 +39,19 @@ jobs:
           CERTIFICATE_PASSWORD: ${{ secrets.CERTIFICATE_PASSWORD }}
         run: |
           echo "$SIGNING_CERTIFICATE" | base64 --decode > certificate.p12
-          # Import certificate into the login keychain explicitly
           security import certificate.p12 -k ~/Library/Keychains/login.keychain -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
 
       - name: Code Sign Application
         if: matrix.os == 'macos-latest'
         run: |
+          set -x
           codesign --sign "${{ secrets.SIGNING_IDENTITY }}" \
-            --deep --force --timestamp --options runtime \
+            --deep \
+            --force \
+            --timestamp \
+            --options runtime \
             --entitlements build/entitlements.mac.plist \
+            --verbose \
             "dist/mac/DHIS2 Downloader.app"
 
       - name: Verify Code Signature
