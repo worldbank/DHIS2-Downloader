@@ -199,7 +199,7 @@ const HistoryPage = ({ dictionaryDb, queryDb }) => {
     clearExistingParams()
     const params = downloadQueries.filter((el) => el.id === id)
     const dimensions = params.flatMap((param) =>
-      param.dimension.includes(';') ? param.dimension.split(';') : param.dimension
+      param.dimension.includes(';') ? param.dimension.split(';') : [param.dimension]
     )
     // organUnitLevel
     params.forEach((param) => {
@@ -221,7 +221,9 @@ const HistoryPage = ({ dictionaryDb, queryDb }) => {
     // Disaggregation (Additional measures for disaggregations being '')
     const disaggregations = params
       .flatMap((param) =>
-        param.disaggregation.includes(';') ? param.disaggregation.split(';') : param.disaggregation
+        param.disaggregation.includes(';')
+          ? param.disaggregation.split(';')
+          : [param.disaggregation]
       )
       .filter((dis) => dis !== '')
 
