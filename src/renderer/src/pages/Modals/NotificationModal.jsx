@@ -94,7 +94,7 @@ const NotificationModal = () => {
           onClick={handleClose}
           className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition ease-in-out duration-200 focus:outline-none w-full text-center"
         >
-          Close
+          {t('modal.close')}
         </button>
       </div>
     </div>

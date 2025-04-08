@@ -1,6 +1,6 @@
 {
   "title": "Bienvenue !",
-  "dhis2UrlLabel": "URL DHIS2",
+  "dhis2UrlLabel": "Adresse web de DHIS2",
   "dhis2UrlTooltip": "Entrez le lien DHIS2 sans la dernière barre oblique, par exemple, <code>https://votre-dhis2.com</code> au lieu de <code>https://votre-dhis2.com/</code>.",
   "usernameLabel": "Nom d'utilisateur",
   "passwordLabel": "Mot de passe",

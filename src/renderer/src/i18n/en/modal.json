@@ -11,5 +11,9 @@
   "signoutTitle": "Clear downloading histories on sign out?",
   "signoutDescription": "Do you want to remove recorded downloading histories from this device? This operation cannot be undone.",
   "yes": "Yes",
-  "no": "No"
+  "no": "No",
+  "close": "close",
+  "successfulConnect": "Connected Successfully",
+  "invalidUsername": "Invalid Username or Password",
+  "failedAuthentication": "Failed to initialize authentication"
 }

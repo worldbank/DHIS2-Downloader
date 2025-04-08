@@ -10,6 +10,7 @@ import {
 } from '../service/useApi'
 import { dictionaryDb, servicesDb, queryDb } from '../service/db'
 import { triggerLoading, triggerNotification } from '../reducers/statusReducer'
+import i18n from '../i18n/i18n.js'
 
 const initialState = {
   dhis2Url: '',
@@ -62,7 +63,7 @@ export const initializeAuth = () => async (dispatch) => {
       dispatch(setUsername(storedUsername))
     }
   } catch (error) {
-    dispatch(triggerNotification({ message: 'Failed to initialize authentication', type: 'error' }))
+    dispatch(triggerNotification({ message: i18n.t('modal.failedAuthentication'), type: 'error' }))
   } finally {
     dispatch(triggerLoading(false))
   }
@@ -133,9 +134,9 @@ export const connect = (dhis2Url, username, password) => async (dispatch) => {
 
       await dictionaryDb.elements.bulkAdd(allElements)
 
-      dispatch(triggerNotification({ message: 'Connected successfully', type: 'success' }))
+      dispatch(triggerNotification({ message: i18n.t('modal.successfulConnect'), type: 'success' }))
     } else {
-      dispatch(triggerNotification({ message: 'Invalid Username or Password', type: 'error' }))
+      dispatch(triggerNotification({ message: i18n.t('modal.invalidUsername'), type: 'error' }))
     }
   } catch (error) {
     dispatch(triggerNotification({ message: error.message || error.toString(), type: 'error' }))

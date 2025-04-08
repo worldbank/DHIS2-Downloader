@@ -11,5 +11,9 @@
   "signoutTitle": "Effacer l’historique des téléchargements lors de la déconnexion ?",
   "signoutDescription": "Souhaitez-vous supprimer l’historique des téléchargements enregistré sur cet appareil ? Cette opération est irréversible.",
   "yes": "Oui",
-  "no": "Non"
+  "no": "Non",
+  "close": "fermer",
+  "successfulConnect": "Connecté avec succès",
+  "invalidUsername": "Nom d'utilisateur ou mot de passe invalide",
+  "failedAuthentication": "Échec de l'initialisation de l'authentification"
 }
