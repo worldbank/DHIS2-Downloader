@@ -31,34 +31,6 @@ jobs:
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
-      # === macOS Code Signing Steps ===
-      - name: Import Code Signing Certificate
-        if: matrix.os == 'macos-latest'
-        env:
-          SIGNING_CERTIFICATE: ${{ secrets.SIGNING_CERTIFICATE }}
-          CERTIFICATE_PASSWORD: ${{ secrets.CERTIFICATE_PASSWORD }}
-        run: |
-          echo "$SIGNING_CERTIFICATE" | base64 --decode > certificate.p12
-          security import certificate.p12 -k ~/Library/Keychains/login.keychain -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
-
-      - name: Code Sign Application
-        if: matrix.os == 'macos-latest'
-        run: |
-          set -x
-          codesign --sign "${{ secrets.SIGNING_IDENTITY }}" \
-            --deep \
-            --force \
-            --timestamp \
-            --options runtime \
-            --entitlements build/entitlements.mac.plist \
-            --verbose \
-            "dist/mac/DHIS2 Downloader.app"
-
-      - name: Verify Code Signature
-        if: matrix.os == 'macos-latest'
-        run: codesign --verify --deep --strict --verbose=2 "dist/mac/DHIS2 Downloader.app"
-      # === End of macOS Code Signing Steps ===
-
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
