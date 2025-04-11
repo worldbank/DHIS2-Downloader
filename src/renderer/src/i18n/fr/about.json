@@ -63,7 +63,7 @@
   },
   "resources": {
     "title": "Ressources Complémentaires",
-    "description": "Pour en savoir plus sur l'utilisation du système de téléchargement de données FASTR DHIS2, veuillez consulter nos ressources de formation. Le code est accessible via GitHub sous licence BSD-2."
+    "description": "Pour en savoir plus sur l'utilisation du système de téléchargement de données FASTR DHIS2, veuillez consulter nos <trainingLink> ressources de formation</trainingLink>.\nLe code est accessible via <githubLink> GitHub <githubLink> sous licence BSD-2."
   },
   "team": {
     "title": "Notre équipe",

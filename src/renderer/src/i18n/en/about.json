@@ -59,7 +59,7 @@
   },
   "resources": {
     "title": "Additional Resources",
-    "description": "Learn more about how to use the FASTR DHIS2 Data Downloader by visiting our Training Resources. The code is accessible via GitHub under BSD-2 License."
+    "description": "Learn more about how to use the FASTR DHIS2 Data Downloader by visiting our <trainingLink>Training Resources</trainingLink>.\nThe code is accessible via <githubLink> GitHub </githubLink> under BSD-2 License."
   },
   "team": {
     "title": "Our Team",

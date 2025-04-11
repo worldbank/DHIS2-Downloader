@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Accordion, AccordionGroup } from '../components/Accordion'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, Trans } from 'react-i18next'
 
 const AboutPage = () => {
   const { t } = useTranslation()
@@ -100,12 +100,30 @@ const AboutPage = () => {
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">
             {t('aboutPage.resources.title')}
           </h2>
-          <p>{t('aboutPage.resources.description')}</p>
-        </section>
-
-        <section className="team-info mt-10">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">{t('aboutPage.team.title')}</h2>
-          <p>{t('aboutPage.team.description')}</p>
+          <p>
+            <Trans
+              i18nKey="aboutPage.resources.description"
+              components={{
+                trainingLink: (
+                  <a
+                    href="https://scribehow.com/shared/Installation_de_FASTR_DHIS2_Telechargeur_des_donees_votre_ordinateur__XPJu_kTYTTizQj9JyJqFKw"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline"
+                  />
+                ),
+                githubLink: (
+                  <a
+                    href="https://github.com/worldbank/DHIS2-Downloader"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline"
+                  />
+                ),
+                br: <br />
+              }}
+            />
+          </p>
         </section>
 
         <section className="contact-info mt-10 flex flex-col md:flex-row">
