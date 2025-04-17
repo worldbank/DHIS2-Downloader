@@ -106,7 +106,7 @@ const AboutPage = () => {
               components={{
                 trainingLink: (
                   <a
-                    href="https://scribehow.com/shared/Installation_de_FASTR_DHIS2_Telechargeur_des_donees_votre_ordinateur__XPJu_kTYTTizQj9JyJqFKw"
+                    href="https://scribehow.com/page/FASTR_data_downloader_tutorial_page__lr13_gEiRuehOe57UwyyBA"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-600 underline"
