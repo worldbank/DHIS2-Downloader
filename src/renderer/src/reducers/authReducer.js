@@ -132,7 +132,7 @@ export const connect = (dhis2Url, username, password) => async (dispatch) => {
         }))
       ]
 
-      await dictionaryDb.elements.bulkAdd(allElements)
+      await dictionaryDb.elements.bulkPut(allElements)
 
       dispatch(triggerNotification({ message: i18n.t('modal.successfulConnect'), type: 'success' }))
     } else {
