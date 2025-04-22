@@ -10,5 +10,6 @@
   "numerator": "Numerator",
   "numeratorName": "Numerator Name",
   "denominator": "Denominator",
-  "denominatorName": "Denominator Name"
+  "denominatorName": "Denominator Name",
+  "categories": "Disaggregated Dimension"
 }

@@ -70,9 +70,28 @@ const DataDictionary = ({ dictionaryDb }) => {
     }
   }
 
+  const flattenForExport = (item) => {
+    const disaggregateSummary =
+      item.categoryCombo?.categories
+        ?.map((cat) => {
+          const catName = `${cat.displayName} [${cat.id}]`
+          const options = cat.categoryOptions
+            ?.map((opt) => `${opt.displayName} [${opt.id}]`)
+            .join(', ')
+          return `${catName}: ${options}`
+        })
+        .join(' | ') || 'N/A'
+
+    const { categoryCombo, ...rest } = item
+    return {
+      ...rest,
+      categoryCombo: disaggregateSummary
+    }
+  }
+
   const handleExportAll = () => {
     try {
-      const csvDataPoints = objectToCsv(data)
+      const csvDataPoints = objectToCsv(data.map(flattenForExport))
       const csvBlob = new Blob([csvDataPoints], { type: 'text/csv' })
       const downloadLink = document.createElement('a')
       downloadLink.href = URL.createObjectURL(csvBlob)
@@ -85,7 +104,7 @@ const DataDictionary = ({ dictionaryDb }) => {
 
   const handleExportCurrent = () => {
     try {
-      const csvDataPoints = objectToCsv(currentPageData)
+      const csvDataPoints = objectToCsv(currentPageData.map(flattenForExport))
       const csvBlob = new Blob([csvDataPoints], { type: 'text/csv' })
       const downloadLink = document.createElement('a')
       downloadLink.href = URL.createObjectURL(csvBlob)
@@ -131,6 +150,7 @@ const DataDictionary = ({ dictionaryDb }) => {
                 <th className="py-1 px-1 border-r">{t('dictionary.id')}</th>
                 <th className="py-1 px-1 border-r">{t('dictionary.name')}</th>
                 <th className="py-1 px-1 border-r">{t('dictionary.description')}</th>
+                <th className="py-1 px-1 border-r">{t('dictionary.categories')}</th>
                 <th className="py-1 px-1 border-r">{t('dictionary.numerator')}</th>
                 <th className="py-1 px-1 border-r">{t('dictionary.numeratorName')}</th>
                 <th className="py-1 px-1 border-r">{t('dictionary.denominator')}</th>
@@ -144,6 +164,14 @@ const DataDictionary = ({ dictionaryDb }) => {
                   <td className="py-1 px-1 border-r break-words">{el.id}</td>
                   <td className="py-1 px-1 border-r break-words">{el.displayName}</td>
                   <td className="py-1 px-1 border-r break-words">{el.displayDescription}</td>
+                  <td className="py-1 px-1 border-r break-words">
+                    {el.categoryCombo?.categories?.map((cat) => (
+                      <div key={cat.id}>
+                        <strong>{cat.displayName}:</strong>{' '}
+                        {cat.categoryOptions?.map((opt) => opt.displayName).join(', ')}
+                      </div>
+                    ))}
+                  </td>
                   <td className="py-1 px-1 border-r break-words">{el.numerator}</td>
                   <td className="py-1 px-1 border-r break-words">{el.numeratorName}</td>
                   <td className="py-1 px-1 border-r break-words">{el.denominator}</td>

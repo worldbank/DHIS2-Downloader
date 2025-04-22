@@ -1,11 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { getCategoryCombination, getOrganizationUnitGroupSets } from '../service/useApi'
+import { getCategories, getOrganizationUnitGroupSets } from '../service/useApi'
 
-export const fetchCategoryCombinations = createAsyncThunk(
-  'category/fetchCategoryCombinations',
+export const fetchCategories = createAsyncThunk(
+  'category/fetchCategories',
   async ({ dhis2Url, username, password }) => {
-    const response = await getCategoryCombination(dhis2Url, username, password)
-    return response.categoryCombos
+    const response = await getCategories(dhis2Url, username, password)
+    return response.categories
   }
 )
 
@@ -20,16 +20,17 @@ export const fetchOrgUnitGroupSets = createAsyncThunk(
 const categorySlice = createSlice({
   name: 'category',
   initialState: {
-    category: [],
+    categories: [],
+    orgUnitGroupSets: [],
     selectedCategory: []
   },
   reducers: {
     setSelectedCategory: (state, action) => {
-      const coId = action.payload
-      if (state.selectedCategory.includes(coId)) {
-        state.selectedCategory = state.selectedCategory.filter((id) => id !== coId)
+      const id = action.payload
+      if (state.selectedCategory.includes(id)) {
+        state.selectedCategory = state.selectedCategory.filter((x) => x !== id)
       } else {
-        state.selectedCategory.push(coId)
+        state.selectedCategory.push(id)
       }
     },
     clearSelectedCategory: (state) => {
@@ -38,15 +39,14 @@ const categorySlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchCategoryCombinations.fulfilled, (state, action) => {
-        state.category = [...state.category, ...action.payload]
+      .addCase(fetchCategories.fulfilled, (state, action) => {
+        state.categories = action.payload
       })
       .addCase(fetchOrgUnitGroupSets.fulfilled, (state, action) => {
-        state.category = [...state.category, ...action.payload]
+        state.orgUnitGroupSets = action.payload
       })
   }
 })
 
 export const { setSelectedCategory, clearSelectedCategory } = categorySlice.actions
-
 export default categorySlice.reducer

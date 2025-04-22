@@ -88,13 +88,19 @@ export const getOrganizationLevels = (dhis2Url, username, password) => {
   const url = `${dhis2Url}/api/organisationUnitLevels?paging=false&fields=id,displayName,level`
   return fetchData(url, username, password)
 }
+
+export const getCategories = (dhis2Url, username, password) => {
+  const url = `${dhis2Url}/api/categories?fields=id,displayName,categoryOptions[id,displayName]&paging=false`
+  return fetchData(url, username, password)
+}
+
 export const getCategoryCombination = (dhis2Url, username, password) => {
-  const url = `${dhis2Url}/api/categoryCombos?fields=id,displayName&paging=false`
+  const url = `${dhis2Url}/api/categoryCombos?fields=id,name,categories[id,displayName,categoryOptions[id,displayName]]&paging=false`
   return fetchData(url, username, password)
 }
 
 export const getDataElements = (dhis2Url, username, password) => {
-  const elementUrl = `${dhis2Url}/api/dataElements?fields=id,displayName,displayDescription&paging=false`
+  const elementUrl = `${dhis2Url}/api/dataElements?fields=id,displayName,displayDescription,categoryCombo[id,displayName,categories[id,displayName,categoryOptions[id,displayName]]&paging=false`
   return fetchData(elementUrl, username, password)
 }
 

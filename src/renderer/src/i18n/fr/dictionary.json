@@ -10,5 +10,6 @@
   "numerator": "Numérateur",
   "numeratorName": "Nom du numérateur",
   "denominator": "Dénominateur",
-  "denominatorName": "Nom du dénominateur"
+  "denominatorName": "Nom du dénominateur",
+  "categories": "Dimension désagrégée"
 }
