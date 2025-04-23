@@ -1,24 +1,14 @@
 import React, { useEffect, useRef } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import {
-  fetchCategories,
-  fetchOrgUnitGroupSets,
-  setSelectedCategory
-} from '../../reducers/categoryReducer'
+import { setSelectedCategory } from '../../reducers/categoryReducer'
 import { mouseClick, mouseToggle } from '../../reducers/mouseReducer'
 
 const CategoryDropdownMenu = () => {
   const dispatch = useDispatch()
   const { categories, orgUnitGroupSets, selectedCategory } = useSelector((state) => state.category)
   const openDropdowns = useSelector((state) => state.mouse.openDropdowns)
-  const { dhis2Url, username, password } = useSelector((state) => state.auth)
   const dropdownId = 'categoryDropdown'
   const dropdownRef = useRef(null)
-
-  useEffect(() => {
-    dispatch(fetchCategories({ dhis2Url, username, password }))
-    dispatch(fetchOrgUnitGroupSets({ dhis2Url, username, password }))
-  }, [dhis2Url, username, password, dispatch])
 
   const handleClickOutside = (event) => {
     if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {

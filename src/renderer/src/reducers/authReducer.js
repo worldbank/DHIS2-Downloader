@@ -6,8 +6,10 @@ import {
   getProgramIndicators,
   getCategoryOptionCombos,
   getDataSets,
-  getOrganizationUnitGroupSets
+  getOrganizationUnitGroupSets,
+  getCategories
 } from '../service/useApi'
+import { setCategories, setOrgUnitGroupSets } from './categoryReducer.js'
 import { dictionaryDb, servicesDb, queryDb } from '../service/db'
 import { triggerLoading, triggerNotification } from '../reducers/statusReducer'
 import i18n from '../i18n/i18n.js'
@@ -87,14 +89,16 @@ export const connect = (dhis2Url, username, password) => async (dispatch) => {
         programIndicators,
         catOptionCombos,
         dataSetsRaw,
-        orgUnitGroupSets
+        orgUnitGroupSets,
+        categoriesRaw
       ] = await Promise.all([
         getDataElements(dhis2Url, username, password),
         getIndicators(dhis2Url, username, password),
         getProgramIndicators(dhis2Url, username, password),
         getCategoryOptionCombos(dhis2Url, username, password),
         getDataSets(dhis2Url, username, password),
-        getOrganizationUnitGroupSets(dhis2Url, username, password)
+        getOrganizationUnitGroupSets(dhis2Url, username, password),
+        getCategories(dhis2Url, username, password)
       ])
 
       const dataSetMetrics = [
@@ -129,10 +133,16 @@ export const connect = (dhis2Url, username, password) => async (dispatch) => {
         ...orgUnitGroupSets.organisationUnitGroupSets.map((og) => ({
           ...og,
           category: 'OrganizationUnitGroupSets'
+        })),
+        ...categoriesRaw.categories.map((cat) => ({
+          ...cat,
+          category: 'category'
         }))
       ]
 
       await dictionaryDb.elements.bulkPut(allElements)
+      dispatch(setOrgUnitGroupSets(orgUnitGroupSets.organisationUnitGroupSets))
+      dispatch(setCategories(categoriesRaw.categories))
 
       dispatch(triggerNotification({ message: i18n.t('modal.successfulConnect'), type: 'success' }))
     } else {

@@ -1,21 +1,4 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { getCategories, getOrganizationUnitGroupSets } from '../service/useApi'
-
-export const fetchCategories = createAsyncThunk(
-  'category/fetchCategories',
-  async ({ dhis2Url, username, password }) => {
-    const response = await getCategories(dhis2Url, username, password)
-    return response.categories
-  }
-)
-
-export const fetchOrgUnitGroupSets = createAsyncThunk(
-  'category/fetchOrgUnitGroupSets',
-  async ({ dhis2Url, username, password }) => {
-    const response = await getOrganizationUnitGroupSets(dhis2Url, username, password)
-    return response.organisationUnitGroupSets
-  }
-)
+import { createSlice } from '@reduxjs/toolkit'
 
 const categorySlice = createSlice({
   name: 'category',
@@ -25,6 +8,12 @@ const categorySlice = createSlice({
     selectedCategory: []
   },
   reducers: {
+    setCategories: (state, action) => {
+      state.categories = action.payload
+    },
+    setOrgUnitGroupSets: (state, action) => {
+      state.orgUnitGroupSets = action.payload
+    },
     setSelectedCategory: (state, action) => {
       const id = action.payload
       if (state.selectedCategory.includes(id)) {
@@ -36,17 +25,9 @@ const categorySlice = createSlice({
     clearSelectedCategory: (state) => {
       state.selectedCategory = []
     }
-  },
-  extraReducers: (builder) => {
-    builder
-      .addCase(fetchCategories.fulfilled, (state, action) => {
-        state.categories = action.payload
-      })
-      .addCase(fetchOrgUnitGroupSets.fulfilled, (state, action) => {
-        state.orgUnitGroupSets = action.payload
-      })
   }
 })
 
-export const { setSelectedCategory, clearSelectedCategory } = categorySlice.actions
+export const { setCategories, setOrgUnitGroupSets, setSelectedCategory, clearSelectedCategory } =
+  categorySlice.actions
 export default categorySlice.reducer
