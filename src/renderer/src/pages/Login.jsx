@@ -1,12 +1,15 @@
+import React, { useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { setDhis2Url, setUsername, setPassword, connect } from '../reducers/authReducer'
 import Tooltip from '../components/Tooltip'
 import { useTranslation } from 'react-i18next'
+import { Eye, EyeSlash } from '../components/Icons'
 
 const Login = () => {
   const dispatch = useDispatch()
   const { t } = useTranslation()
   const { dhis2Url, username, password } = useSelector((state) => state.auth)
+  const [showPassword, setShowPassword] = useState(false)
 
   const handleConnect = async (event) => {
     event.preventDefault()
@@ -46,14 +49,29 @@ const Login = () => {
             </div>
             <div>
               <label className="block mb-2">{t('login.passwordLabel')}</label>
-              <input
-                type="password"
-                placeholder={t('login.passwordPlaceholder')}
-                value={password}
-                onChange={(e) => dispatch(setPassword(e.target.value))}
-                className="w-full px-4 py-2 border border-teal-300 rounded focus:outline-none focus:border-blue-500"
-              />
+
+              {/* flex container as the “box” */}
+              <div
+                className="flex items-center border border-teal-300 rounded
+                  focus-within:border-blue-500 overflow-hidden"
+              >
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => dispatch(setPassword(e.target.value))}
+                  placeholder={t('login.passwordPlaceholder')}
+                  className="flex-1 px-4 py-2 focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((s) => !s)}
+                  className="px-3 text-gray-500 hover:text-black"
+                >
+                  {showPassword ? <EyeSlash /> : <Eye />}
+                </button>
+              </div>
             </div>
+
             <div>
               <button
                 type="submit"
