@@ -132,7 +132,7 @@ export const connect = (dhis2Url, username, password) => async (dispatch) => {
         ...dataSets,
         ...orgUnitGroupSets.organisationUnitGroupSets.map((og) => ({
           ...og,
-          category: 'OrganizationUnitGroupSets'
+          category: 'organisationUnitGroupSets'
         })),
         ...categoriesRaw.categories.map((cat) => ({
           ...cat,

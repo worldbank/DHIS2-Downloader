@@ -120,7 +120,7 @@ export const getCategoryOptionCombos = (dhis2Url, username, password) => {
 }
 
 export const getOrganizationUnitGroupSets = (dhis2Url, username, password) => {
-  const orgUnitGroupSetsUrl = `${dhis2Url}/api/organisationUnitGroupSets?fields=id,displayName&paging=false`
+  const orgUnitGroupSetsUrl = `${dhis2Url}/api/organisationUnitGroupSets?fields=id,displayName,organisationUnitGroups[id,displayName]&paging=false`
   return fetchData(orgUnitGroupSetsUrl, username, password)
 }
 

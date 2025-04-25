@@ -1,4 +1,3 @@
-// reducers/facilitySlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { dictionaryDb } from '../service/db'
 import { topology } from 'topojson-server'
@@ -11,7 +10,6 @@ export const fetchFacilityData = createAsyncThunk(
   'facility/fetchFacilityData',
   async ({ dhis2Url, username, password }, { dispatch }) => {
     try {
-      // Always fetch fresh data
       const [geoFeatures, facilities] = await Promise.all([
         dispatch(fetchGeoFeatures({ dhis2Url, username, password })).unwrap(),
         dispatch(fetchFacilities({ dhis2Url, username, password })).unwrap()
@@ -21,10 +19,8 @@ export const fetchFacilityData = createAsyncThunk(
         mergeFacilitiesAndGeoFeatures({ geoFeatures, facilities })
       ).unwrap()
 
-      // Process and save to Dexie
       await saveToDatabase(mergedData)
 
-      // Return success without data - data will be loaded from Dexie
       return { success: true }
     } catch (error) {
       console.error('Error fetching facility data:', error)
@@ -33,7 +29,6 @@ export const fetchFacilityData = createAsyncThunk(
   }
 )
 
-// New thunk to load data from Dexie
 export const loadDataFromDexie = createAsyncThunk('facility/loadDataFromDexie', async () => {
   try {
     const data = await dictionaryDb.facility.toArray()
@@ -41,7 +36,6 @@ export const loadDataFromDexie = createAsyncThunk('facility/loadDataFromDexie', 
       throw Error('No data found in IndexedDb.')
     }
 
-    // Convert to GeoJSON after loading from Dexie
     const geoJsonData = convertToGeoJSON(data)
 
     return {
@@ -54,7 +48,24 @@ export const loadDataFromDexie = createAsyncThunk('facility/loadDataFromDexie', 
   }
 })
 
-// Function to save processed data to Dexie
+export const loadGroupSetsFromDexie = createAsyncThunk(
+  'facility/loadGroupSetsFromDexie',
+  async () => {
+    const sets = await dictionaryDb.elements
+      .where('category')
+      .equals('organisationUnitGroupSets')
+      .toArray()
+
+    const map = {}
+    sets.forEach((set) => {
+      if (set.displayName && Array.isArray(set.organisationUnitGroups)) {
+        map[set.displayName] = set.organisationUnitGroups.map((g) => g.id)
+      }
+    })
+    return map
+  }
+)
+
 const saveToDatabase = async (data) => {
   const processedData = await processData(data)
   await dictionaryDb.facility.clear()
@@ -62,7 +73,6 @@ const saveToDatabase = async (data) => {
   return processedData
 }
 
-// Rest of the helper functions remain the same
 const processData = async (data) => {
   return data
     .map((item) => ({
@@ -74,7 +84,6 @@ const processData = async (data) => {
     .sort((a, b) => (b.level || 0) - (a.level || 0))
 }
 
-// Async thunk to fetch geo features
 export const fetchGeoFeatures = createAsyncThunk(
   'facility/fetchGeoFeatures',
   async ({ dhis2Url, username, password }) => {
@@ -91,7 +100,6 @@ export const fetchGeoFeatures = createAsyncThunk(
   }
 )
 
-// Async thunk to fetch facilities
 export const fetchFacilities = createAsyncThunk(
   'facility/fetchFacilities',
   async ({ dhis2Url, username, password }) => {
@@ -111,6 +119,7 @@ export const fetchFacilities = createAsyncThunk(
         const hierarchyIds = pathIds.slice(0, -1)
         return hierarchyIds.map((id) => idNameMapping[id] || id)
       }
+
       const processedFacilities = facilities
         .map((facility) => {
           let geometry = null
@@ -129,6 +138,7 @@ export const fetchFacilities = createAsyncThunk(
           }
         })
         .sort((a, b) => (b.level || 0) - (a.level || 0))
+
       return processedFacilities
     } else {
       return []
@@ -136,7 +146,6 @@ export const fetchFacilities = createAsyncThunk(
   }
 )
 
-// Async thunk to merge facilities and geo features
 export const mergeFacilitiesAndGeoFeatures = createAsyncThunk(
   'facility/mergeFacilitiesAndGeoFeatures',
   async ({ facilities, geoFeatures }) => {
@@ -144,24 +153,21 @@ export const mergeFacilitiesAndGeoFeatures = createAsyncThunk(
     const geoFeatureMap = new Map(geoFeatures.map((geo) => [geo.id, geo]))
     const uniqueIds = new Set([...facilityMap.keys(), ...geoFeatureMap.keys()])
 
-    // Merge data based on unique IDs
     const mergedData = Array.from(uniqueIds).map((id) => {
       const facility = facilityMap.get(id) || {}
       const geoFeature = geoFeatureMap.get(id) || {}
-      const merged = {
+      return {
         id,
         ...geoFeature,
         ...facility,
         geometry: facility.geometry || geoFeature.geometry || null
       }
-
-      return merged
     })
+
     return mergedData
   }
 )
 
-// convert data to GeoJSON and TopoJSON
 const convertToGeoJSON = (data) => {
   const geoJSON = {
     type: 'FeatureCollection',
@@ -182,9 +188,7 @@ const convertToGeoJSON = (data) => {
   topoData = presimplify(topoData)
   const minWeight = quantile(topoData, 0.5)
   topoData = simplify(topoData, minWeight)
-  const simplifiedGeoJSON = feature(topoData, topoData.objects.data)
-
-  return simplifiedGeoJSON
+  return feature(topoData, topoData.objects.data)
 }
 
 const facilitySlice = createSlice({
@@ -194,7 +198,8 @@ const facilitySlice = createSlice({
     mergedData: null,
     loading: false,
     error: null,
-    dataProcessed: false
+    dataProcessed: false,
+    organisationUnitGroupSetMap: {}
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -204,7 +209,6 @@ const facilitySlice = createSlice({
         state.error = null
       })
       .addCase(fetchFacilityData.fulfilled, (state) => {
-        // Don't set data here, just mark as not loading
         state.loading = false
       })
       .addCase(fetchFacilityData.rejected, (state, action) => {
@@ -226,6 +230,9 @@ const facilitySlice = createSlice({
         state.loading = false
         state.error = action.error.message
         state.dataProcessed = false
+      })
+      .addCase(loadGroupSetsFromDexie.fulfilled, (state, action) => {
+        state.organisationUnitGroupSetMap = action.payload
       })
   }
 })

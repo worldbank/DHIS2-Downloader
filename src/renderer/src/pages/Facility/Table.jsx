@@ -1,7 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import Pagination from '../../components/Pagination'
-import { fetchFacilityData, loadDataFromDexie } from '../../reducers/facilityReducer'
+import {
+  fetchFacilityData,
+  loadDataFromDexie,
+  loadGroupSetsFromDexie
+} from '../../reducers/facilityReducer'
 import { triggerLoading } from '../../reducers/statusReducer'
 import Papa from 'papaparse'
 import { MicroArrowTopRight } from '../../components/Icons'
@@ -40,7 +44,7 @@ const DataTable = React.memo(({ data }) => {
               {/* Dynamically render headers for path levels */}
               {Array.from({ length: maxLevels }).map((_, idx) => (
                 <th key={idx} className="py-2 px-2 whitespace-nowrap">
-                  orgUnitLevel {idx + 1}
+                  orgUnitLevel{idx + 1}
                 </th>
               ))}
               <th className="py-2 px-2 whitespace-nowrap">Name</th>
@@ -85,10 +89,17 @@ const FacilityTable = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [jumpToPage, setJumpToPage] = useState('')
   const [itemsPerPage, setItemsPerPage] = useState(10)
+  const [selectedGroupSet, setSelectedGroupSet] = useState('All')
+  const [filteredFacilities, setFilteredFacilities] = useState([])
   const [currentPageData, setCurrentPageData] = useState([])
+
   const dispatch = useDispatch()
   const { dhis2Url, username, password } = useSelector((state) => state.auth)
-  const { mergedData: facilities } = useSelector((state) => state.facility)
+  const {
+    mergedData: facilities,
+    dataProcessed,
+    organisationUnitGroupSetMap
+  } = useSelector((state) => state.facility)
   const { t } = useTranslation()
 
   useEffect(() => {
@@ -96,33 +107,57 @@ const FacilityTable = () => {
       try {
         dispatch(triggerLoading(true))
         await dispatch(loadDataFromDexie()).unwrap()
+        await dispatch(loadGroupSetsFromDexie()).unwrap()
       } catch (error) {
-        console.log('No data in Dexie or error loading, fetching from remote...')
+        console.log('Fallback to fetch from remote...')
         await dispatch(fetchFacilityData({ dhis2Url, username, password })).unwrap()
         await dispatch(loadDataFromDexie()).unwrap()
+        await dispatch(loadGroupSetsFromDexie()).unwrap()
       } finally {
         dispatch(triggerLoading(false))
       }
     }
+
     if (!facilities || facilities.length === 0) {
       loadData()
     }
   }, [dispatch, dhis2Url, username, password])
 
-  // Ensure facilities is an array
-  const facilitiesArray = Array.isArray(facilities) ? facilities : []
-
-  const totalPages =
-    facilitiesArray.length > 0 ? Math.ceil(facilitiesArray.length / itemsPerPage) : 0
-
-  const handlePagination = useCallback(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage
-    const pageData = facilitiesArray.slice(startIndex, startIndex + itemsPerPage)
-    setCurrentPageData(pageData)
-  }, [currentPage, itemsPerPage, facilitiesArray])
   useEffect(() => {
-    handlePagination()
-  }, [handlePagination])
+    if (!dataProcessed || !facilities || facilities.length === 0) return
+
+    const groupIdsInSet =
+      selectedGroupSet === 'All' ? null : organisationUnitGroupSetMap[selectedGroupSet] || []
+
+    // Only include the organisationUnitGroups affiliated to selected organisationUnitGroupSets
+    const filtered =
+      selectedGroupSet === 'All'
+        ? [...facilities].sort((a, b) => (a.level || 0) - (b.level || 0))
+        : facilities
+            .filter((item) =>
+              item.organisationUnitGroups?.some((g) => groupIdsInSet.includes(g.id))
+            )
+            .map((item) => ({
+              ...item,
+              organisationUnitGroups:
+                item.organisationUnitGroups?.filter((g) => groupIdsInSet.includes(g.id)) || []
+            }))
+            .sort((a, b) => (a.level || 0) - (b.level || 0))
+
+    setFilteredFacilities(filtered)
+
+    const startIndex = (currentPage - 1) * itemsPerPage
+    setCurrentPageData(filtered.slice(startIndex, startIndex + itemsPerPage))
+  }, [
+    facilities,
+    selectedGroupSet,
+    currentPage,
+    itemsPerPage,
+    dataProcessed,
+    organisationUnitGroupSetMap
+  ])
+
+  const totalPages = Math.ceil(filteredFacilities.length / itemsPerPage)
 
   const handlePageChange = (page) => {
     if (page > 0 && page <= totalPages) {
@@ -144,7 +179,10 @@ const FacilityTable = () => {
   }
 
   const handleExportToCSV = () => {
-    const csvData = facilities.map((item) => {
+    const groupIdsInSet =
+      selectedGroupSet === 'All' ? null : organisationUnitGroupSetMap[selectedGroupSet] || []
+
+    const csvData = filteredFacilities.map((item) => {
       const flatItem = {
         Level: item.level,
         Name: item.displayName,
@@ -153,15 +191,17 @@ const FacilityTable = () => {
           ? JSON.stringify(item.geometry.coordinates)
           : 'No geometry available',
         'Organization Unit Groups': item.organisationUnitGroups
-          ? item.organisationUnitGroups.map((group) => group.name).join(', ')
+          ? item.organisationUnitGroups
+              .filter((group) => selectedGroupSet === 'All' || groupIdsInSet.includes(group.id))
+              .map((group) => group.name)
+              .join(', ')
           : 'N/A'
       }
       if (item.decodedPath && item.decodedPath.length > 0) {
         item.decodedPath.forEach((levelName, idx) => {
-          flatItem[`orgUnitLevel ${idx + 1}`] = levelName
+          flatItem[`orgUnitLevel${idx + 1}`] = levelName
         })
       }
-
       return flatItem
     })
 
@@ -176,23 +216,42 @@ const FacilityTable = () => {
     document.body.removeChild(link)
   }
 
+  const availableGroupSets = Object.keys(organisationUnitGroupSetMap || {})
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
       <div className="w-full max-w-7xl">
         <div className="overflow-x-auto mb-4 w-full">
-          <div className="flex justify-start space-x-4 mb-2">
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-2 gap-2">
             <button
               className="text-blue-500 hover:text-blue-700 font-medium text-sm"
               onClick={handleExportToCSV}
             >
               <MicroArrowTopRight /> {t('mainPage.exportCSV')}
             </button>
+            <select
+              className="text-sm p-2 border rounded"
+              value={selectedGroupSet}
+              onChange={(e) => {
+                setSelectedGroupSet(e.target.value)
+                setCurrentPage(1)
+              }}
+            >
+              <option value="All">All</option>
+              {availableGroupSets.map((name) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))}
+            </select>
           </div>
-          {/* DataTable component with no container */}
-          <DataTable data={currentPageData} />
+          <DataTable
+            data={currentPageData}
+            selectedGroupSet={selectedGroupSet}
+            groupSetMap={organisationUnitGroupSetMap}
+          />
         </div>
         <div className="flex flex-col sm:flex-row justify-between items-center mt-4 w-full">
-          {/* Pagination without unnecessary container */}
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
@@ -208,4 +267,5 @@ const FacilityTable = () => {
     </div>
   )
 }
+
 export default FacilityTable
