@@ -50,7 +50,7 @@ const DataTable = React.memo(({ data }) => {
               <th className="py-2 px-2 whitespace-nowrap">Name</th>
               <th className="py-2 px-2 whitespace-nowrap">ID</th>
               <th className="py-2 px-2 whitespace-nowrap">Coordinates</th>
-              <th className="py-2 px-2 whitespace-nowrap">Organization Unit Groups</th>
+              <th className="py-2 px-2 whitespace-nowrap">OrganisationUnitGroups</th>
             </tr>
           </thead>
           <tbody className="text-gray-800 text-xs font-light">
@@ -120,6 +120,8 @@ const FacilityTable = () => {
 
     if (!facilities || facilities.length === 0) {
       loadData()
+    } else {
+      dispatch(loadGroupSetsFromDexie())
     }
   }, [dispatch, dhis2Url, username, password])
 
@@ -132,7 +134,7 @@ const FacilityTable = () => {
     // Only include the organisationUnitGroups affiliated to selected organisationUnitGroupSets
     const filtered =
       selectedGroupSet === 'All'
-        ? [...facilities].sort((a, b) => (a.level || 0) - (b.level || 0))
+        ? [...facilities].sort((a, b) => (b.level || 0) - (a.level || 0))
         : facilities
             .filter((item) =>
               item.organisationUnitGroups?.some((g) => groupIdsInSet.includes(g.id))
@@ -142,7 +144,7 @@ const FacilityTable = () => {
               organisationUnitGroups:
                 item.organisationUnitGroups?.filter((g) => groupIdsInSet.includes(g.id)) || []
             }))
-            .sort((a, b) => (a.level || 0) - (b.level || 0))
+            .sort((a, b) => (b.level || 0) - (a.level || 0))
 
     setFilteredFacilities(filtered)
 
@@ -190,7 +192,7 @@ const FacilityTable = () => {
         Coordinates: item.geometry
           ? JSON.stringify(item.geometry.coordinates)
           : 'No geometry available',
-        'Organization Unit Groups': item.organisationUnitGroups
+        OrganisationUnitGroups: item.organisationUnitGroups
           ? item.organisationUnitGroups
               .filter((group) => selectedGroupSet === 'All' || groupIdsInSet.includes(group.id))
               .map((group) => group.name)
@@ -205,6 +207,7 @@ const FacilityTable = () => {
       return flatItem
     })
 
+    console.log(csvData)
     const csv = Papa.unparse(csvData)
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
