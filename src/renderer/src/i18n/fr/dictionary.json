@@ -11,5 +11,6 @@
   "numeratorName": "Nom du numérateur",
   "denominator": "Dénominateur",
   "denominatorName": "Nom du dénominateur",
-  "categories": "Dimension désagrégée"
+  "categories": "Dimension désagrégée",
+  "allColumns": "toutes les colonnes"
 }
