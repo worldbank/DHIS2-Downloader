@@ -84,29 +84,34 @@ export const csvGeneratorToBlob = (generator) => {
   return new Blob(csvParts, { type: 'text/csv' })
 }
 
-export const objectToCsv = (array) => {
-  if (!array || !array.length) {
+export const objectToCsv = (array, columnsOrder = []) => {
+  if (!array?.length) {
     console.error('No data to export')
-    return
+    return ''
   }
 
-  // Get all unique headers across all objects
-  const headers = Array.from(new Set(array.flatMap((obj) => Object.keys(obj))))
-  const csvRows = []
+  // 1) Determine headers: use columnsOrder if provided, else all unique keys
+  const headers = columnsOrder.length
+    ? columnsOrder
+    : Array.from(new Set(array.flatMap((obj) => Object.keys(obj))))
 
-  // Add the headers row
+  const csvRows = []
+  // 2) Header row
   csvRows.push(headers.join(','))
 
-  // Add each row of data
+  // 3) Data rows
   for (const obj of array) {
-    const values = headers.map((header) => {
-      const value = obj[header] !== undefined ? obj[header] : ''
-      const escapedValue = ('' + value).replace(/\\/g, '\\\\').replace(/"/g, '\\"')
-      return `"${escapedValue}"`
+    const line = headers.map((header) => {
+      const raw = obj[header] != null ? obj[header] : ''
+      // replace commas inside values so they don't create extra columns
+      const noCommas = String(raw).replace(/,/g, ';')
+      // escape internal quotes by doubling them
+      const escaped = noCommas.replace(/"/g, '""')
+      return `"${escaped}"`
     })
-    csvRows.push(values.join(','))
+    csvRows.push(line.join(','))
   }
 
-  // Create a Blob from the CSV string
-  return csvRows.join('\n')
+  // 4) Join with CRLF for Excel
+  return csvRows.join('\r\n')
 }

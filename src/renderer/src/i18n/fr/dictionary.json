@@ -12,5 +12,6 @@
   "denominator": "Dénominateur",
   "denominatorName": "Nom du dénominateur",
   "categories": "Dimension désagrégée",
-  "allColumns": "toutes les colonnes"
+  "allColumns": "toutes les colonnes",
+  "filter": "Filtrer"
 }

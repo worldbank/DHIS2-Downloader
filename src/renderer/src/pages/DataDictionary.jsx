@@ -7,26 +7,42 @@ import ExportLink from '../components/ExportLink'
 import Pagination from '../components/Pagination'
 
 // eslint-disable-next-line react/prop-types
-const DataDictionary = ({ dictionaryDb }) => {
-  const [currentPage, setCurrentPage] = useState(1)
-  const [jumpToPage, setJumpToPage] = useState('')
-  const [itemsPerPage, setItemsPerPage] = useState(10)
-  const [currentPageData, setCurrentPageData] = useState([])
-  const [searchInput, setSearchInput] = useState('')
-  const [searchQuery, setSearchQuery] = useState('')
-  const [searchColumn, setSearchColumn] = useState('all')
-  const dictionaryDbRef = useRef(dictionaryDb)
+export default function DataDictionary({ dictionaryDb }) {
   const { t } = useTranslation()
+  const dbRef = useRef(dictionaryDb)
 
+  // pagination state
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
+  const [jumpToPage, setJumpToPage] = useState('')
+  const [currentPageData, setCurrentPageData] = useState([])
+
+  // per-column filters
+  const [columnFilters, setColumnFilters] = useState({
+    category: '',
+    id: '',
+    displayName: '',
+    displayDescription: '',
+    categories: '',
+    numerator: '',
+    numeratorName: '',
+    denominator: '',
+    denominatorName: ''
+  })
+  const handleColumnFilterChange = (col) => (e) => {
+    setColumnFilters((prev) => ({ ...prev, [col]: e.target.value }))
+    setCurrentPage(1)
+  }
+
+  // load all items from Dexie
   const allElements =
-    useLiveQuery(() => dictionaryDbRef.current.elements.orderBy('category').toArray(), []) || []
+    useLiveQuery(() => dbRef.current.elements.orderBy('category').toArray(), []) || []
   const data = useMemo(() => allElements, [allElements])
 
+  // filter logic: only per-column
   const filteredData = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase()
-    if (!q) return data
-
     return data.filter((item) => {
+      // flatten categories/options
       const categoriesText =
         item.categoryCombo?.categories
           ?.flatMap((cat) => [
@@ -35,206 +51,155 @@ const DataDictionary = ({ dictionaryDb }) => {
           ])
           .join(' ') || ''
 
-      let fieldText = ''
-      switch (searchColumn) {
-        case 'category':
-          fieldText = item.category
-          break
-        case 'id':
-          fieldText = item.id
-          break
-        case 'displayName':
-          fieldText = item.displayName
-          break
-        case 'displayDescription':
-          fieldText = item.displayDescription || ''
-          break
-        case 'categories':
-          fieldText = categoriesText
-          break
-        case 'numerator':
-          fieldText = item.numerator?.toString() ?? ''
-          break
-        case 'numeratorName':
-          fieldText = item.numeratorName || ''
-          break
-        case 'denominator':
-          fieldText = item.denominator?.toString() ?? ''
-          break
-        case 'denominatorName':
-          fieldText = item.denominatorName || ''
-          break
-        case 'all':
-        default:
-          fieldText = [
-            item.category,
-            item.id,
-            item.displayName,
-            item.displayDescription,
-            categoriesText,
-            item.numeratorName,
-            item.denominatorName
-          ].join(' ')
+      const lookup = {
+        category: item.category,
+        id: item.id,
+        displayName: item.displayName,
+        displayDescription: item.displayDescription || '',
+        categories: categoriesText,
+        numerator: item.numerator?.toString() ?? '',
+        numeratorName: item.numeratorName ?? '',
+        denominator: item.denominator?.toString() ?? '',
+        denominatorName: item.denominatorName ?? ''
       }
 
-      return fieldText.toLowerCase().includes(q)
+      return Object.entries(columnFilters).every(([col, val]) => {
+        if (!val) return true
+        return lookup[col].toLowerCase().includes(val.trim().toLowerCase())
+      })
     })
-  }, [data, searchColumn, searchQuery])
+  }, [data, columnFilters])
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage)
 
-  const fetchData = useCallback(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage
-    const pageData = filteredData.slice(startIndex, startIndex + itemsPerPage)
-
-    const updatedPageData = updateFormulaNames(
-      updateFormulaNames(pageData, data, 'numerator'),
-      data,
-      'denominator'
-    )
-
-    setCurrentPageData(updatedPageData)
+  // paginate & apply formula names
+  const fetchPage = useCallback(() => {
+    const start = (currentPage - 1) * itemsPerPage
+    const page = filteredData.slice(start, start + itemsPerPage)
+    const withNum = updateFormulaNames(page, data, 'numerator')
+    const withDen = updateFormulaNames(withNum, data, 'denominator')
+    setCurrentPageData(withDen)
   }, [currentPage, itemsPerPage, filteredData, data])
 
   useEffect(() => {
-    fetchData()
-  }, [fetchData])
-
+    fetchPage()
+  }, [fetchPage])
   useEffect(() => {
     setCurrentPage(1)
-  }, [searchColumn])
+  }, [columnFilters])
 
-  const handlePageChange = (page) => {
-    if (page > 0 && page <= totalPages) {
-      setCurrentPage(page)
-    }
+  // pagination handlers
+  const handlePageChange = (p) => {
+    if (p >= 1 && p <= totalPages) setCurrentPage(p)
   }
-
-  const handleItemsPerPageChange = (event) => {
-    setItemsPerPage(Number(event.target.value))
+  const handleItemsPerPageChange = (e) => {
+    setItemsPerPage(Number(e.target.value))
     setCurrentPage(1)
   }
-
-  const handleJumpToPageSubmit = (event) => {
-    event.preventDefault()
-    const page = Number(jumpToPage)
-    if (!isNaN(page) && page > 0 && page <= totalPages) {
-      setCurrentPage(page)
-    }
+  const handleJumpToPageSubmit = (e) => {
+    e.preventDefault()
+    const p = Number(jumpToPage)
+    if (!isNaN(p) && p >= 1 && p <= totalPages) setCurrentPage(p)
   }
 
+  // flatten for CSV export
   const flattenForExport = (item) => {
-    const disaggregateSummary =
+    const categoriesText =
       item.categoryCombo?.categories
         ?.map((cat) => {
-          const catName = `${cat.displayName} [${cat.id}]`
-          const options = cat.categoryOptions
-            ?.map((opt) => `${opt.displayName} [${opt.id}]`)
-            .join(', ')
-          return `${catName}: ${options}`
+          const opts = cat.categoryOptions?.map((o) => o.displayName).join(', ')
+          return `${cat.displayName} [${cat.id}]: ${opts}`
         })
-        .join(' | ') || 'N/A'
+        .join(' | ') || ''
 
-    const { categoryCombo, ...rest } = item
     return {
-      ...rest,
-      categoryCombo: disaggregateSummary
+      category: item.category,
+      id: item.id,
+      displayName: item.displayName,
+      displayDescription: item.displayDescription ?? '',
+      categories: categoriesText,
+      numerator: item.numerator ?? '',
+      numeratorName: item.numeratorName ?? '',
+      denominator: item.denominator ?? '',
+      denominatorName: item.denominatorName ?? ''
     }
   }
-
+  // export handlers
   const handleExportAll = () => {
-    try {
-      const csvDataPoints = objectToCsv(data.map(flattenForExport))
-      const csvBlob = new Blob([csvDataPoints], { type: 'text/csv' })
-      const downloadLink = document.createElement('a')
-      downloadLink.href = URL.createObjectURL(csvBlob)
-      downloadLink.download = 'JsonId.csv'
-      downloadLink.click()
-    } catch (error) {
-      console.log(error)
-    }
+    const allWithNum  = updateFormulaNames(data, data, 'numerator')
+    const allWithNames = updateFormulaNames(allWithNum, data, 'denominator')
+    const rows = allWithNames.map(flattenForExport)
+    const csv = objectToCsv(rows)
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = 'DataDictionary_All.csv'
+    a.click()
   }
-
-  const handleExportCurrent = () => {
-    try {
-      const csvDataPoints = objectToCsv(currentPageData.map(flattenForExport))
-      const csvBlob = new Blob([csvDataPoints], { type: 'text/csv' })
-      const downloadLink = document.createElement('a')
-      downloadLink.href = URL.createObjectURL(csvBlob)
-      downloadLink.download = 'JsonId_thisPage.csv'
-      downloadLink.click()
-    } catch (error) {
-      console.log(error)
-    }
-  }
-
-  const handleSearchChange = (event) => {
-    setSearchInput(event.target.value)
-  }
-
-  const handleSearchSubmit = (event) => {
-    event.preventDefault()
-    setSearchQuery(searchInput)
-    setCurrentPage(1)
+  const handleExportPage = () => {
+    const startIndex = (currentPage - 1) * itemsPerPage
+    const rows = currentPageData.map(flattenForExport)
+    const csv = objectToCsv(rows)
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = 'DataDictionary_Page.csv'
+    a.click()
   }
 
   return (
-    <div className="mt-4 flex flex-col items-center w-full">
-      <div className="w-full max-w-4xl mx-auto mb-4">
-        <form onSubmit={handleSearchSubmit} className="flex items-center space-x-2">
-          <select
-            value={searchColumn}
-            onChange={(e) => setSearchColumn(e.target.value)}
-            className="px-3 py-2 border rounded"
-          >
-            <option value="all">{t('dictionary.allColumns')}</option>
-            <option value="category">{t('dictionary.type')}</option>
-            <option value="id">{t('dictionary.id')}</option>
-            <option value="displayName">{t('dictionary.name')}</option>
-            <option value="displayDescription">{t('dictionary.description')}</option>
-            <option value="categories">{t('dictionary.categories')}</option>
-            <option value="numerator">{t('dictionary.numerator')}</option>
-            <option value="numeratorName">{t('dictionary.numeratorName')}</option>
-            <option value="denominator">{t('dictionary.denominator')}</option>
-            <option value="denominatorName">{t('dictionary.denominatorName')}</option>
-          </select>
-          <input
-            type="text"
-            value={searchInput}
-            onChange={handleSearchChange}
-            placeholder={t('dictionary.searchPlaceholder')}
-            className="flex-1 px-4 py-2 border border-gray-300 rounded"
-          />
-          <button type="submit" className="ml-2 px-4 py-2 bg-blue-500 text-white rounded">
-            {t('dictionary.search')}
-          </button>
-        </form>
-      </div>
+    <div className="w-full max-w-6xl mx-auto p-6 space-y-6">
+      {/* Table card */}
+      <div className="bg-white shadow-lg rounded-lg overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            {/* header */}
+            <tr className="uppercase text-gray-600 text-xs">
+              <th className="px-6 py-3">{t('dictionary.type')}</th>
+              <th className="px-6 py-3">{t('dictionary.id')}</th>
+              <th className="px-6 py-3">{t('dictionary.name')}</th>
+              <th className="px-6 py-3">{t('dictionary.description')}</th>
+              <th className="px-6 py-3">{t('dictionary.categories')}</th>
+              <th className="px-6 py-3">{t('dictionary.numerator')}</th>
+              <th className="px-6 py-3">{t('dictionary.numeratorName')}</th>
+              <th className="px-6 py-3">{t('dictionary.denominator')}</th>
+              <th className="px-6 py-3">{t('dictionary.denominatorName')}</th>
+            </tr>
+            {/* filter row */}
+            <tr className="bg-white">
+              {[
+                'category',
+                'id',
+                'displayName',
+                'displayDescription',
+                'categories',
+                'numerator',
+                'numeratorName',
+                'denominator',
+                'denominatorName'
+              ].map((col) => (
+                <th key={col} className="px-6 py-2">
+                  <input
+                    type={col === 'numerator' || col === 'denominator' ? 'number' : 'text'}
+                    value={columnFilters[col]}
+                    onChange={handleColumnFilterChange(col)}
+                    placeholder={t('dictionary.filter') || 'Filtrer'}
+                    className="w-full border-b border-gray-200 text-xs p-1 focus:outline-none"
+                  />
+                </th>
+              ))}
+            </tr>
+          </thead>
 
-      {currentPageData.length > 0 && (
-        <div className="overflow-x-auto w-full">
-          <table className="w-full max-w-4xl mx-auto bg-white shadow-md rounded-lg">
-            <thead>
-              <tr className="bg-gray-100 text-gray-800 uppercase text-sm leading-normal">
-                <th className="py-1 px-1 border-r">{t('dictionary.type')}</th>
-                <th className="py-1 px-1 border-r">{t('dictionary.id')}</th>
-                <th className="py-1 px-1 border-r">{t('dictionary.name')}</th>
-                <th className="py-1 px-1 border-r">{t('dictionary.description')}</th>
-                <th className="py-1 px-1 border-r">{t('dictionary.categories')}</th>
-                <th className="py-1 px-1 border-r">{t('dictionary.numerator')}</th>
-                <th className="py-1 px-1 border-r">{t('dictionary.numeratorName')}</th>
-                <th className="py-1 px-1 border-r">{t('dictionary.denominator')}</th>
-                <th className="py-1 px-1 border-r">{t('dictionary.denominatorName')}</th>
-              </tr>
-            </thead>
-            <tbody className="text-gray-600 text-xs font-light">
-              {currentPageData.map((el) => (
-                <tr key={el.id} className="border-b">
-                  <td className="py-1 px-1 border-r break-words">{el.category}</td>
-                  <td className="py-1 px-1 border-r break-words">{el.id}</td>
-                  <td className="py-1 px-1 border-r break-words">{el.displayName}</td>
-                  <td className="py-1 px-1 border-r break-words">{el.displayDescription}</td>
-                  <td className="py-1 px-1 border-r break-words">
+          <tbody className="bg-white divide-y divide-gray-100 text-sm text-gray-700">
+            {currentPageData.length > 0 ? (
+              currentPageData.map((el) => (
+                <tr key={el.id}>
+                  <td className="px-6 py-3">{el.category}</td>
+                  <td className="px-6 py-3">{el.id}</td>
+                  <td className="px-6 py-3">{el.displayName}</td>
+                  <td className="px-6 py-3">{el.displayDescription}</td>
+                  <td className="px-6 py-3">
                     {el.categoryCombo?.categories?.map((cat) => (
                       <div key={cat.id}>
                         <strong>{cat.displayName}:</strong>{' '}
@@ -242,34 +207,41 @@ const DataDictionary = ({ dictionaryDb }) => {
                       </div>
                     ))}
                   </td>
-                  <td className="py-1 px-1 border-r break-words">{el.numerator}</td>
-                  <td className="py-1 px-1 border-r break-words">{el.numeratorName}</td>
-                  <td className="py-1 px-1 border-r break-words">{el.denominator}</td>
-                  <td className="py-1 px-1 border-r break-words">{el.denominatorName}</td>
+                  <td className="px-6 py-3">{el.numerator}</td>
+                  <td className="px-6 py-3">{el.numeratorName}</td>
+                  <td className="px-6 py-3">{el.denominator}</td>
+                  <td className="px-6 py-3">{el.denominatorName}</td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={9} className="py-6 text-center text-gray-400">
+                  {t('dictionary.noResults') || 'Aucun résultat.'}
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* actions & pagination */}
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="flex space-x-3">
+          <ExportLink onClick={handleExportAll} text={t('dictionary.exportAll')} />
+          <ExportLink onClick={handleExportPage} text={t('dictionary.exportPage')} />
         </div>
-      )}
 
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-        onItemsPerPageChange={handleItemsPerPageChange}
-        onJumpToPageSubmit={handleJumpToPageSubmit}
-        jumpToPage={jumpToPage}
-        setJumpToPage={setJumpToPage}
-        itemsPerPage={itemsPerPage}
-      />
-
-      <div className="mt-4 w-full max-w-4xl mx-auto flex justify-between items-center">
-        <ExportLink onClick={handleExportAll} text={t('dictionary.exportAll')} />
-        <ExportLink onClick={handleExportCurrent} text={t('dictionary.exportPage')} />
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          onItemsPerPageChange={handleItemsPerPageChange}
+          onJumpToPageSubmit={handleJumpToPageSubmit}
+          jumpToPage={jumpToPage}
+          setJumpToPage={setJumpToPage}
+          itemsPerPage={itemsPerPage}
+        />
       </div>
     </div>
   )
 }
-
-export default DataDictionary

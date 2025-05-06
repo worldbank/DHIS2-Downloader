@@ -12,5 +12,6 @@
   "denominator": "Denominator",
   "denominatorName": "Denominator Name",
   "categories": "Disaggregated Dimension",
-  "allColumns": "All columns"
+  "allColumns": "All columns",
+  "filter": "Filter"
 }

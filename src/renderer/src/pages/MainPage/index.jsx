@@ -83,31 +83,22 @@ const MainPage = ({ queryDb }) => {
   }
 
   const processChunks = async (chunks, fileStream, downloadParams, headerState) => {
-    let index = 0
-
-    // Process chunks sequentially until the header is written
-    while (!headerState.written && index < chunks.length) {
-      await fetchAndProcessChunk(chunks[index], index, fileStream, downloadParams, headerState)
-      index++
-    }
-
-    if (!headerState.written) {
-      dispatch(
-        addLog({
-          message: t('mainPage.noDataForHeader'),
-          type: 'error'
-        })
-      )
+    // nothing to do if there are no chunks
+    if (chunks.length === 0) {
+      dispatch(addLog({ message: t('mainPage.noDataForHeader'), type: 'error' }))
       return
     }
 
-    // Process the remaining chunks in parallel
-    const remainingChunks = chunks.slice(index)
-    const fetchPromises = remainingChunks.map((chunk, idx) =>
-      fetchAndProcessChunk(chunk, index + idx, fileStream, downloadParams, headerState)
-    )
+    // 1) Fetch & write the very first chunk (this writes the header + its rows)
+    await fetchAndProcessChunk(chunks[0], 0, fileStream, downloadParams, headerState)
 
-    await Promise.all(fetchPromises)
+    // 2) Fetch all the others in parallel (they’ll all skip their own header row)
+    const rest = chunks.slice(1)
+    await Promise.all(
+      rest.map((chunk, idx) =>
+        fetchAndProcessChunk(chunk, idx + 1, fileStream, downloadParams, headerState)
+      )
+    )
   }
 
   const fetchAndProcessChunk = async (chunk, index, fileStream, downloadParams, headerState) => {
