@@ -1,5 +1,5 @@
 {
-  "title": "Diviser les données en segments plus petits",
+  "title": "Configuration",
   "description": "Entrez le nombre de périodes temporelles pour chaque segment.",
   "placeholder": "Entrez un nombre",
   "cancel": "Annuler",
@@ -15,5 +15,8 @@
   "close": "fermer",
   "successfulConnect": "Connecté avec succès",
   "invalidUsername": "Nom d'utilisateur ou mot de passe invalide",
-  "failedAuthentication": "Échec de l'initialisation de l'authentification"
+  "failedAuthentication": "Échec de l'initialisation de l'authentification",
+  "format": "Format",
+  "long": "format long",
+  "wide": "format large"
 }

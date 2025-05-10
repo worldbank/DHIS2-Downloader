@@ -1,5 +1,5 @@
 {
-  "title": "Split Data Into Smaller Chunks",
+  "title": "Configuration",
   "description": "Enter the number of time periods for each chunk.",
   "placeholder": "Enter a number",
   "cancel": "Cancel",
@@ -15,5 +15,8 @@
   "close": "close",
   "successfulConnect": "Connected Successfully",
   "invalidUsername": "Invalid Username or Password",
-  "failedAuthentication": "Failed to initialize authentication"
+  "failedAuthentication": "Failed to initialize authentication",
+  "format": "Format",
+  "long": "Long Format",
+  "wide": "Wide Format"
 }

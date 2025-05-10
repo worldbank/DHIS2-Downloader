@@ -1,29 +1,61 @@
-export const generateDownloadingUrl = (dhis2Url, ou, dx, pe, co, format = 'csv') => {
+export const generateDownloadingUrl = (
+  dhis2Url,
+  ou,
+  dx,
+  pe,
+  co,
+  format = 'csv',
+  layout = { rows: ['ou', 'pe', 'dx'], columns: [] }
+) => {
+  // Base dimension URL parts
   let parameters = `api/analytics.${format}?dimension=ou:${ou}&dimension=pe:${pe}&dimension=dx:${dx}`
-  let defaultFormat =
-    '&displayProperty=NAME&ignoreLimit=TRUE&hierarchyMeta=TRUE&hideEmptyRows=TRUE&showHierarchy=TRUE&rows=ou;pe;dx'
 
-  if (co.length !== 0) {
-    parameters += co.map((el) => `&dimension=${el}`).join('')
-    let rowString = co.join(';')
-    defaultFormat += `;${rowString}`
+  // Add disaggregates (if any)
+  if (co && co.length > 0) {
+    parameters += co.map((c) => `&dimension=${c}`).join('')
   }
 
-  const url = `${dhis2Url}/${parameters}${defaultFormat}`
-  return url
+  // Layout processing
+  let layoutParams =
+    '&displayProperty=NAME&ignoreLimit=TRUE&hierarchyMeta=TRUE&hideEmptyRows=TRUE&showHierarchy=TRUE'
+
+  const rows = layout?.rows || ['ou', 'pe', 'dx']
+  const columns = layout?.columns || []
+
+  if (rows.length > 0) layoutParams += `&rows=${rows.join(';')}`
+  if (columns.length > 0) layoutParams += `&columns=${columns.join(';')}`
+
+  return `${dhis2Url}/${parameters}${layoutParams}`
 }
 
-export const createDataChunks = (dxs, pe, ou, chunkSize) => {
+export const createDataChunks = (dxs, pe, ou, chunkSize, layout) => {
   const chunks = []
-  dxs.forEach((dx) => {
+
+  const isWide = layout?.columns?.includes('dx')
+
+  if (isWide) {
+    // Wide format: keep all dxs, only chunk periods
     for (let i = 0; i < pe.length; i += chunkSize) {
       chunks.push({
-        dx: [dx],
+        dx: dxs,
         periods: pe.slice(i, i + chunkSize),
         ou: ou
       })
     }
-  })
+  } else {
+    // Long format: chunk periods per each dx
+    for (let i = 0; i < pe.length; i += chunkSize) {
+      const periodChunk = pe.slice(i, i + chunkSize)
+      chunks.push(
+        ...dxs.map((dx) => ({
+          dx: [dx],
+          periods: periodChunk,
+          ou: ou
+        }))
+      )
+    }
+  }
+
   return chunks
 }
 
