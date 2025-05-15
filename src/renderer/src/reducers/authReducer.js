@@ -12,6 +12,7 @@ import {
 import { setCategories, setOrgUnitGroupSets } from './categoryReducer.js'
 import { dictionaryDb, servicesDb, queryDb } from '../service/db'
 import { triggerLoading, triggerNotification } from '../reducers/statusReducer'
+import { rehydrateAppStateFromDexie } from './categoryReducer'
 import i18n from '../i18n/i18n.js'
 
 const initialState = {
@@ -60,6 +61,7 @@ export const initializeAuth = () => async (dispatch) => {
       dispatch(setDhis2Url(storedDhis2Url))
       dispatch(setUsername(storedUsername))
       dispatch(setPassword(storedPassword))
+      dispatch(rehydrateAppStateFromDexie())
     } else if (storedDhis2Url && storedUsername) {
       dispatch(setDhis2Url(storedDhis2Url))
       dispatch(setUsername(storedUsername))
