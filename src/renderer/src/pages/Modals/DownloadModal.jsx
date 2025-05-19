@@ -9,6 +9,7 @@ const ChunkingStrategyModal = ({ onStrategySelect }) => {
   const dispatch = useDispatch()
   const { t } = useTranslation()
   const [customChunkSize, setCustomChunkSize] = useState('3')
+  const [layoutFormat, setLayoutFormat] = useState('long')
 
   const handleConfirm = () => {
     if (!customChunkSize || isNaN(customChunkSize) || customChunkSize <= 0) {
@@ -18,36 +19,58 @@ const ChunkingStrategyModal = ({ onStrategySelect }) => {
 
     const parsedChunkSize = parseInt(customChunkSize, 10)
     dispatch(setChunkingStrategy(parsedChunkSize))
-    onStrategySelect(parsedChunkSize)
-    console.log(`Updated Redux with chunk size: ${parsedChunkSize}`)
+
+    const layout =
+      layoutFormat === 'wide'
+        ? { rows: ['ou', 'pe'], columns: ['dx'] }
+        : { rows: ['ou', 'pe', 'dx'], columns: [] }
+
+    onStrategySelect(layout)
     dispatch(closeModal())
   }
 
   return (
-    <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white p-4 rounded shadow-lg w-80">
-        <h3 className="text-lg font-semibold mb-4 text-center">{t('modal.title')}</h3>
+    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+      <div className="bg-white p-5 rounded-2xl shadow-xl w-full max-w-md">
+        <h2 className="text-xl font-semibold text-gray-800 mb-5 text-center">{t('modal.title')}</h2>
+
+        {/* Format Selection */}
         <div className="mb-4">
-          <label className="block text-sm text-gray-600 mb-2">{t('modal.description')}</label>
+          <label className="block text-sm text-gray-600 mb-1">{t('modal.format')}</label>
+          <select
+            value={layoutFormat}
+            onChange={(e) => setLayoutFormat(e.target.value)}
+            className="w-full text-sm px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+          >
+            <option value="long">{t('modal.long')}</option>
+            <option value="wide">{t('modal.wide')}</option>
+          </select>
+        </div>
+
+        {/* Chunk Size Input */}
+        <div className="mb-6">
+          <label className="block text-sm text-gray-600 mb-1">{t('modal.description')}</label>
           <input
             type="number"
+            min="1"
             value={customChunkSize}
             onChange={(e) => setCustomChunkSize(e.target.value)}
-            className="w-full border px-3 py-2 rounded"
+            className="w-full text-sm px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
             placeholder={t('modal.placeholder')}
-            min="1"
           />
         </div>
-        <div className="flex justify-end gap-2">
+
+        {/* Action Buttons */}
+        <div className="flex justify-end space-x-2">
           <button
             onClick={() => dispatch(closeModal())}
-            className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300"
+            className="text-sm px-4 py-2 rounded-md bg-gray-100 hover:bg-gray-200 transition"
           >
             {t('modal.cancel')}
           </button>
           <button
             onClick={handleConfirm}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            className="text-sm px-4 py-2 rounded-md bg-blue-500 text-white hover:bg-blue-600 transition"
           >
             {t('modal.confirm')}
           </button>

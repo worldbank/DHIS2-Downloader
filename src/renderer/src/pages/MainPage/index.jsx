@@ -46,7 +46,7 @@ const MainPage = ({ queryDb }) => {
     return saveFilePath
   }
 
-  const getDownloadParameters = () => {
+  const getDownloadParameters = (layout) => {
     const ou = getOrganizationUnits()
     const elementIds = addedElements.map((element) => element.id)
     const elementNames = addedElements.map((element) => element.displayName)
@@ -60,12 +60,15 @@ const MainPage = ({ queryDb }) => {
       pe: periods.join(';'),
       periods,
       elementIds,
+      layout: layout, // ensure layout object is stored
       downloadingUrl: generateDownloadingUrl(
         dhis2Url,
         ou,
         elementIds.join(';'),
         periods.join(';'),
-        selectedCategory
+        selectedCategory,
+        'csv',
+        layout // pass correct object
       )
     }
   }
@@ -108,8 +111,11 @@ const MainPage = ({ queryDb }) => {
       ou,
       dx.join(';'),
       periods.join(';'),
-      downloadParams.co
+      downloadParams.co,
+      'csv',
+      downloadParams.layout
     )
+    console.log(downloadParams.layout)
 
     try {
       const blob = await fetchCsvData(chunkUrl, username, password)
@@ -176,13 +182,14 @@ const MainPage = ({ queryDb }) => {
       openModal({
         type: 'CHUNKING_STRATEGY',
         props: {
-          onStrategySelect: () => handleStreamDownload()
+          onStrategySelect: (layout) => handleStreamDownload(layout)
         }
       })
     )
   }
 
-  const handleStreamDownload = async () => {
+  const handleStreamDownload = async (layout) => {
+    console.log('Layout from modal:', layout)
     let fileStream = null
     try {
       const currentChunkingStrategy = store.getState().download.chunkingStrategy
@@ -191,12 +198,14 @@ const MainPage = ({ queryDb }) => {
 
       fileStream = window.fileSystem.createWriteStream(saveFilePath)
 
-      const downloadParams = getDownloadParameters()
+      const downloadParams = getDownloadParameters(layout)
+      console.log(downloadParams)
       const chunks = createDataChunks(
         downloadParams.elementIds,
         downloadParams.periods,
         downloadParams.ou,
-        parseInt(currentChunkingStrategy, 10)
+        parseInt(currentChunkingStrategy, 10),
+        layout
       )
 
       console.log('Generated Chunks:', chunks)
