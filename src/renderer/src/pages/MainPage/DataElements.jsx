@@ -43,6 +43,10 @@ const DataElementsSelector = () => {
     dispatch(setFilteredElements(filtered))
   }, [data, selectedDataType, searchQuery, dispatch])
 
+  const handleDoubleClickElement = (element) => {
+    dispatch(addSelectedElements([{ id: element.id, displayName: element.displayName }]))
+  }
+
   const handleSelectElement = (event) => {
     const selected = Array.from(event.target.selectedOptions).map((option) => ({
       id: option.value,
@@ -65,7 +69,9 @@ const DataElementsSelector = () => {
         <option value="All">{t('dataElementsMenu.dataTypeOptions.all')}</option>
         <option value="DataElement">{t('dataElementsMenu.dataTypeOptions.dataElement')}</option>
         <option value="Indicator">{t('dataElementsMenu.dataTypeOptions.indicator')}</option>
-        <option value="ProgramIndicator">{t('dataElementsMenu.dataTypeOptions.programIndicator')}</option>
+        <option value="ProgramIndicator">
+          {t('dataElementsMenu.dataTypeOptions.programIndicator')}
+        </option>
         <option value="dataSets">{t('dataElementsMenu.dataTypeOptions.dataSet')}</option>
       </select>
       <input
@@ -82,7 +88,12 @@ const DataElementsSelector = () => {
         style={{ minHeight: '200px', maxHeight: '200px' }}
       >
         {filteredElements?.map((element) => (
-          <option key={element.id} value={element.id} className="whitespace-normal">
+          <option
+            key={element.id}
+            value={element.id}
+            className="whitespace-normal"
+            onDoubleClick={() => handleDoubleClickElement(element)}
+          >
             - {element.displayName}
           </option>
         ))}
@@ -112,7 +123,7 @@ const SelectedDataElementsDisplay = () => {
       <ul>
         {addedDataElements?.map((element) => (
           <li key={element.id} className="text-sm">
-            {element.displayName}
+            - {element.displayName}
             <button onClick={() => handleRemoveElement(element.id)} className="ml-2 text-red-500">
               {t('dataElementsMenu.removeButton')}
             </button>
