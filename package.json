@@ -1,6 +1,6 @@
 {
   "name": "dhis2-downloader",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "DHIS2 Downloader",
   "main": "./out/main/index.js",
   "author": "globalfinancingfacility.org",
@@ -54,13 +54,13 @@
     "@vitejs/plugin-react": "^4.2.1",
     "electron": "^28.2.0",
     "electron-builder": "^24.9.1",
-    "electron-vite": "^2.0.0",
+    "electron-vite": "^3.1.0",
     "eslint": "^8.56.0",
     "eslint-plugin-react": "^7.33.2",
     "prettier": "^3.2.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "tailwindcss": "^3.4.4",
-    "vite": "^5.4.17"
+    "vite": "^6.3.5"
   }
 }
