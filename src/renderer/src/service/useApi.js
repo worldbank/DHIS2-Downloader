@@ -27,6 +27,41 @@ export const fetchData = async (apiUrl, username, password, timeout = 3600000) =
   }
 }
 
+export const fetchJsonData = async (apiUrl, username, password, timeout = 1200000) => {
+  const controller = new AbortController()
+  const { signal } = controller
+  const fetchOptions = {
+    headers: {
+      Authorization: `Basic ${btoa(`${username}:${password}`)}`,
+      Accept: 'application/json'
+    },
+    signal
+  }
+  const timeoutId = setTimeout(() => controller.abort(), timeout)
+
+  try {
+    const response = await fetch(apiUrl, fetchOptions)
+    clearTimeout(timeoutId)
+
+    if (!response.ok) {
+      // Try to extract a helpful error message from an HTML error page
+      const text = await response.text()
+      const parser = new DOMParser()
+      const doc = parser.parseFromString(text, 'text/html')
+      const title = doc.querySelector('title')?.textContent
+      throw new Error(title || `HTTP error! status: ${response.status}`)
+    }
+
+    // Parse and return JSON
+    return await response.json()
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      throw new Error(`Request timed out after ${timeout}ms`)
+    }
+    throw error
+  }
+}
+
 export const fetchCsvData = async (apiUrl, username, password, timeout = 1200000) => {
   const controller = new AbortController()
   const { signal } = controller

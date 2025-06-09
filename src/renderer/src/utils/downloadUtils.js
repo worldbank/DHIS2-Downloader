@@ -4,9 +4,8 @@ export const generateDownloadingUrl = (
   dx,
   pe,
   co,
-  format = 'csv',
-  layout = { rows: ['ou', 'pe', 'dx'], columns: [] }
-) => {
+  format = 'json',
+  layout = { rows: ['ou', 'pe', 'dx'], columns: [] }) => {
   // Base dimension URL parts
   let parameters = `api/analytics.${format}?dimension=ou:${ou}&dimension=pe:${pe}&dimension=dx:${dx}`
 

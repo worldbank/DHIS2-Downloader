@@ -84,48 +84,59 @@ const MainPage = ({ queryDb }) => {
       notes: ''
     })
   }
-
   const processChunks = async (chunks, fileStream, downloadParams, headerState) => {
-    // nothing to do if there are no chunks
     if (chunks.length === 0) {
       dispatch(addLog({ message: t('mainPage.noDataForHeader'), type: 'error' }))
       return
     }
 
-    // 1) Fetch & write the very first chunk (this writes the header + its rows)
-    await fetchAndProcessChunk(chunks[0], 0, fileStream, downloadParams, headerState)
-
-    // 2) Fetch all the others in parallel (they’ll all skip their own header row)
-    const rest = chunks.slice(1)
-    await Promise.all(
-      rest.map((chunk, idx) =>
-        fetchAndProcessChunk(chunk, idx + 1, fileStream, downloadParams, headerState)
+    // (a) parallel fetch
+    const fetches = chunks.map(({ dx, periods, ou }, idx) => {
+      const url = generateDownloadingUrl(
+        dhis2Url,
+        ou,
+        dx.join(';'),
+        periods.join(';'),
+        downloadParams.co,
+        'csv',
+        downloadParams.layout
       )
-    )
-  }
+      return fetchCsvData(url, username, password)
+        .then((blob) => blob.text())
+        .then((text) => ({ idx, text, dx, periods }))
+        .catch((error) => ({ idx, error, dx, periods }))
+    })
 
-  const fetchAndProcessChunk = async (chunk, index, fileStream, downloadParams, headerState) => {
-    const { dx, periods, ou } = chunk
-    const chunkUrl = generateDownloadingUrl(
-      dhis2Url,
-      ou,
-      dx.join(';'),
-      periods.join(';'),
-      downloadParams.co,
-      'csv',
-      downloadParams.layout
-    )
-    console.log(downloadParams.layout)
+    // (b) wait for all
+    const results = await Promise.all(fetches)
 
-    try {
-      const blob = await fetchCsvData(chunkUrl, username, password)
-      const text = await blob.text()
-      writeChunkToFile(text, fileStream, headerState)
+    // (c) sort in ascending index
+    results.sort((a, b) => a.idx - b.idx)
+
+    // (d) write each chunk in order
+    for (const { idx, text, error, dx, periods } of results) {
+      if (error) {
+        dispatch(
+          addLog({
+            message: t('mainPage.chunkFailed', {
+              index: idx + 1,
+              dx: dx.join(';'),
+              startPeriod: periods[0],
+              endPeriod: periods[periods.length - 1],
+              error: error.message
+            }),
+            type: 'error'
+          })
+        )
+        continue
+      }
+
+      writeChunkToFile(text, fileStream, headerState, idx)
 
       dispatch(
         addLog({
           message: t('mainPage.chunkSuccess', {
-            index: index + 1,
+            index: idx + 1,
             dx: dx.join(';'),
             startPeriod: periods[0],
             endPeriod: periods[periods.length - 1]
@@ -133,48 +144,35 @@ const MainPage = ({ queryDb }) => {
           type: 'info'
         })
       )
-    } catch (error) {
-      dispatch(
-        addLog({
-          message: t('mainPage.chunkFailed', {
-            index: index + 1,
-            dx: dx.join(';'),
-            startPeriod: periods[0],
-            endPeriod: periods[periods.length - 1],
-            error: error?.message
-          }),
-          type: 'error'
-        })
-      )
-    } finally {
-      if (window.api.triggerGarbageCollection) {
-        window.api.triggerGarbageCollection()
-      }
     }
   }
 
-  const writeChunkToFile = (text, fileStream, headerState) => {
-    const rows = text.split('\n').filter(Boolean)
+  const writeChunkToFile = (text, fileStream, headerState, chunkIndex) => {
+    const rows = text.split('\n').filter((line) => line.trim().length > 0)
+    if (rows.length === 0) return
 
-    if (!headerState.written) {
-      if (rows.length === 0) return
-      const header = rows[0] + ',downloaded_date'
-      fileStream.write(header + '\n')
-      headerState.written = true
+    let out = ''
+
+    if (chunkIndex === 0) {
+      // First chunk: pull off the header row, emit it once
+      if (!headerState.written) {
+        const hdr = rows.shift()
+        out += `${hdr},downloaded_date\n`
+        headerState.written = true
+      } else {
+        // (This shouldn’t happen, but just in case:)
+        rows.shift()
+      }
+    } else {
+      // Subsequent chunks: drop their header row
       rows.shift()
     }
 
     if (rows.length > 0) {
-      const firstRow = rows[0]
-      if (firstRow.toLowerCase().includes('period') || firstRow.toLowerCase().includes('orgunit')) {
-        rows.shift()
-      }
+      out += rows.map((r) => `${r},${currentDate}`).join('\n') + '\n'
     }
 
-    if (rows.length > 0) {
-      const dataWithDate = rows.map((row) => row + `,${currentDate}`).join('\n')
-      fileStream.write(dataWithDate + '\n')
-    }
+    fileStream.write(out)
   }
 
   const handleDownloadClick = () => {
@@ -196,7 +194,11 @@ const MainPage = ({ queryDb }) => {
       const saveFilePath = await getSaveFilePath()
       if (!saveFilePath) return
 
-      fileStream = window.fileSystem.createWriteStream(saveFilePath)
+      fileStream = window.fileSystem.createWriteStream(saveFilePath, {
+        flags: 'w',
+        encoding: 'utf8'
+      })
+      fileStream.write('\uFEFF')
 
       const downloadParams = getDownloadParameters(layout)
       console.log(downloadParams)
