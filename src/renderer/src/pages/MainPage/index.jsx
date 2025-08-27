@@ -107,15 +107,25 @@ const MainPage = ({ queryDb }) => {
         .catch((error) => ({ idx, error, dx, periods }))
     })
 
-    // (b) wait for all
-    const results = await Promise.all(fetches)
+    // (b) wait for all & sort
+    const results = (await Promise.all(fetches)).sort((a, b) => a.idx - b.idx)
 
-    // (c) sort in ascending index
-    results.sort((a, b) => a.idx - b.idx)
+    // (c) write header ONCE, before any data
+    if (!headerState.written) {
+      const firstOk = results.find((r) => r.text && !r.error)
+      if (!firstOk) {
+        dispatch(addLog({ message: t('mainPage.noDataForHeader'), type: 'error' }))
+        return
+      }
+      const lines = firstOk.text.split('\n').filter((l) => l.trim().length > 0)
+      const header = lines[0].replace(/\r$/, '')
+      fileStream.write(`${header},downloaded_date\n`)
+      headerState.written = true
+    }
 
-    // (d) write each chunk in order
+    // (d) now write each chunk’s DATA rows (always drop first row)
     for (const { idx, text, error, dx, periods } of results) {
-      if (error) {
+      if (error || !text) {
         dispatch(
           addLog({
             message: t('mainPage.chunkFailed', {
@@ -123,7 +133,7 @@ const MainPage = ({ queryDb }) => {
               dx: dx.join(';'),
               startPeriod: periods[0],
               endPeriod: periods[periods.length - 1],
-              error: error.message
+              error: error?.message || 'Unknown error'
             }),
             type: 'error'
           })
@@ -131,7 +141,14 @@ const MainPage = ({ queryDb }) => {
         continue
       }
 
-      writeChunkToFile(text, fileStream, headerState, idx)
+      const rows = text.split('\n').filter((l) => l.trim().length > 0)
+      // drop header line from this chunk
+      if (rows.length) rows.shift()
+
+      if (rows.length) {
+        const out = rows.map((r) => `${r.replace(/\r$/, '')},${currentDate}`).join('\n') + '\n'
+        fileStream.write(out)
+      }
 
       dispatch(
         addLog({
@@ -145,34 +162,6 @@ const MainPage = ({ queryDb }) => {
         })
       )
     }
-  }
-
-  const writeChunkToFile = (text, fileStream, headerState, chunkIndex) => {
-    const rows = text.split('\n').filter((line) => line.trim().length > 0)
-    if (rows.length === 0) return
-
-    let out = ''
-
-    if (chunkIndex === 0) {
-      // First chunk: pull off the header row, emit it once
-      if (!headerState.written) {
-        const hdr = rows.shift()
-        out += `${hdr},downloaded_date\n`
-        headerState.written = true
-      } else {
-        // (This shouldn’t happen, but just in case:)
-        rows.shift()
-      }
-    } else {
-      // Subsequent chunks: drop their header row
-      rows.shift()
-    }
-
-    if (rows.length > 0) {
-      out += rows.map((r) => `${r},${currentDate}`).join('\n') + '\n'
-    }
-
-    fileStream.write(out)
   }
 
   const handleDownloadClick = () => {
