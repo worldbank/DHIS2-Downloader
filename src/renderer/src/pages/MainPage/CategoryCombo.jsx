@@ -2,11 +2,13 @@ import React, { useEffect, useRef } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { setSelectedCategory } from '../../reducers/categoryReducer'
 import { mouseClick, mouseToggle } from '../../reducers/mouseReducer'
+import { useTranslation } from 'react-i18next'
 
 const CategoryDropdownMenu = () => {
   const dispatch = useDispatch()
   const { categories, orgUnitGroupSets, selectedCategory } = useSelector((state) => state.category)
   const openDropdowns = useSelector((state) => state.mouse.openDropdowns)
+  const { t } = useTranslation()
   const dropdownId = 'categoryDropdown'
   const dropdownRef = useRef(null)
 
@@ -41,7 +43,7 @@ const CategoryDropdownMenu = () => {
           {selectedCategory.length > 0 ? (
             <span className="flex-grow">{selectedCategory.length} selected</span>
           ) : (
-            <span className="flex-grow">Select Disaggregation</span>
+            <span className="flex-grow">{t('mainPage.selectDisaggregation')}</span>
           )}
           <span className="absolute right-4 pointer-events-none">▼</span>
         </div>

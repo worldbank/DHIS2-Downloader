@@ -1,6 +1,6 @@
 {
   "overviewTitle": "À propos de FASTR DHIS2 Data Downloader",
-  "welcomeText": "Bienvenue sur le système de téléchargement de données FASTR DHIS2 (FASTR DHIS2 Data Downloader), votre solution idéale pour extraire facilement les données des systèmes DHIS2. Cet outil simplifie le téléchargement de données DHIS2 pour différents utilisateurs, qu'il s'agisse de fonctionnaires du ministère de la Santé, de chercheurs, d'ONG ou de bailleurs de fonds.",
+  "welcomeText": "Bienvenue au système de téléchargement de données FASTR DHIS2 (FASTR DHIS2 Data Downloader), votre solution idéale pour facilement extraire les données du système DHIS2. Cet outil simplifie le téléchargement de données DHIS2 pour différents utilisateurs, qu'il s'agisse de fonctionnaires du ministère de la Santé, de chercheurs, d'ONG ou de bailleurs de fonds.",
   "features": {
     "title": "Fonctionnalités",
     "downloadingData": {

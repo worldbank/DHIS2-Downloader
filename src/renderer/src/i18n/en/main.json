@@ -8,8 +8,10 @@
   "organizationUnitsTooltip": "An organisational unit is usually a geographical unit, which exists within a hierarchy.",
   "dataElementsAndIndicators": "Data Elements and Indicators",
   "organizationLevels": "Organization Levels",
+  "selectLevels": "Select Levels",
   "dateRange": "Date Range",
   "disaggregation": "Disaggregation",
+  "selectDisaggregation": "Select Disaggregation",
   "disaggregationTooltip": {
     "header": "Disaggregation includes:",
     "list": [

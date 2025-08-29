@@ -8,6 +8,8 @@
   "organizationUnitsTooltip": "Une unité organisationnelle est généralement une unité géographique qui s’inscrit dans une hiérarchie.",
   "dataElementsAndIndicators": "Éléments de données et indicateurs",
   "organizationLevels": "Niveaux d'organisation",
+  "selectLevels": "Sélectionner niveaux",
+  "selectDisaggregation": "Sélectionner désagrégation",
   "dateRange": "Plage de dates",
   "disaggregation": "Désagrégation",
   "disaggregationTooltip": {

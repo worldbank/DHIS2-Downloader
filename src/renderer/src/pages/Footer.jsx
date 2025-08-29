@@ -2,8 +2,11 @@ import WBGLogo from '../assets/WBG-SupportedBy-horizontal-white-web.png'
 import GFFLogo from '../assets/GFF_Logo_White_En.png'
 import FASTRLogo from '../assets/FASTR_White_Horiz.png'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 const Footer = () => {
+  const { t } = useTranslation()
+
   return (
     <footer className="bg-gff-green text-white p-5">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
@@ -41,10 +44,10 @@ const Footer = () => {
             rel="noreferrer"
             className="hover:text-gray-300"
           >
-            Terms & Conditions
+            {t('navbar.terms')}
           </a>
           <Link to="/privacy" className="hover:text-gray-300">
-            Privacy Policy
+            {t('navbar.privacy')}
           </Link>
         </div>
       </div>

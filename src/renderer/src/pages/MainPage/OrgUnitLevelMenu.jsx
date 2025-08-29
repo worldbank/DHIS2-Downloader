@@ -2,12 +2,14 @@ import React, { useEffect, useRef } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { updateOrgUnitLevels, fetchOrganizationLevels } from '../../reducers/orgUnitReducer'
 import { mouseClick, mouseToggle } from '../../reducers/mouseReducer'
+import { useTranslation } from 'react-i18next'
 
 const OrgUnitLevelMenu = () => {
   const dispatch = useDispatch()
   const { allOrgUnitLevels, selectedOrgUnitLevels } = useSelector((state) => state.orgUnit)
   const openDropdowns = useSelector((state) => state.mouse.openDropdowns)
   const { dhis2Url, username, password } = useSelector((state) => state.auth)
+  const { t } = useTranslation()
   const dropdownId = 'orgUnitLevel'
   const dropdownRef = useRef(null)
 
@@ -49,7 +51,7 @@ const OrgUnitLevelMenu = () => {
           {selectedOrgUnitLevels?.length > 0 ? (
             <span className="flex-grow">{selectedOrgUnitLevels?.length} selected</span>
           ) : (
-            <span className="flex-grow">{'Select Level'}</span>
+            <span className="flex-grow">{t('mainPage.selectLevels')}</span>
           )}
           <span className="absolute right-4 pointer-events-none">▼</span>
         </div>
