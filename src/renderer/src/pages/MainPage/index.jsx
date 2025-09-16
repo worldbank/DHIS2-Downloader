@@ -16,7 +16,11 @@ import Tooltip from '../../components/Tooltip'
 import { openModal } from '../../reducers/modalReducer'
 import { fetchCsvData } from '../../service/useApi'
 import { generatePeriods } from '../../utils/dateUtils'
-import { generateDownloadingUrl, createDataChunks } from '../../utils/downloadUtils'
+import {
+  generateDownloadingUrl,
+  createDataChunks,
+  buildOuParamForOneParent
+} from '../../utils/downloadUtils'
 import { useTranslation } from 'react-i18next'
 
 // eslint-disable-next-line react/prop-types
@@ -169,14 +173,13 @@ const MainPage = ({ queryDb }) => {
       openModal({
         type: 'CHUNKING_STRATEGY',
         props: {
-          onStrategySelect: (layout) => handleStreamDownload(layout)
+          onStrategySelect: (layout, perOuMode) => handleStreamDownload({ layout, perOuMode })
         }
       })
     )
   }
 
-  const handleStreamDownload = async (layout) => {
-    console.log('Layout from modal:', layout)
+  const handleStreamDownload = async ({ layout, perOuMode }) => {
     let fileStream = null
     try {
       const currentChunkingStrategy = store.getState().download.chunkingStrategy
@@ -189,27 +192,65 @@ const MainPage = ({ queryDb }) => {
       })
       fileStream.write('\uFEFF')
 
-      const downloadParams = getDownloadParameters(layout)
-      console.log(downloadParams)
-      const chunks = createDataChunks(
-        downloadParams.elementIds,
-        downloadParams.periods,
-        downloadParams.ou,
-        parseInt(currentChunkingStrategy, 10),
-        layout
-      )
-
-      console.log('Generated Chunks:', chunks)
+      const periods = generatePeriods(frequency, startDate, endDate)
+      const elementIds = addedElements.map((e) => e.id)
 
       dispatch(clearLogs())
       dispatch(triggerLoading(true))
 
       const headerState = { written: false }
-      await processChunks(chunks, fileStream, downloadParams, headerState)
-      fileStream.end()
 
+      if (perOuMode) {
+        for (let i = 0; i < selectedOrgUnits.length; i++) {
+          const parentId = selectedOrgUnits[i]
+          const ouForThisParent = buildOuParamForOneParent(
+            parentId,
+            selectedOrgUnitLevels && selectedOrgUnitLevels.length ? selectedOrgUnitLevels : [5]
+          )
+
+          const chunks = createDataChunks(
+            elementIds,
+            periods,
+            ouForThisParent,
+            parseInt(currentChunkingStrategy, 10),
+            layout
+          )
+
+          await processChunks(
+            chunks,
+            fileStream,
+            {
+              ou: ouForThisParent,
+              co: selectedCategory,
+              elementIds,
+              periods,
+              layout
+            },
+            headerState
+          )
+
+          dispatch(
+            addLog({
+              message: `Finished ${i + 1}/${selectedOrgUnits.length} • OU ${parentId}`,
+              type: 'info'
+            })
+          )
+          await new Promise((r) => setTimeout(r, 200))
+        }
+      } else {
+        const downloadParams = getDownloadParameters(layout)
+        const chunks = createDataChunks(
+          downloadParams.elementIds,
+          downloadParams.periods,
+          downloadParams.ou,
+          parseInt(currentChunkingStrategy, 10),
+          layout
+        )
+        await processChunks(chunks, fileStream, downloadParams, headerState)
+      }
+
+      fileStream.end()
       dispatch(triggerNotification({ message: t('mainPage.downloadSuccess'), type: 'success' }))
-      await saveQueryToDatabase(downloadParams)
       clearCacheIfPossible()
     } catch (error) {
       handleDownloadError(error, fileStream)

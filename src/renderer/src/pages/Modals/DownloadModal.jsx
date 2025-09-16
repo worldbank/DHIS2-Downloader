@@ -8,8 +8,10 @@ import { useTranslation } from 'react-i18next'
 const ChunkingStrategyModal = ({ onStrategySelect }) => {
   const dispatch = useDispatch()
   const { t } = useTranslation()
+
   const [customChunkSize, setCustomChunkSize] = useState('3')
   const [layoutFormat, setLayoutFormat] = useState('long')
+  const [perOuMode, setPerOuMode] = useState(false)
 
   const handleConfirm = () => {
     if (!customChunkSize || isNaN(customChunkSize) || customChunkSize <= 0) {
@@ -25,7 +27,8 @@ const ChunkingStrategyModal = ({ onStrategySelect }) => {
         ? { rows: ['ou', 'pe'], columns: ['dx'] }
         : { rows: ['ou', 'pe', 'dx'], columns: [] }
 
-    onStrategySelect(layout)
+    // PASS the flag as a 2nd arg
+    onStrategySelect(layout, perOuMode)
     dispatch(closeModal())
   }
 
@@ -48,7 +51,7 @@ const ChunkingStrategyModal = ({ onStrategySelect }) => {
         </div>
 
         {/* Chunk Size Input */}
-        <div className="mb-6">
+        <div className="mb-4">
           <label className="block text-sm text-gray-600 mb-1">{t('modal.description')}</label>
           <input
             type="number"
@@ -58,6 +61,19 @@ const ChunkingStrategyModal = ({ onStrategySelect }) => {
             className="w-full text-sm px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
             placeholder={t('modal.placeholder')}
           />
+        </div>
+
+        <div className="mb-6 flex items-center gap-2">
+          <input
+            id="perOuMode"
+            type="checkbox"
+            checked={perOuMode}
+            onChange={(e) => setPerOuMode(e.target.checked)}
+            className="h-4 w-4 text-blue-600 border-gray-300 rounded mr-2"
+          />
+          <label htmlFor="perOuMode" className="text-sm text-gray-700">
+            {t('modal.perOuMode')}
+          </label>
         </div>
 
         {/* Action Buttons */}

@@ -18,5 +18,6 @@
   "failedAuthentication": "Failed to initialize authentication",
   "format": "Format",
   "long": "Long Format",
-  "wide": "Wide Format"
+  "wide": "Wide Format",
+  "perOuMode": "One-by-one Organisation Unit Mode"
 }

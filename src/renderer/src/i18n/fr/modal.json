@@ -18,5 +18,6 @@
   "failedAuthentication": "Échec de l'initialisation de l'authentification",
   "format": "Format",
   "long": "format long",
-  "wide": "format large"
+  "wide": "format large",
+  "perOuMode": "Mode unité organisationnelle un par un"
 }

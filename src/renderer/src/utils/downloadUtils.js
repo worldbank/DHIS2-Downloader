@@ -160,3 +160,10 @@ export const objectToCsv = (array, columnsOrder = []) => {
   // 4) Join with CRLF for Excel
   return csvRows.join('\r\n')
 }
+
+export function buildOuParamForOneParent(parentId, selectedLevels) {
+  const levels =
+    selectedLevels && selectedLevels.length ? selectedLevels.map((l) => `LEVEL-${l}`) : ['LEVEL-5']
+  // DHIS2: LEVEL-5;{parentId} ⇒ all level-5 descendants of that parent
+  return `${levels.join(';')};${parentId}`
+}

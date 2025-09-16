@@ -94,7 +94,7 @@ const DataElementsSelector = () => {
             className="whitespace-normal"
             onDoubleClick={() => handleDoubleClickElement(element)}
           >
-            - {element.displayName}
+            {element.displayName}
           </option>
         ))}
       </select>
