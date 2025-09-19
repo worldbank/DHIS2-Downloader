@@ -31,15 +31,37 @@ const DataElementsSelector = () => {
   }, [allElements, dispatch])
 
   useEffect(() => {
+    const qRaw = (searchQuery || '').trim()
+    const q = qRaw.toLowerCase()
+
+    const rank = (el) => {
+      const name = String(el.displayName || '').toLowerCase()
+      const id = String(el.id || '').toLowerCase()
+
+      if (!q) return 100 // neutral rank when no queryß
+      if (id === q) return 0 // exact UID match
+      if (id.startsWith(q)) return 1 // UID starts with query
+      if (name === q) return 2 // exact name match
+      if (name.startsWith(q)) return 3 // name starts with query
+      if (name.includes(q)) return 4 // name contains
+      if (id.includes(q)) return 5 // UID contains
+      return 999
+    }
+
     const filtered = data
       .filter((element) =>
         selectedDataType !== 'All' ? element.category === selectedDataType : true
       )
-      .filter(
-        (element) =>
-          searchQuery === '' ||
-          element.displayName.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+      .filter((el) => {
+        if (!q) return true
+        const name = String(el.displayName || '').toLowerCase()
+        const id = String(el.id || '').toLowerCase()
+        return name.includes(q) || id.includes(q)
+      })
+      .map((el) => ({ el, r: rank(el) }))
+      .sort((a, b) => a.r - b.r || (a.el.displayName || '').localeCompare(b.el.displayName || ''))
+      .map(({ el }) => el)
+
     dispatch(setFilteredElements(filtered))
   }, [data, selectedDataType, searchQuery, dispatch])
 
@@ -50,7 +72,7 @@ const DataElementsSelector = () => {
   const handleSelectElement = (event) => {
     const selected = Array.from(event.target.selectedOptions).map((option) => ({
       id: option.value,
-      displayName: option.label
+      displayName: option.getAttribute('data-displayname') || option.label
     }))
     dispatch(setSelectedElements(selected))
   }
@@ -74,30 +96,34 @@ const DataElementsSelector = () => {
         </option>
         <option value="dataSets">{t('dataElementsMenu.dataTypeOptions.dataSet')}</option>
       </select>
+
       <input
         type="text"
-        placeholder={t('dataElementsMenu.searchPlaceholder')}
+        placeholder={t('dataElementsMenu.searchPlaceholder') || 'Search by name or ID'}
         value={searchQuery}
         onChange={(e) => dispatch(setSearchQuery(e.target.value))}
         className="mb-2 w-full px-4 py-2 border border-gray-700 rounded"
       />
+
       <select
         multiple
         onChange={handleSelectElement}
-        className="w-full px-4 py-2 overflow-y border-gray-700 rounded"
+        className="w-full px-4 py-2 overflow-y border border-gray-700 rounded"
         style={{ minHeight: '200px', maxHeight: '200px' }}
       >
         {filteredElements?.map((element) => (
           <option
             key={element.id}
             value={element.id}
+            data-displayname={element.displayName}
             className="whitespace-normal"
             onDoubleClick={() => handleDoubleClickElement(element)}
           >
-            {element.displayName}
+            {element.displayName} ({element.id})
           </option>
         ))}
       </select>
+
       <button
         onClick={handleAddSelectedElements}
         className="mt-2 mr-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
@@ -123,7 +149,7 @@ const SelectedDataElementsDisplay = () => {
       <ul>
         {addedDataElements?.map((element) => (
           <li key={element.id} className="text-sm">
-            - {element.displayName}
+            - {element.displayName} <span className="text-gray-500">({element.id})</span>
             <button onClick={() => handleRemoveElement(element.id)} className="ml-2 text-red-500">
               {t('dataElementsMenu.removeButton')}
             </button>

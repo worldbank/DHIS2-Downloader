@@ -1,6 +1,6 @@
 {
   "name": "dhis2-downloader",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "description": "DHIS2 Downloader",
   "main": "./out/main/index.js",
   "author": "globalfinancingfacility.org",
