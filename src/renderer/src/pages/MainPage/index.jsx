@@ -13,7 +13,7 @@ import {
   triggerNotification
 } from '../../reducers/statusReducer'
 import Tooltip from '../../components/Tooltip'
-import { openModal } from '../../reducers/modalReducer'
+import { openModal, closeModal } from '../../reducers/modalReducer'
 import { fetchCsvData } from '../../service/useApi'
 import { generatePeriods } from '../../utils/dateUtils'
 import {
@@ -50,10 +50,13 @@ const MainPage = ({ queryDb }) => {
     return saveFilePath
   }
 
-  const getDownloadParameters = (layout) => {
-    const ou = getOrganizationUnits()
-    const elementIds = addedElements.map((element) => element.id)
-    const elementNames = addedElements.map((element) => element.displayName)
+  const getDownloadParameters = (layout, opts = {}) => {
+    // opts.ouOverride is only used for saving query in per OU mode
+    // in that case we want to save all OUs and levels in one query
+    // instead of just the current OU or levels
+    const ou = opts.ouOverride ?? getOrganizationUnits()
+    const elementIds = addedElements.map((e) => e.id)
+    const elementNames = addedElements.map((e) => e.displayName)
     const periods = generatePeriods(frequency, startDate, endDate)
 
     return {
@@ -64,7 +67,7 @@ const MainPage = ({ queryDb }) => {
       pe: periods.join(';'),
       periods,
       elementIds,
-      layout: layout, // ensure layout object is stored
+      layout,
       downloadingUrl: generateDownloadingUrl(
         dhis2Url,
         ou,
@@ -72,7 +75,7 @@ const MainPage = ({ queryDb }) => {
         periods.join(';'),
         selectedCategory,
         'csv',
-        layout // pass correct object
+        layout
       )
     }
   }
@@ -182,6 +185,18 @@ const MainPage = ({ queryDb }) => {
   const handleStreamDownload = async ({ layout, perOuMode }) => {
     let fileStream = null
     try {
+      // Validation for per OU mode
+      const hasOUs = selectedOrgUnits.length > 0
+      if (perOuMode && !hasOUs) {
+        dispatch(closeModal())
+        dispatch(
+          triggerNotification({
+            message: t('mainPage.errorNeedAtLeastOneOU'),
+            type: 'error'
+          })
+        )
+        return
+      }
       const currentChunkingStrategy = store.getState().download.chunkingStrategy
       const saveFilePath = await getSaveFilePath()
       if (!saveFilePath) return
@@ -237,6 +252,13 @@ const MainPage = ({ queryDb }) => {
           )
           await new Promise((r) => setTimeout(r, 200))
         }
+
+        // Save query with all OUs and levels into one database entry
+        const levelsToken = selectedOrgUnitLevels.map((l) => `LEVEL-${l}`).join(';')
+        const ouCombined = `${levelsToken};${selectedOrgUnits.join(';')}`
+
+        const historyParams = getDownloadParameters(layout, { ouOverride: ouCombined })
+        await saveQueryToDatabase(historyParams)
       } else {
         const downloadParams = getDownloadParameters(layout)
         const chunks = createDataChunks(
@@ -247,6 +269,8 @@ const MainPage = ({ queryDb }) => {
           layout
         )
         await processChunks(chunks, fileStream, downloadParams, headerState)
+        // Save query into database
+        await saveQueryToDatabase(downloadParams)
       }
 
       fileStream.end()
