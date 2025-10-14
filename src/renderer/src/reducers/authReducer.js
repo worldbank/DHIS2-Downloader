@@ -7,7 +7,8 @@ import {
   getCategoryOptionCombos,
   getDataSets,
   getOrganizationUnitGroupSets,
-  getCategories
+  getCategories,
+  getCategoryOptionGroupSets
 } from '../service/useApi'
 import { setCategories, setOrgUnitGroupSets } from './categoryReducer.js'
 import { dictionaryDb, servicesDb, queryDb } from '../service/db'
@@ -92,7 +93,8 @@ export const connect = (dhis2Url, username, password) => async (dispatch) => {
         catOptionCombos,
         dataSetsRaw,
         orgUnitGroupSets,
-        categoriesRaw
+        categoriesRaw,
+        categoryOptionGroupSets
       ] = await Promise.all([
         getDataElements(dhis2Url, username, password),
         getIndicators(dhis2Url, username, password),
@@ -100,7 +102,8 @@ export const connect = (dhis2Url, username, password) => async (dispatch) => {
         getCategoryOptionCombos(dhis2Url, username, password),
         getDataSets(dhis2Url, username, password),
         getOrganizationUnitGroupSets(dhis2Url, username, password),
-        getCategories(dhis2Url, username, password)
+        getCategories(dhis2Url, username, password),
+        getCategoryOptionGroupSets(dhis2Url, username, password)
       ])
 
       const dataSetMetrics = [
@@ -139,6 +142,10 @@ export const connect = (dhis2Url, username, password) => async (dispatch) => {
         ...categoriesRaw.categories.map((cat) => ({
           ...cat,
           category: 'category'
+        })),
+        ...categoryOptionGroupSets.categoryOptionGroupSets.map((cog) => ({
+          ...cog,
+          category: 'categoryOptionGroupSets'
         }))
       ]
 

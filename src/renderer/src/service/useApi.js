@@ -154,6 +154,11 @@ export const getCategoryOptionCombos = (dhis2Url, username, password) => {
   return fetchData(catComboOptionUrl, username, password)
 }
 
+export const getCategoryOptionGroupSets = (dhis2Url, username, password) => {
+  const catComboOptionUrl = `${dhis2Url}/api/categoryOptionGroupSets?fields=id,displayName&paging=false`
+  return fetchData(catComboOptionUrl, username, password)
+}
+
 export const getOrganizationUnitGroupSets = (dhis2Url, username, password) => {
   const orgUnitGroupSetsUrl = `${dhis2Url}/api/organisationUnitGroupSets?fields=id,displayName,organisationUnitGroups[id,displayName]&paging=false`
   return fetchData(orgUnitGroupSetsUrl, username, password)

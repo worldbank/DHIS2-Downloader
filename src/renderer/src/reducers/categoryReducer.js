@@ -36,7 +36,9 @@ export const rehydrateAppStateFromDexie = () => async (dispatch) => {
   try {
     const allElements = await dictionaryDb.elements.toArray()
 
-    const categories = allElements.filter((el) => el.category === 'category')
+    const categories = allElements.filter(
+      (el) => el.category === 'category' || el.category === 'categoryOptionGroupSets'
+    )
     const orgUnitGroupSets = allElements.filter((el) => el.category === 'organisationUnitGroupSets')
 
     dispatch(setCategories(categories))
