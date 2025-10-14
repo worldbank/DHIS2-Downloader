@@ -14,6 +14,7 @@ import Map from './pages/Facility/Map'
 import FacilityTable from './pages/Facility/Table'
 import ModalManager from './pages/Modals/ModalManager'
 import PrivacyPolicy from './pages/Privacy'
+import DownloadResultsTable from './pages/DownloadResultsTable'
 import { servicesDb, dictionaryDb, queryDb } from './service/db'
 import { openModal } from './reducers/modalReducer'
 
@@ -62,6 +63,14 @@ const App = () => {
             element={
               <PrivateRoute>
                 <HistoryPage dictionaryDb={dictionaryDb} queryDb={queryDb} />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/download-results"
+            element={
+              <PrivateRoute>
+                <DownloadResultsTable />
               </PrivateRoute>
             }
           />

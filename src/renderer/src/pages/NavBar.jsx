@@ -94,6 +94,13 @@ const NavBar = ({ accessToken, username, handleDisconnect }) => {
                 >
                   {t('navbar.history')}
                 </Link>
+                <Link
+                  to="/download-results"
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  onClick={() => dispatch(mouseClick())}
+                >
+                  {t('navbar.downloadResults')}
+                </Link>
               </div>
             )}
           </div>

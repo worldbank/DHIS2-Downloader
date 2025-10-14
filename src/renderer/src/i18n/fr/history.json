@@ -11,5 +11,9 @@
   "paramsPassed": "Paramètres transférés pour la ligne {{id}}.",
   "finishedDownloading": "Téléchargement terminé depuis {{url}}",
   "noSelectedRedownload": "Aucun worker ou URL sélectionné pour le re-téléchargement.",
-  "errorProcessingDownloads": "Erreur lors du traitement des téléchargements :"
+  "errorProcessingDownloads": "Erreur lors du traitement des téléchargements :",
+  "ok": "OK",
+  "failed": "Échec",
+  "exportCsv": "Exporter CSV",
+  "resultsTitle": "Résultats du téléchargement"
 }

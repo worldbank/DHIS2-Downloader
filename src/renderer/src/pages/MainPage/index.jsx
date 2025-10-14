@@ -1,3 +1,4 @@
+// MainPage.jsx - Optimized version
 import OrganizationUnitTree from './OrganizationUnitTree'
 import OrgUnitLevelMenu from './OrgUnitLevelMenu'
 import DateRangeSelector from './DateRangeSelector'
@@ -23,23 +24,24 @@ import {
 } from '../../utils/downloadUtils'
 import { useTranslation } from 'react-i18next'
 
-// eslint-disable-next-line react/prop-types
 const MainPage = ({ queryDb }) => {
   const dispatch = useDispatch()
   const { t } = useTranslation()
-  const { selectedOrgUnits, selectedOrgUnitLevels } = useSelector((state) => state.orgUnit)
-  const { addedElements } = useSelector((state) => state.dataElements)
-  const { selectedCategory } = useSelector((state) => state.category)
-  const { frequency, startDate, endDate } = useSelector((state) => state.dateRange)
-  const { dhis2Url, username, password } = useSelector((state) => state.auth)
+
+  const { selectedOrgUnits, selectedOrgUnitLevels } = useSelector((s) => s.orgUnit)
+  const { addedElements } = useSelector((s) => s.dataElements)
+  const { selectedCategory } = useSelector((s) => s.category)
+  const { frequency, startDate, endDate } = useSelector((s) => s.dateRange)
+  const { dhis2Url, username, password } = useSelector((s) => s.auth)
   const currentDate = new Date().toISOString().split('T')[0]
 
+  // --- Helpers ------------------------------------------------------------
   const getOrganizationUnits = () => {
     if (selectedOrgUnits.length > 0) {
-      const levels = selectedOrgUnitLevels.map((level) => `LEVEL-${level}`).join(';')
+      const levels = selectedOrgUnitLevels.map((l) => `LEVEL-${l}`).join(';')
       return `${levels};${selectedOrgUnits.join(';')}`
     }
-    return selectedOrgUnitLevels.map((level) => `LEVEL-${level}`).join(';')
+    return selectedOrgUnitLevels.map((l) => `LEVEL-${l}`).join(';')
   }
 
   const getSaveFilePath = async () => {
@@ -51,9 +53,6 @@ const MainPage = ({ queryDb }) => {
   }
 
   const getDownloadParameters = (layout, opts = {}) => {
-    // opts.ouOverride is only used for saving query in per OU mode
-    // in that case we want to save all OUs and levels in one query
-    // instead of just the current OU or levels
     const ou = opts.ouOverride ?? getOrganizationUnits()
     const elementIds = addedElements.map((e) => e.id)
     const elementNames = addedElements.map((e) => e.displayName)
@@ -80,24 +79,49 @@ const MainPage = ({ queryDb }) => {
     }
   }
 
+  // --- DB helpers ---------------------------------------------------------
   const saveQueryToDatabase = async (downloadParams) => {
-    await queryDb.query.add({
+    const id = await queryDb.query.add({
       organizationLevel: downloadParams.ou,
       period: downloadParams.pe,
       dimension: downloadParams.dx,
       dimensionName: downloadParams.dxNames,
-      disaggregation: downloadParams.co.join(';'),
+      disaggregation: Array.isArray(downloadParams.co)
+        ? downloadParams.co.join(';')
+        : downloadParams.co,
       url: downloadParams.downloadingUrl,
       notes: ''
     })
+    return id
   }
-  const processChunks = async (chunks, fileStream, downloadParams, headerState) => {
-    if (chunks.length === 0) {
-      dispatch(addLog({ message: t('mainPage.noDataForHeader'), type: 'error' }))
-      return
-    }
 
-    // (a) parallel fetch
+  const createRun = async (queryId) => {
+    const runId = await queryDb.runs.add({ ok: false })
+    await queryDb.runQueries.add({ runId, queryId })
+    return runId
+  }
+
+  const finalizeRun = async (runId, hadAnySuccess, hadAnyFailure) => {
+    const ok = hadAnySuccess && !hadAnyFailure
+    await queryDb.runs.update(runId, { ok })
+  }
+
+  // --- OPTIMIZED Chunk processor ------------------------------------------
+  /**
+   * KEY OPTIMIZATION: Batch all DB writes at the end instead of inside loop
+   */
+  const processChunks = async (
+    chunks,
+    fileStream,
+    downloadParams,
+    headerState,
+    { runId, queryId }
+  ) => {
+    let hadAnySuccess = false
+    let hadAnyFailure = false
+    if (!chunks.length) return { hadAnySuccess, hadAnyFailure }
+
+    // 1️⃣ Fire all requests in parallel (no DB writes yet)
     const fetches = chunks.map(({ dx, periods, ou }, idx) => {
       const url = generateDownloadingUrl(
         dhis2Url,
@@ -110,29 +134,58 @@ const MainPage = ({ queryDb }) => {
       )
       return fetchCsvData(url, username, password)
         .then((blob) => blob.text())
-        .then((text) => ({ idx, text, dx, periods }))
-        .catch((error) => ({ idx, error, dx, periods }))
+        .then((text) => ({ idx, text, dx, periods, ou }))
+        .catch((error) => ({ idx, error, dx, periods, ou }))
     })
 
-    // (b) wait for all & sort
+    // 2️⃣ Wait for all results
     const results = (await Promise.all(fetches)).sort((a, b) => a.idx - b.idx)
 
-    // (c) write header ONCE, before any data
+    // 3️⃣ Accumulate all result records in memory
+    const resultsToInsert = []
+
+    // 4️⃣ Write header if needed
     if (!headerState.written) {
       const firstOk = results.find((r) => r.text && !r.error)
       if (!firstOk) {
-        dispatch(addLog({ message: t('mainPage.noDataForHeader'), type: 'error' }))
-        return
+        // All failed - batch insert all failures
+        await queryDb.results.bulkAdd(
+          results.map((r) => ({
+            runId,
+            queryId,
+            ok: false,
+            chunkIndex: r.idx,
+            ou: r.ou,
+            startPeriod: r.periods?.[0],
+            endPeriod: r.periods?.at(-1),
+            dxCount: r.dx?.length ?? 0,
+            errorMessage: 'No successful header chunk',
+            createdAt: Date.now()
+          }))
+        )
+        return { hadAnySuccess, hadAnyFailure: true }
       }
-      const lines = firstOk.text.split('\n').filter((l) => l.trim().length > 0)
-      const header = lines[0].replace(/\r$/, '')
+      const header = firstOk.text.split('\n')[0].replace(/\r$/, '')
       fileStream.write(`${header},downloaded_date\n`)
       headerState.written = true
     }
 
-    // (d) now write each chunk’s DATA rows (always drop first row)
-    for (const { idx, text, error, dx, periods } of results) {
+    for (const { idx, text, error, dx, periods, ou } of results) {
       if (error || !text) {
+        hadAnyFailure = true
+        resultsToInsert.push({
+          runId,
+          queryId,
+          ok: false,
+          chunkIndex: idx,
+          ou,
+          startPeriod: periods[0],
+          endPeriod: periods.at(-1),
+          dxCount: dx.length,
+          errorMessage: error?.message || 'Unknown error',
+          createdAt: Date.now()
+        })
+
         dispatch(
           addLog({
             message: t('mainPage.chunkFailed', {
@@ -148,14 +201,28 @@ const MainPage = ({ queryDb }) => {
         continue
       }
 
-      const rows = text.split('\n').filter((l) => l.trim().length > 0)
-      // drop header line from this chunk
-      if (rows.length) rows.shift()
-
-      if (rows.length) {
-        const out = rows.map((r) => `${r.replace(/\r$/, '')},${currentDate}`).join('\n') + '\n'
-        fileStream.write(out)
+      // Write to file
+      const lines = text.split('\n').filter((l) => l.trim().length)
+      if (lines.length) lines.shift() // Remove header
+      if (lines.length) {
+        fileStream.write(
+          lines.map((r) => `${r.replace(/\r$/, '')},${currentDate}`).join('\n') + '\n'
+        )
       }
+
+      hadAnySuccess = true
+      resultsToInsert.push({
+        runId,
+        queryId,
+        ok: true,
+        chunkIndex: idx,
+        ou,
+        startPeriod: periods[0],
+        endPeriod: periods.at(-1),
+        dxCount: dx.length,
+        errorMessage: null,
+        createdAt: Date.now()
+      })
 
       dispatch(
         addLog({
@@ -169,8 +236,15 @@ const MainPage = ({ queryDb }) => {
         })
       )
     }
+
+    if (resultsToInsert.length) {
+      await queryDb.results.bulkAdd(resultsToInsert)
+    }
+
+    return { hadAnySuccess, hadAnyFailure }
   }
 
+  // --- Download trigger ---------------------------------------------------
   const handleDownloadClick = () => {
     dispatch(
       openModal({
@@ -184,20 +258,20 @@ const MainPage = ({ queryDb }) => {
 
   const handleStreamDownload = async ({ layout, perOuMode }) => {
     let fileStream = null
+    let runId = null
+    let queryId = null
+    let summary = { hadAnySuccess: false, hadAnyFailure: false }
+
     try {
-      // Validation for per OU mode
-      const hasOUs = selectedOrgUnits.length > 0
-      if (perOuMode && !hasOUs) {
+      if (perOuMode && selectedOrgUnits.length === 0) {
         dispatch(closeModal())
         dispatch(
-          triggerNotification({
-            message: t('mainPage.errorNeedAtLeastOneOU'),
-            type: 'error'
-          })
+          triggerNotification({ message: t('mainPage.errorNeedAtLeastOneOU'), type: 'error' })
         )
         return
       }
-      const currentChunkingStrategy = store.getState().download.chunkingStrategy
+
+      const chunkSize = parseInt(store.getState().download.chunkingStrategy, 10)
       const saveFilePath = await getSaveFilePath()
       if (!saveFilePath) return
 
@@ -207,42 +281,42 @@ const MainPage = ({ queryDb }) => {
       })
       fileStream.write('\uFEFF')
 
-      const periods = generatePeriods(frequency, startDate, endDate)
-      const elementIds = addedElements.map((e) => e.id)
-
       dispatch(clearLogs())
       dispatch(triggerLoading(true))
 
       const headerState = { written: false }
 
       if (perOuMode) {
+        const levelsToken = selectedOrgUnitLevels.map((l) => `LEVEL-${l}`).join(';')
+        const ouCombined = `${levelsToken};${selectedOrgUnits.join(';')}`
+        const params = getDownloadParameters(layout, { ouOverride: ouCombined })
+        queryId = await saveQueryToDatabase(params)
+        runId = await createRun(queryId)
+
         for (let i = 0; i < selectedOrgUnits.length; i++) {
           const parentId = selectedOrgUnits[i]
           const ouForThisParent = buildOuParamForOneParent(
             parentId,
-            selectedOrgUnitLevels && selectedOrgUnitLevels.length ? selectedOrgUnitLevels : [5]
+            selectedOrgUnitLevels.length ? selectedOrgUnitLevels : [5]
           )
 
           const chunks = createDataChunks(
-            elementIds,
-            periods,
+            params.elementIds,
+            params.periods,
             ouForThisParent,
-            parseInt(currentChunkingStrategy, 10),
+            chunkSize,
             layout
           )
 
-          await processChunks(
+          const s = await processChunks(
             chunks,
             fileStream,
-            {
-              ou: ouForThisParent,
-              co: selectedCategory,
-              elementIds,
-              periods,
-              layout
-            },
-            headerState
+            { ...params, ou: ouForThisParent },
+            headerState,
+            { runId, queryId }
           )
+          summary.hadAnySuccess ||= s.hadAnySuccess
+          summary.hadAnyFailure ||= s.hadAnyFailure
 
           dispatch(
             addLog({
@@ -250,33 +324,30 @@ const MainPage = ({ queryDb }) => {
               type: 'info'
             })
           )
-          await new Promise((r) => setTimeout(r, 200))
         }
-
-        // Save query with all OUs and levels into one database entry
-        const levelsToken = selectedOrgUnitLevels.map((l) => `LEVEL-${l}`).join(';')
-        const ouCombined = `${levelsToken};${selectedOrgUnits.join(';')}`
-
-        const historyParams = getDownloadParameters(layout, { ouOverride: ouCombined })
-        await saveQueryToDatabase(historyParams)
       } else {
-        const downloadParams = getDownloadParameters(layout)
+        const params = getDownloadParameters(layout)
+        queryId = await saveQueryToDatabase(params)
+        runId = await createRun(queryId)
+
         const chunks = createDataChunks(
-          downloadParams.elementIds,
-          downloadParams.periods,
-          downloadParams.ou,
-          parseInt(currentChunkingStrategy, 10),
+          params.elementIds,
+          params.periods,
+          params.ou,
+          chunkSize,
           layout
         )
-        await processChunks(chunks, fileStream, downloadParams, headerState)
-        // Save query into database
-        await saveQueryToDatabase(downloadParams)
+
+        summary = await processChunks(chunks, fileStream, params, headerState, { runId, queryId })
       }
 
       fileStream.end()
+      await finalizeRun(runId, summary.hadAnySuccess, summary.hadAnyFailure)
+
       dispatch(triggerNotification({ message: t('mainPage.downloadSuccess'), type: 'success' }))
       clearCacheIfPossible()
     } catch (error) {
+      if (runId) await queryDb.runs.update(runId, { ok: false })
       handleDownloadError(error, fileStream)
     } finally {
       dispatch(triggerLoading(false))
@@ -284,17 +355,13 @@ const MainPage = ({ queryDb }) => {
   }
 
   const clearCacheIfPossible = () => {
-    if (window.api.clearBrowserCache) {
-      window.api.clearBrowserCache()
-    }
+    if (window.api.clearBrowserCache) window.api.clearBrowserCache()
   }
 
   const handleDownloadError = (error, fileStream) => {
-    const errorMessage = error.message || error
-    dispatch(triggerNotification({ message: errorMessage, type: 'error' }))
-    if (fileStream) {
-      fileStream.end()
-    }
+    const message = error.message || error
+    dispatch(triggerNotification({ message, type: 'error' }))
+    if (fileStream) fileStream.end()
   }
 
   const isDownloadDisabled =
@@ -304,21 +371,16 @@ const MainPage = ({ queryDb }) => {
     addedElements.length === 0 ||
     selectedOrgUnitLevels.length === 0
 
+  // --- UI ---------------------------------------------------------------
   return (
     <div>
       <div dir="ltr">
         <div className="flex flex-col md:flex-row px-4 py-8 mt-1">
-          {/* Organization Units Column */}
-          <div
-            className="w-full md:w-1/3 px-4 py-8 mt-1 md:mt-0"
-            style={{ height: 'auto', minHeight: '70vh' }}
-          >
+          <div className="w-full md:w-1/3 px-4 py-8" style={{ minHeight: '70vh' }}>
             <h3 className="text-lg font-semibold mb-4 text-gray-700">
               {t('mainPage.organizationUnits')}
               <Tooltip>
-                <div>
-                  <p>{t('mainPage.organizationUnitsTooltip')}</p>
-                </div>
+                <p>{t('mainPage.organizationUnitsTooltip')}</p>
               </Tooltip>
             </h3>
             <div
@@ -329,11 +391,7 @@ const MainPage = ({ queryDb }) => {
             </div>
           </div>
 
-          {/* Data Elements and Indicators Column */}
-          <div
-            className="w-full md:w-1/3 px-4 py-8 mt-1 md:mt-0"
-            style={{ height: 'auto', minHeight: '70vh' }}
-          >
+          <div className="w-full md:w-1/3 px-4 py-8" style={{ minHeight: '70vh' }}>
             <h3 className="text-lg font-semibold mb-4 text-gray-700">
               {t('mainPage.dataElementsAndIndicators')}
             </h3>
@@ -345,42 +403,26 @@ const MainPage = ({ queryDb }) => {
             </div>
           </div>
 
-          {/* Third Column: Organization Levels, Date Range, Disaggregation, Download */}
-          <div
-            className="w-full md:w-1/3 px-4 py-8 mt-1 md:mt-0"
-            style={{ height: 'auto', minHeight: '70vh' }}
-          >
+          <div className="w-full md:w-1/3 px-4 py-8" style={{ minHeight: '70vh' }}>
             <h3 className="text-lg font-semibold mb-4 text-gray-700">
               {t('mainPage.organizationLevels')}
             </h3>
-            <div className="mb-6" style={{ height: 'calc((70vh -2rem) / 3)' }}>
+            <div className="mb-6" style={{ height: 'calc((70vh -2rem)/3)' }}>
               <OrgUnitLevelMenu />
             </div>
+
             <h3 className="text-lg font-semibold mb-4 text-gray-700">{t('mainPage.dateRange')}</h3>
-            <div className="mb-6" style={{ height: 'calc((70vh -2rem) / 3)' }}>
+            <div className="mb-6" style={{ height: 'calc((70vh -2rem)/3)' }}>
               <DateRangeSelector />
             </div>
+
             <h3 className="text-lg font-semibold mb-4 text-gray-700">
-              {t('mainPage.disaggregation')}{' '}
-              <Tooltip>
-                <div className="text-gray-600 text-sm">
-                  <p>{t('mainPage.disaggregationTooltip.header')}</p>
-                  <ul className="list-disc pl-5">
-                    {t('mainPage.disaggregationTooltip.list', { returnObjects: true }).map(
-                      (item, index) => (
-                        <li key={index} dangerouslySetInnerHTML={{ __html: item }} />
-                      ),
-                      []
-                    )}
-                  </ul>
-                </div>
-              </Tooltip>
+              {t('mainPage.disaggregation')}
             </h3>
-            <div style={{ height: 'calc((70vh -2rem) / 3)' }}>
+            <div style={{ height: 'calc((70vh -2rem)/3)' }}>
               <CategoryDropdownMenu />
             </div>
 
-            {/* Download Button */}
             <div className="w-full mt-4">
               <h3 className="text-lg font-semibold mb-4 text-gray-700">{t('mainPage.download')}</h3>
               <p className="text-xs text-gray-500 mb-2">

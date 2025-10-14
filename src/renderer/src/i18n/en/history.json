@@ -11,5 +11,9 @@
   "paramsPassed": "Parameters passed for row {{id}}.",
   "finishedDownloading": "Finished downloading from {{url}}",
   "noSelectedRedownload": "No worker or no URLs selected for redownload.",
-  "errorProcessingDownloads": "Error processing downloads:"
+  "errorProcessingDownloads": "Error processing downloads:",
+  "ok": "OK",
+  "failed": "Failed",
+  "exportCsv": "Export CSV",
+  "resultsTitle": "Download Results"
 }
