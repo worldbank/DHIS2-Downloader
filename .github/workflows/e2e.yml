@@ -73,6 +73,10 @@ jobs:
 
   build_on_mac:
     runs-on: macOS-latest
+    env:
+      ELECTRON_MIRROR: https://npmmirror.com/mirrors/electron/
+      ELECTRON_BUILDER_BINARIES_MIRROR: https://npmmirror.com/mirrors/electron-builder-binaries/
+      ELECTRON_BUILDER_BINARIES_DOWNLOAD_BASE_URL: https://npmmirror.com/mirrors/electron-builder-binaries/
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
