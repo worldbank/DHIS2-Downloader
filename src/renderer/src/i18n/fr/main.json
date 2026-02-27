@@ -23,5 +23,6 @@
   "downloadNote": "Remarque : utilisez un nom de fichier unique pour éviter tout écrasement.",
   "exportGeoJSON": "Exporter GeoJSON",
   "exportCSV": "Exporter CSV",
-  "errorNeedAtLeastOneOU": "Veuillez sélectionner au moins une unité organisationnelle pour le mode un par un."
+  "errorNeedAtLeastOneOU": "Veuillez sélectionner au moins une unité organisationnelle pour le mode un par un.",
+  "defaultCategoryDisaggregation": "Désagrégation par défaut"
 }

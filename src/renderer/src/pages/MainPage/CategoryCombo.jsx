@@ -33,6 +33,20 @@ const CategoryDropdownMenu = () => {
     dispatch(setSelectedCategory(id))
   }
 
+  // If 'co' exists in categories, use that; otherwise create a synthetic one
+  const defaultCategoryFromStore = categories.find(
+    (cat) => cat.id === 'co' || cat.isDefaultCategoryOptionDimension
+  )
+
+  const defaultCategory = defaultCategoryFromStore ?? {
+    id: 'co',
+    displayName: t('mainPage.defaultCategoryDisaggregation')
+  }
+
+  const otherCategories = categories.filter(
+    (cat) => !defaultCategoryFromStore || cat.id !== defaultCategoryFromStore.id
+  )
+
   return (
     <div className="relative w-full" ref={dropdownRef}>
       <div className="p-4 bg-gray-100">
@@ -51,6 +65,33 @@ const CategoryDropdownMenu = () => {
         {openDropdowns[dropdownId] && (
           <div className="absolute mt-1 w-full rounded-lg shadow-lg bg-white border border-gray-200 z-10">
             <ul className="max-h-60 overflow-y-auto custom-scrollbar p-2 space-y-2">
+              {/* --- DEFAULT CATEGORY DISAGGREGATION (dimension=co) --- */}
+              <>
+                <li className="px-2 text-xs font-bold text-gray-500 uppercase tracking-wide">
+                  {t('mainPage.defaultCategoryDisaggregation')}
+                </li>
+                <li key={defaultCategory.id}>
+                  <label
+                    className="flex text-sm items-center space-x-2 py-1 px-2 cursor-pointer font-semibold"
+                    onClick={(e) => handleSelectCategory(defaultCategory.id, e)}
+                  >
+                    <input
+                      type="checkbox"
+                      value={defaultCategory.id}
+                      checked={selectedCategory.includes(defaultCategory.id)}
+                      onChange={(e) => handleSelectCategory(defaultCategory.id, e)}
+                      className="cursor-pointer"
+                    />
+                    <span>{t('mainPage.defaultCategoryDisaggregation')}</span>
+                  </label>
+                </li>
+
+                {(orgUnitGroupSets.length > 0 || otherCategories.length > 0) && (
+                  <li className="border-t border-gray-200 mt-1" />
+                )}
+              </>
+
+              {/* --- ORG UNIT GROUP SETS --- */}
               {orgUnitGroupSets.length > 0 && (
                 <>
                   <li className="px-2 text-xs font-bold text-gray-500 uppercase tracking-wide">
@@ -76,13 +117,13 @@ const CategoryDropdownMenu = () => {
                 </>
               )}
 
-              {/* --- CATEGORIES --- */}
-              {categories.length > 0 && (
+              {/* --- CATEGORIES (excluding co if it comes from store) --- */}
+              {otherCategories.length > 0 && (
                 <>
                   <li className="px-2 pt-2 text-xs font-bold text-gray-500 uppercase tracking-wide border-t border-gray-200">
                     Categories
                   </li>
-                  {categories.map((cat) => (
+                  {otherCategories.map((cat) => (
                     <li key={cat.id}>
                       <label
                         className="flex text-sm items-center space-x-2 py-1 px-2 cursor-pointer"

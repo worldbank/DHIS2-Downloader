@@ -23,5 +23,6 @@
   "downloadNote": "Note: Use a unique file name to prevent overwriting.",
   "exportGeoJSON": "Export GeoJSON",
   "exportCSV": "Export CSV",
-  "errorNeedAtLeastOneOU": "Please select at least one organisation unit for one-by-one mode."
+  "errorNeedAtLeastOneOU": "Please select at least one organisation unit for one-by-one mode.",
+  "defaultCategoryDisaggregation": "Default"
 }
