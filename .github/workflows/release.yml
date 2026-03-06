@@ -15,6 +15,16 @@ permissions:
 jobs:
   package_and_release:
     runs-on: ${{ matrix.os }}
+    env:
+      npm_config_registry: https://registry.npmjs.org
+      NPM_CONFIG_REGISTRY: https://registry.npmjs.org
+      ELECTRON_MIRROR: https://github.com/electron/electron/releases/download/
+      NPM_CONFIG_ELECTRON_BUILDER_BINARIES_MIRROR: https://github.com/electron-userland/electron-builder-binaries/releases/download/
+      npm_config_electron_builder_binaries_mirror: https://github.com/electron-userland/electron-builder-binaries/releases/download/
+      ELECTRON_BUILDER_BINARIES_MIRROR: https://github.com/electron-userland/electron-builder-binaries/releases/download/
+      NPM_CONFIG_ELECTRON_BUILDER_BINARIES_CUSTOM_DIR: ""
+      npm_config_electron_builder_binaries_custom_dir: ""
+      ELECTRON_BUILDER_BINARIES_CUSTOM_DIR: ""
     strategy:
       fail-fast: false
       matrix:
@@ -30,20 +40,22 @@ jobs:
           cache: npm
           registry-url: https://registry.npmjs.org
 
+      - name: Print download config
+        run: |
+          echo "npm registry: $(npm config get registry)"
+          echo "npm electron builder binaries mirror: $(npm config get electron_builder_binaries_mirror)"
+          echo "npm electron builder binaries custom dir: $(npm config get electron_builder_binaries_custom_dir)"
+          echo "ELECTRON_MIRROR=$ELECTRON_MIRROR"
+          echo "ELECTRON_BUILDER_BINARIES_MIRROR=$ELECTRON_BUILDER_BINARIES_MIRROR"
+          echo "NPM_CONFIG_ELECTRON_BUILDER_BINARIES_MIRROR=$NPM_CONFIG_ELECTRON_BUILDER_BINARIES_MIRROR"
+
       - name: Install dependencies
         run: npm ci
-        env:
-          npm_config_registry: https://registry.npmjs.org
-          ELECTRON_MIRROR: https://github.com/electron/electron/releases/download/
-          ELECTRON_BUILDER_BINARIES_MIRROR: https://github.com/electron-userland/electron-builder-binaries/releases/download/
 
       - name: Build application
         run: npm run build:${{ matrix.os == 'macos-latest' && 'mac' || 'win' }}
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
-          npm_config_registry: https://registry.npmjs.org
-          ELECTRON_MIRROR: https://github.com/electron/electron/releases/download/
-          ELECTRON_BUILDER_BINARIES_MIRROR: https://github.com/electron-userland/electron-builder-binaries/releases/download/
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
