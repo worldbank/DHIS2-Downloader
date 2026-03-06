@@ -5,6 +5,10 @@ on:
     tags:
       - 'v*.*.*'
 
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
@@ -12,24 +16,34 @@ jobs:
   package_and_release:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [macos-latest, windows-latest]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '18.x'
+          cache: npm
+          registry-url: https://registry.npmjs.org
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
+        env:
+          npm_config_registry: https://registry.npmjs.org
+          ELECTRON_MIRROR: https://github.com/electron/electron/releases/download/
+          ELECTRON_BUILDER_BINARIES_MIRROR: https://github.com/electron-userland/electron-builder-binaries/releases/download/
 
       - name: Build application
         run: npm run build:${{ matrix.os == 'macos-latest' && 'mac' || 'win' }}
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          npm_config_registry: https://registry.npmjs.org
+          ELECTRON_MIRROR: https://github.com/electron/electron/releases/download/
+          ELECTRON_BUILDER_BINARIES_MIRROR: https://github.com/electron-userland/electron-builder-binaries/releases/download/
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
