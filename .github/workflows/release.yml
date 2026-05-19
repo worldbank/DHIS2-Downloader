@@ -19,6 +19,8 @@ jobs:
       npm_config_registry: https://registry.npmjs.org
       NPM_CONFIG_REGISTRY: https://registry.npmjs.org
       ELECTRON_MIRROR: https://github.com/electron/electron/releases/download/
+      NPM_CONFIG_ELECTRON_MIRROR: https://github.com/electron/electron/releases/download/
+      npm_config_electron_mirror: https://github.com/electron/electron/releases/download/
       NPM_CONFIG_ELECTRON_BUILDER_BINARIES_MIRROR: https://github.com/electron-userland/electron-builder-binaries/releases/download/
       npm_config_electron_builder_binaries_mirror: https://github.com/electron-userland/electron-builder-binaries/releases/download/
       ELECTRON_BUILDER_BINARIES_MIRROR: https://github.com/electron-userland/electron-builder-binaries/releases/download/
@@ -28,7 +30,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            artifact_name: linux
+            build_command: npm run build && npx electron-builder --linux AppImage deb --x64
+          - os: windows-latest
+            artifact_name: windows
+            build_command: npm run build:win
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -53,14 +61,14 @@ jobs:
         run: npm ci
 
       - name: Build application
-        run: npm run build:${{ matrix.os == 'macos-latest' && 'mac' || 'win' }}
+        run: ${{ matrix.build_command }}
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.run_number }}-${{ matrix.os }}
+          name: ${{ github.run_number }}-${{ matrix.artifact_name }}
           path: dist/**
 
       - name: Create Release
@@ -73,5 +81,6 @@ jobs:
           prerelease: false
           files: |
             dist/*.zip
-            dist/*.dmg
             dist/*.exe
+            dist/*.AppImage
+            dist/*.deb

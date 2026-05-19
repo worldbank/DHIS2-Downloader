@@ -74,8 +74,15 @@ jobs:
   build_on_mac:
     runs-on: macOS-latest
     env:
-      ELECTRON_MIRROR: https://npmmirror.com/mirrors/electron/
+      ELECTRON_MIRROR: https://github.com/electron/electron/releases/download/
+      NPM_CONFIG_ELECTRON_MIRROR: https://github.com/electron/electron/releases/download/
+      npm_config_electron_mirror: https://github.com/electron/electron/releases/download/
       ELECTRON_BUILDER_BINARIES_MIRROR: https://github.com/electron-userland/electron-builder-binaries/releases/download/
+      NPM_CONFIG_ELECTRON_BUILDER_BINARIES_MIRROR: https://github.com/electron-userland/electron-builder-binaries/releases/download/
+      npm_config_electron_builder_binaries_mirror: https://github.com/electron-userland/electron-builder-binaries/releases/download/
+      ELECTRON_BUILDER_BINARIES_CUSTOM_DIR: ""
+      NPM_CONFIG_ELECTRON_BUILDER_BINARIES_CUSTOM_DIR: ""
+      npm_config_electron_builder_binaries_custom_dir: ""
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
