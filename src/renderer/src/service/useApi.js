@@ -86,7 +86,16 @@ export const fetchCsvData = async (apiUrl, username, password, timeout = 1200000
       throw new Error(errorText || `HTTP error! status: ${response.status}`)
     }
 
-    return await response.blob()
+    // Some DHIS2 servers return an error (e.g. E7151 "Too many combinations")
+    // as an HTTP 200 body on the analytics.csv endpoint. Detect that here so it
+    // is treated as a failure instead of being written to file as bogus data.
+    const blob = await response.blob()
+    const text = await blob.text()
+    const firstLine = (text.split('\n').find((l) => l.trim().length) || '').trim()
+    if (/^E\d{3,4}\s*:/.test(firstLine) || /too many combinations/i.test(firstLine)) {
+      throw new Error(firstLine)
+    }
+    return new Blob([text], { type: 'text/csv' })
   } catch (error) {
     if (error.name === 'AbortError') {
       throw new Error(`Request timed out after ${timeout}ms`)

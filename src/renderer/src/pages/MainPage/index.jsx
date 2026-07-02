@@ -15,12 +15,12 @@ import {
 } from '../../reducers/statusReducer'
 import Tooltip from '../../components/Tooltip'
 import { openModal, closeModal } from '../../reducers/modalReducer'
-import { fetchCsvData } from '../../service/useApi'
 import { generatePeriods } from '../../utils/dateUtils'
 import {
   generateDownloadingUrl,
   createDataChunks,
-  buildOuParamForOneParent
+  buildOuParamForOneParent,
+  fetchCsvChunkAdaptive
 } from '../../utils/downloadUtils'
 import { useTranslation } from 'react-i18next'
 
@@ -121,19 +121,29 @@ const MainPage = ({ queryDb }) => {
     let hadAnyFailure = false
     if (!chunks.length) return { hadAnySuccess, hadAnyFailure }
 
-    // 1️⃣ Fire all requests in parallel (no DB writes yet)
+    // 1️⃣ Fire all requests in parallel (no DB writes yet).
+    // Each chunk self-heals: if the server rejects it as "too many combinations",
+    // fetchCsvChunkAdaptive splits the periods and retries down to a single period.
     const fetches = chunks.map(({ dx, periods, ou }, idx) => {
-      const url = generateDownloadingUrl(
-        dhis2Url,
-        ou,
-        dx.join(';'),
-        periods.join(';'),
-        downloadParams.co,
-        'csv',
-        downloadParams.layout
+      return fetchCsvChunkAdaptive(
+        {
+          dhis2Url,
+          ou,
+          dx,
+          periods,
+          co: downloadParams.co,
+          layout: downloadParams.layout,
+          username,
+          password
+        },
+        (splitPeriods) =>
+          dispatch(
+            addLog({
+              message: `Chunk too large, splitting ${splitPeriods[0]}–${splitPeriods.at(-1)} and retrying…`,
+              type: 'info'
+            })
+          )
       )
-      return fetchCsvData(url, username, password)
-        .then((blob) => blob.text())
         .then((text) => ({ idx, text, dx, periods, ou }))
         .catch((error) => ({ idx, error, dx, periods, ou }))
     })

@@ -1,3 +1,55 @@
+import { fetchCsvData } from '../service/useApi'
+
+// Merge several CSV strings: keep the first header, append every data row.
+export const mergeCsvTexts = (texts) => {
+  let header = ''
+  const body = []
+  for (const t of texts) {
+    if (!t) continue
+    const lines = t.split('\n').filter((l) => l.trim().length)
+    if (!lines.length) continue
+    if (!header) header = lines[0]
+    body.push(...lines.slice(1))
+  }
+  return header ? [header, ...body].join('\n') : ''
+}
+
+// Fetch one chunk as CSV text. If the server rejects it with a
+// "too many combinations" limit (E7151, returned as HTTP 409 or as an
+// HTTP-200 CSV error body - both surfaced as a thrown error by fetchCsvData),
+// split the periods in half and retry recursively down to a single period,
+// then merge the pieces. This makes downloads self-heal on strict servers
+// (e.g. facility-level pulls) regardless of the configured chunk size.
+export const fetchCsvChunkAdaptive = async (
+  { dhis2Url, ou, dx, periods, co, layout, username, password },
+  onSplit
+) => {
+  const url = generateDownloadingUrl(dhis2Url, ou, dx.join(';'), periods.join(';'), co, 'csv', layout)
+  try {
+    const blob = await fetchCsvData(url, username, password)
+    return await blob.text()
+  } catch (err) {
+    const tooMany = /too many combinations|E7151/i.test(err?.message || '')
+    if (!tooMany || periods.length <= 1) {
+      // single period still too large, or an unrelated error - cannot recover here
+      throw err
+    }
+    if (onSplit) onSplit(periods)
+    const mid = Math.ceil(periods.length / 2)
+    const [left, right] = await Promise.all([
+      fetchCsvChunkAdaptive(
+        { dhis2Url, ou, dx, periods: periods.slice(0, mid), co, layout, username, password },
+        onSplit
+      ),
+      fetchCsvChunkAdaptive(
+        { dhis2Url, ou, dx, periods: periods.slice(mid), co, layout, username, password },
+        onSplit
+      )
+    ])
+    return mergeCsvTexts([left, right])
+  }
+}
+
 export const generateDownloadingUrl = (
   dhis2Url,
   ou,
