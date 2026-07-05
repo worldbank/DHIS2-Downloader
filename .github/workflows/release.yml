@@ -27,6 +27,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - os: macos-15-intel
+            artifact_name: macos
+            build_command: npm run build:mac
           - os: ubuntu-latest
             artifact_name: linux
             build_command: npm run build && npx electron-builder --linux AppImage deb --x64
@@ -77,6 +80,7 @@ jobs:
           prerelease: false
           files: |
             dist/*.zip
+            dist/*.dmg
             dist/*.exe
             dist/*.AppImage
             dist/*.deb
